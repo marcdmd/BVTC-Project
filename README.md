@@ -43,15 +43,16 @@ Hi guys! See below for a step-by-step guide on how to proceed!
 ---
 
 ## Situation B: You already have code on your laptop
-**Do this if you already built models, views, or templates locally.**
+**Do this if you already built models, views, or templates locally and want to transfer it to our working project file**
 
 **Important:** You must copy your specific files into this official project structure.
 
 1.  **Clone the Official Repo (in a new folder):**
-    Go to a different folder on your computer (e.g., `Documents/GroupProject`) and clone this repo:
+    Go to a different folder on your computer (e.g., `Documents/{Where your projects are located}`) and clone this repo:
     ```bash
     git clone [https://github.com/marcdmd/BVTC-Project.git](https://github.com/marcdmd/BVTC-Project.git)
     ```
+    *Don't create a new file manually anymore via file explorer. Just go to the directory where you want the project to be created and the project file will automatically be created.
 
 2.  **Manually Copy Your Files:**
     * Open your *old* project folder.
@@ -77,7 +78,7 @@ Hi guys! See below for a step-by-step guide on how to proceed!
 
 ---
 
-## ⚡ How to Avoid Conflicts (Daily Routine)
+## Routine when editing
 Before you start working every day, ALWAYS do this first:
 
 1.  **Pull the latest changes:**
