@@ -52,11 +52,11 @@ Hi guys! See below for a step-by-step guide on how to proceed!
 **Important:** You cannot just "merge" folders. You must manually copy your specific files into this official structure.
 
 1. **Clone the Official Repo (in a new folder):**
-   Go to a generic folder (like `Documents`) and clone this repo:
+   Go to a generic folder (like `Documents/MSYS42`) and clone this repo:
    ```bash
    git clone [https://github.com/marcdmd/BVTC-Project.git](https://github.com/marcdmd/BVTC-Project.git)
    ```
-   *Note: Do not create a new folder manually. Git will automatically create the `BVTC-Project` folder for you.*
+   *Note: Do not create a new folder manually. Just go to where you want the project to be created and Git will automatically create the `BVTC-Project` folder for you.*
 
 2. **Manually Copy Your Files:**
    * Open your *old* project folder.
