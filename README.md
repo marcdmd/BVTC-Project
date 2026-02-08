@@ -1,3 +1,5 @@
+Hi guys! See below for a step-by-step guide on how to proceed!
+
 ## Situation A: You haven't started anything yet
 **Do this if you have no code on your laptop.**
 
@@ -43,7 +45,7 @@
 ## Situation B: You already have code on your laptop
 **Do this if you already built models, views, or templates locally.**
 
-**Important:** You cannot just "merge" two different Django projects. You must copy your specific files into this official project structure.
+**Important:** You must copy your specific files into this official project structure.
 
 1.  **Clone the Official Repo (in a new folder):**
     Go to a different folder on your computer (e.g., `Documents/GroupProject`) and clone this repo:
