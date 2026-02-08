@@ -70,7 +70,7 @@ Hi guys! See below for a step-by-step guide on how to proceed!
    Run `python manage.py runserver` inside the new `BVTC-Project` folder to make sure your copied code works.
 
 4. **Push Your Changes:**
-   Once your code is integrated and working, follow the steps in **Situation C** below to upload it.
+   Once your code is integrated and working, follow the steps in **Situation C (Starting from No. 3)** below to upload it.
 
 ---
 
