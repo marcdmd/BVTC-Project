@@ -70,6 +70,9 @@
     git push origin main
     ```
 
+*Note that when pushing, cmd prompt will ask you for a username and a password. The username is your github username and the password is your token. If you don't have one, you can create one by going to https://github.com/settings/tokens
+
+
 ---
 
 ## ⚡ How to Avoid Conflicts (Daily Routine)
