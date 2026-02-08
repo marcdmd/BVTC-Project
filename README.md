@@ -103,6 +103,12 @@ Send your changes to GitHub so the rest of us can see them.
 git push origin main
 ```
 
+### 5. Final step: Notify the GC!
+Let the others know if and what you've edited para we're all on the same page and we know if we can work on it na as well! 
+```bash
+Note: Better if one working at a time to avoid conflicts in the files, kaya it's important to notify if you're working on it and once you're done!
+```
+
 ---
 
 ### Authentication Note
