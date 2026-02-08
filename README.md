@@ -106,9 +106,10 @@ git push origin main
 ---
 
 ### Authentication Note
-If the command prompt asks for a **Password**, it is **NOT** your GitHub account password. For reference:
+When pushing, command prompt asks for a Username and password. For the **Password**, it is **NOT** your GitHub account password. For reference:
 1. **Username:** Your GitHub username.
 2. **Password:** Your **Personal Access Token**.
    * *If you don't have one, generate it here:* [https://github.com/settings/tokens](https://github.com/settings/tokens)
    * *Make sure to check the `repo` box when creating the token.*
-   * Just paste on CMD when it asks for password, you will not see it but it's there so pwedeng enter nalang
+   * The token looks something like ghp_EQS62fCHUCHUCHUCHU...
+   * When prompted for a password, just paste on CMD. You will not see it but it's there so pwedeng enter nalang
