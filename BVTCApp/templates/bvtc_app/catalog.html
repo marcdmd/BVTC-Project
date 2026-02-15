@@ -79,7 +79,7 @@
                         <!-- The dots/circles -->
                         <div style="text-align:center">
                             {% for _ in p.productimage_set.all %}
-                            <span class="dot" onclick="currentSlide({{ forloop.counter }})"></span>
+                            <span class="dot" onclick="currentSlide('{{ forloop.counter }}')"></span>
                             {% endfor %}
                         </div>
                     </div>
@@ -106,7 +106,7 @@
                         <div class="horizontal-input-field">
                             {% for color in p.productcolor_set.all %}
                             <div class="product-highlight">
-                                <span style="background: {{ color.product_color }};"></span>
+                                <span style="background: '{{ color.product_color }}';"></span>
                                 <p class="small-r">{{ color.product_color }}</p>
                             </div>
                             {% empty %}
