@@ -1,0 +1,157 @@
+{% extends 'bvtc_app/base.html' %}
+{% load static %}
+
+{% block title %}Orders{% endblock %}
+
+{% block nav %}
+<h1 class="bold">Orders</h1>
+{% endblock %}
+
+{% block orders_button %}
+<button type="submit" style="background: #E9E6E3;">
+    <i class="material-symbols-rounded" style="font-size: 24px;">assignment</i>
+    <p class="button-text small-b">Orders</p>
+</button>
+{% endblock %}
+
+{% block main %}
+<div class="dashboard">
+    <h1>Order Status</h1>
+    <div class="numbers">
+        <div class="number-card">
+            <div class="number" style="color: #0B1E33;">00</div>
+            <p>Under Feasibility</p>
+        </div>
+
+        <div class="number-card">
+            <div class="number" style="color: #013C58;">00</div>
+            <p>Under Quotation</p>
+        </div>
+
+        <div class="number-card">
+            <div class="number" style="color: #00537A;">00</div>
+            <p>In Production</p>
+        </div>
+
+        <div class="number-card">
+            <div class="number" style="color: #F5A201;">00</div>
+            <p>Sampled</p>
+        </div>
+
+        <div class="number-card">
+            <div class="number" style="color: #EDC001;">00</div>
+            <p>Packaged</p>
+        </div>
+
+        <div class="number-card">
+            <div class="number" style="color: #00A887;">00</div>
+            <p>In Transit</p>
+        </div>
+    </div>
+</div>
+
+<div class="tracker">
+    <div class="actions">
+        <form action="" class="filter">
+            <p class="small-r" style="padding: 6px 15px 6px 15px;">Sort by:</p>
+            <input class="filter-input" type="radio" name="sort-by" value="client-name" id="client-name">
+            <label class="filter-label small-b" for="client-name">Client Name</label>
+
+            <input class="filter-input" type="radio" name="sort-by" value="company-name" id="company-name">
+            <label class="filter-label small-b" for="company-name">Company Name</label>
+
+            <input class="filter-input" type="radio" name="sort-by" value="delivery-date" id="delivery-date">
+            <label class="filter-label small-b" for="delivery-date">Delivery Date</label>
+
+            <input class="filter-input" type="radio" name="sort-by" value="account-manager" id="account-manager">
+            <label class="filter-label small-b" for="account-manager">Account Manager</label>
+        </form>
+
+        <div class="actions">
+            <form action="" class="search-area">
+                <input type="search" class="search-bar" placeholder="Search">
+            </form>
+
+            <form action="{% url 'add_order' %}">
+                <button type="submit" class="button-primary small-m"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Order</button>
+            </form>
+        </div>
+    </div>
+
+    <table class="database">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" id="select-all">
+                </th>
+                <th>ORDER ID</th>
+                <th>CUSTOMER NAME</th>
+                <th>COMPANY NAME</th>
+                <th>DELIVERY DATE</th>
+                <th>STATUS</th>
+                <th>ACCOUNT MANAGER</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>
+                    <input type="checkbox" name="to-discard" value="{{ o.id }}" class="to-discard" form="discard-form">
+                </td>
+                <td class="small-b">{{ o.order_id }}</td>
+                <td class="small-b">{{ o.customer_name }}</td>
+                <td class="small-b">{{ o.company_name }}</td>
+                <td class="small-r">{{ o.delivery_date }}</td>
+                <td class="small-b">{{ o.status }}</td>
+                <td class="small-b">{{ o.account_manager }}</td>
+                <td>
+                    <div class="cell-buttons">
+                        <button class="m-button-primary smaller-b">View</button>
+                        <button class="m-button-secondary smaller-b">Edit</button>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <input type="checkbox" name="to-discard" value="{{ o.id }}" class="to-discard" form="discard-form">
+                </td>
+                <td class="small-b">{{ o.order_id }}</td>
+                <td class="small-b">{{ o.customer_name }}</td>
+                <td class="small-b">{{ o.company_name }}</td>
+                <td class="small-r">{{ o.delivery_date }}</td>
+                <td class="small-b">{{ o.status }}</td>
+                <td class="small-b">{{ o.account_manager }}</td>
+                <td>
+                    <div class="cell-buttons">
+                        <button class="m-button-primary smaller-b">View</button>
+                        <button class="m-button-secondary smaller-b">Edit</button>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <input type="checkbox" name="to-discard" value="{{ o.id }}" class="to-discard" form="discard-form">
+                </td>
+                <td class="small-b">{{ o.order_id }}</td>
+                <td class="small-b">{{ o.customer_name }}</td>
+                <td class="small-b">{{ o.company_name }}</td>
+                <td class="small-r">{{ o.delivery_date }}</td>
+                <td class="small-b">{{ o.status }}</td>
+                <td class="small-b">{{ o.account_manager }}</td>
+                <td>
+                    <div class="cell-buttons">
+                        <button class="m-button-primary smaller-b">View</button>
+                        <button class="m-button-secondary smaller-b">Edit</button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block modals %}
+{% endblock %}

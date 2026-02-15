@@ -1,0 +1,118 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>TrackNGo | {% block title %}{%endblock%}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="{% static '/css/style.css' %}">
+    <script type="text/javascript" src="{% static '/js/app.js' %}" defer></script>
+</head>
+
+<body>
+    <main>
+        {% block main %}
+        <div style="display: flex;
+                    height: calc(100% - 60px);
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 3px;
+                    align-self: stretch;">
+
+            <i class="material-symbols-rounded" style="color: #0B1E33; font-size: 180px;">rocket</i>
+
+            <p style="color: #0B1E33;
+                        font-size: 30px;
+                        font-weight: 800;">
+            Coming Soon
+            </p>
+
+            <p style="color: #0B1E33;
+                        font-size: 16px;
+                        font-weight: 400;">
+            We're still working on it
+            </p>
+        </div>
+        {% endblock %}
+    </main>
+
+    <nav>
+        {% block nav %}
+        {% endblock %}
+        <p class="smaller-r username">Signed in as: <b>User</b></p>
+    </nav>
+
+    <aside id="sidebar">
+        <img src="{% static '/images/bvtc_logomark.svg' %}" alt="BVTC's Logomark" width="36" style="padding-bottom: 9px;">
+
+        {% block catalog_button %}
+        <form action="{% url 'catalog' %}" style="display: flex; align-self: stretch;">
+            <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
+                <i class="material-symbols-outlined" style="font-size: 24px;">browse</i>
+                <p class="button-text small-b">Catalog</p>
+            </button>
+        </form>
+        {% endblock %}
+        
+        {% block orders_button %}
+        <form action="{% url 'orders' %}" style="display: flex; align-self: stretch;">
+            <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
+                <i class="material-symbols-outlined" style="font-size: 24px;">assignment</i>
+                <p class="button-text small-b">Orders</p>
+            </button>
+        </form>
+        {% endblock %}
+
+        {% block quotations_button %}
+        <form action="{% url 'quotations' %}" style="display: flex; align-self: stretch;">
+            <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
+                <i class="material-symbols-outlined" style="font-size: 24px;">request_quote</i>
+                <p class="button-text small-b">Quotations</p>
+            </button>
+        </form>
+        {% endblock %}
+        
+        {% block billings_button %}
+        <form action="" style="display: flex; align-self: stretch;">
+            <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
+                <i class="material-symbols-outlined" style="font-size: 24px;">receipt</i>
+                <p class="button-text small-b">Billings</p>
+            </button>
+        </form>
+        {% endblock %}
+
+        {% block customers_button %}
+        <form action="" style="display: flex; align-self: stretch;">
+            <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
+                <i class="material-symbols-outlined" style="font-size: 24px;">group</i>
+                <p class="button-text small-b">Customers</p>
+            </button>
+        </form>
+        {% endblock %}
+
+        {% block profile_button %}
+        <form action="" style="display: flex; align-self: stretch;">
+            <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
+                <i class="material-symbols-outlined" style="font-size: 24px;">account_box</i>
+                <p class="button-text small-b">Profile</p>
+            </button>
+        </form>
+        {% endblock %}
+
+        <div class="arrow" style="display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; align-self: stretch; flex: 1 0 0;">
+            <button class="expand-button" onclick="toggleSidebar()" style="align-self: auto;">
+                <span class="material-symbols-outlined">arrow_menu_open</span>
+            </button>
+        </div>
+    </aside>
+</body>
+
+{% block modals %}
+{% endblock %}
+</html>

@@ -1,0 +1,242 @@
+{% extends 'bvtc_app/base.html' %}
+{% load static %}
+
+{% block title %}Catalog{% endblock %}
+
+{% block nav %}
+<h1 class="bold">Catalog</h1>
+{% endblock %}
+
+{% block catalog_button %}
+<button type="submit" style="background: #E9E6E3;">
+    <i class="material-symbols-rounded" style="font-size: 24px;">browse</i>
+    <p class="button-text small-b">Catalog</p>
+</button>
+{% endblock %}
+
+{% block main %}
+<div class="action-bar">
+    <form action="" class="filter">
+        <p class="small-r" style="padding: 6px 15px 6px 15px;">Filter:</p>
+        <input class="filter-input" type="radio" name="filter" value="all" id="all">
+        <label class="filter-label small-b" for="all">All</label>
+
+        <input class="filter-input" type="radio" name="filter" value="company-profile" id="company-profile">
+        <label class="filter-label small-b" for="company-profile">Company Profile</label>
+
+        <input class="filter-input" type="radio" name="filter" value="individual-items" id="individual-items">
+        <label class="filter-label small-b" for="individual-items">Individual Items</label>
+
+        <input class="filter-input" type="radio" name="filter" value="gift-set" id="gift-set">
+        <label class="filter-label small-b" for="gift-set">Gift Set</label>
+
+        <input class="filter-input" type="radio" name="filter" value="bag" id="bag">
+        <label class="filter-label small-b" for="bag">Bag</label>
+    </form>
+
+    <div class="actions">
+        <form action="" class="search-area">
+            <input type="search" class="search-bar" placeholder="Search">
+        </form>
+        <button class="button-primary small-m open-modal"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Product</button>
+    </div>
+</div>
+
+<div class="catalog">
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal-container" id="modal-container">
+    <div class="modal product-form">
+        <form action="">
+            {% csrf_token %}
+            <h1>Add New Product</h1>
+            <div class="divider">
+                <p>Basic Information</p>
+                <hr>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="file-upload">
+                    <label for="photos">
+                        <span style="color: #898989;">Upload Image/s</span>
+                        <input id="photos" name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;" multiple>
+                    </label>
+                </div>
+                <div class="vertical-section">
+                    <div class="horizontal-input-field">
+                        <label for="product-id">Product ID:</label>
+                        <input type="text" id="product-id" name="product-id" class="input" required>
+                    </div>
+
+                    <div class="horizontal-input-field">
+                        <label for="product-name">Product Name:</label>
+                        <input type="text" id="product-name" name="product-name" class="input" required>
+                    </div>
+
+                    <div class="horizontal-input-field">
+                        <label for="category">Category:</label>
+                        <select class="input" name="category" id="category" required>
+                            <option value="company-profile">Company Profile</option>
+                            <option value="individual-items">Individual Items</option>
+                            <option value="gift-set">Gift Set</option>
+                            <option value="bag">Bag</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vertical-input-field">
+                <label for="product-description">Product Description:</label>
+                <input type="text" class="input" name="product-description" id="product-description">
+            </div>
+
+            <div class="divider">
+                <p>Sales Information</p>
+                <hr>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="moq">MOQ:</label>
+                    <input class="input" type="number" min="1" placeholder="1" name="moq" id="moq" required>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="starting-price">Starting Price:</label>
+                    <input class="input" type="number" min="1" placeholder="1" name="starting-price" id="starting-price" required>
+                </div>
+            </div>
+
+            <div class="vertical-input-field">
+                <label for="colors">Color Variations:</label>
+                <div class="horizontal-input-field" style="flex-wrap: wrap;">
+                    <input class="input" type="text" placeholder="#000000" id="colors" name="colors[]" style="min-width: 90px;">
+                    <input class="input" type="text" placeholder="#000000" id="colors" name="colors[]" style="min-width: 90px;">
+                    <input class="input" type="text" placeholder="#000000" id="colors" name="colors[]" style="min-width: 90px;">
+                    <input class="input" type="text" placeholder="#000000" id="colors" name="colors[]" style="min-width: 90px;">
+                </div>
+            </div>
+
+            <div class="divider">
+                <hr>
+            </div>
+
+            <div class="buttons-section">
+                <button id="close" class="button-secondary small-m">Cancel</button>
+                <button type="submit" class="button-primary small-m">Add Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
