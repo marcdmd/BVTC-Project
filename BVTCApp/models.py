@@ -1,6 +1,4 @@
 from django.db import models
-
-from django.db import models
 from django.utils import timezone
 
 class UserAccount(models.Model): ## double check CHOICES match ui
@@ -32,6 +30,13 @@ class Company(models.Model):
     company_logo = models.CharField(max_length=255)
     company_address = models.CharField(max_length=255)
     tin_number = models.CharField(max_length=15, unique=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f'{self.company_id} - {self.company_name}'
+    
+    class Meta:
+        verbose_name_plural: str = 'Companies'
 
 class CustomerAccount(models.Model):
     customer_id = models.AutoField(primary_key=True)
@@ -41,6 +46,13 @@ class CustomerAccount(models.Model):
     customer_phone_number = models.CharField(max_length=20)
     messenger = models.CharField(max_length=100, blank=True, null=True)
     viber = models.CharField(max_length=15, blank=True, null=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f'{self.customer_id} - {self.customer_name}, {self.company_id}'
+
+    class Meta:
+        verbose_name_plural: str = 'Customer Accounts'
 
 class ShippingDetails(models.Model):
     shipping_id = models.AutoField(primary_key=True)
@@ -54,6 +66,13 @@ class ShippingDetails(models.Model):
     address_line_1 = models.CharField(max_length=100)
     address_line_2 = models.CharField(max_length=100, blank=True, null=True)
     address_postal_code = models.IntegerField()
+    objects = models.Manager()
+
+    def __str__(self):
+        return f'{self.shipping_id} - {self.customer_id}, {self.contact_person}'
+
+    class Meta:
+        verbose_name_plural: str = 'Shipping Details'
 
 class Product(models.Model):
     product_id = models.AutoField(primary_key=True)
@@ -63,14 +82,32 @@ class Product(models.Model):
     description = models.TextField()
     starting_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     MOQ = models.PositiveIntegerField()
+    objects = models.Manager()
+
+    def __str__(self):
+         return f'{self.product_code} - {self.product_name}'
 
 class ProductImage(models.Model): #Composite Key
-    Product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
-    Product_Image = models.CharField(max_length=255)
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_image = models.ImageField(upload_to='images/')
+    objects = models.Manager()
+
+    def __str__(self):
+         return f'{self.product_id} - {self.product_image}'
+
+    class Meta:
+        verbose_name_plural: str = 'Product Images'
 
 class ProductColor(models.Model):
-	product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
-	product_color = models.CharField(max_length=100)
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_color = models.CharField(max_length=100)
+    objects = models.Manager()
+    
+    def __str__(self):
+        return f'{self.product_id} - {self.product_color}'
+
+    class Meta:
+        verbose_name_plural: str = 'Product Colors'
 
 class Order(models.Model): ### double check CHOICES match ui
     PAYMENT_MODES = [
@@ -98,13 +135,12 @@ class Order(models.Model): ### double check CHOICES match ui
          ('Available', 'Available'), 
          ('Limited', 'Limited'), 
          ('Out of Stock', 'Out of Stock'),
-
     ]
 
-    Order_ID = models.AutoField(primary_key=True)
-    Customer_ID = models.ForeignKey(CustomerAccount, on_delete=models.CASCADE)
-    User_ID = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
-    Shipping_ID = models.ForeignKey(ShippingDetails, on_delete=models.CASCADE)
+    order_id = models.AutoField(primary_key=True)
+    customer_id = models.ForeignKey(CustomerAccount, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    shipping_id = models.ForeignKey(ShippingDetails, on_delete=models.CASCADE)
     
     mode_of_payment = models.CharField(max_length=50, choices=PAYMENT_MODES)
     payment_terms = models.CharField(max_length=20, choices=PAYMENT_TERMS)
@@ -137,6 +173,9 @@ class Order(models.Model): ### double check CHOICES match ui
 
     actual_total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
+    def __str__(self):
+        return f'{self.order_id} - {self.customer_id}'
+
 class OrderItem(models.Model):
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -144,6 +183,13 @@ class OrderItem(models.Model):
     customization = models.TextField(blank=True, null=True)
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f'{self.order_id}-{self.product_id}'
+
+    class Meta:
+        verbose_name_plural: str = 'Order Items'
 
 class BillingStatement(models.Model):
 	billing_statement_id = models.AutoField(primary_key=True)
