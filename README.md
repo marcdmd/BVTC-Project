@@ -82,6 +82,12 @@ Hi guys! See below for a step-by-step guide on how to proceed!
 ```bash
 git pull origin main
 ```
+After this, run migrations just to make sure (make sure you're in virtual environment already at this point)
+```bash
+python manage.py makemigrations
+
+python manage.py migrate
+```
 
 ### 2. Code & Test
 Make your changes in VS Code (edit views, add HTML, etc.).
