@@ -16,147 +16,50 @@
 
 {% block main %}
 <div class="action-bar">
-    <form action="" class="filter">
-        <p class="small-r" style="padding: 6px 15px 6px 15px;">Filter:</p>
-        <input class="filter-input" type="radio" name="filter" value="all" id="all" checked>
-        <label class="filter-label small-b" for="all">All</label>
+    <div class="horizontal-section">
+        <form action="" class="filter" style="flex-wrap: wrap;">
+            <p class="small-r filter-name" style="padding: 6px 15px 6px 0px;">Filter:</p>
+            <input class="filter-input" type="radio" name="filter" value="all" id="all" checked>
+            <label class="filter-label small-b" for="all">All</label>
 
-        <input class="filter-input" type="radio" name="filter" value="company-profile" id="company-profile">
-        <label class="filter-label small-b" for="company-profile">Company Profile</label>
+            <input class="filter-input" type="radio" name="filter" value="company-profile" id="company-profile">
+            <label class="filter-label small-b" for="company-profile">Company Profile</label>
 
-        <input class="filter-input" type="radio" name="filter" value="individual-items" id="individual-items">
-        <label class="filter-label small-b" for="individual-items">Individual Items</label>
+            <input class="filter-input" type="radio" name="filter" value="individual-items" id="individual-items">
+            <label class="filter-label small-b" for="individual-items">Individual Items</label>
 
-        <input class="filter-input" type="radio" name="filter" value="gift-set" id="gift-set">
-        <label class="filter-label small-b" for="gift-set">Gift Set</label>
+            <input class="filter-input" type="radio" name="filter" value="gift-set" id="gift-set">
+            <label class="filter-label small-b" for="gift-set">Gift Set</label>
 
-        <input class="filter-input" type="radio" name="filter" value="bag" id="bag">
-        <label class="filter-label small-b" for="bag">Bag</label>
-    </form>
-
-    <div class="actions">
-        <form action="" class="search-area">
-            <input type="search" class="search-bar" placeholder="Search">
+            <input class="filter-input" type="radio" name="filter" value="bag" id="bag">
+            <label class="filter-label small-b" for="bag">Bag</label>
         </form>
-        <button class="button-primary small-m open-modal"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Product</button>
+
+        <div class="actions">
+            <form action="" class="search-area">
+                <input type="search" class="search-bar" placeholder="Search">
+            </form>
+            <button class="button-primary small-m" data-modal="add-product-modal"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Product</button>
+        </div>
     </div>
 </div>
 
 <div class="catalog">
-    <div class="product-card">
+    <div class="product-card open-modal" data-modal="product-modal">
         <div class="thumbnail">
             <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
         </div>
         <div class="product-details">
-            <span class="smaller-r">Product ID</span>
+            <span class="product-id smaller-r">Product ID</span>
             <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
+            <p class="smaller-b">Starts at ₱ 00.00</p>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block modals %}
-<div class="modal-container" id="modal-container">
+<div class="modal-container" id="add-product-modal">
     <div class="modal product-form">
         <form action="">
             {% csrf_token %}
@@ -233,10 +136,79 @@
             </div>
 
             <div class="buttons-section">
-                <button id="close" class="button-secondary small-m">Cancel</button>
+                <button type="button" class="close-modal button-secondary small-m">Cancel</button>
                 <button type="submit" class="button-primary small-m">Add Product</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="modal-container" id="product-modal">
+    <div class="modal product-view">
+        <div class="horizontal-section">
+            <div class="vertical-section">
+                <div class="slideshow-container">
+                    <!-- Full-width images with number and caption text -->
+                    <div class="mySlides fade">
+                        <img class="img-container" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
+                    </div>
+
+                    <div class="mySlides fade">
+                        <img class="img-container" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
+                    </div>
+
+                    <div class="mySlides fade">
+                        <img class="img-container" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
+                    </div>
+                    <!-- Next and previous buttons -->
+                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+                </div>
+
+                <!-- The dots/circles -->
+                <div style="text-align:center">
+                    <span class="dot" onclick="currentSlide(1)"></span>
+                    <span class="dot" onclick="currentSlide(2)"></span>
+                    <span class="dot" onclick="currentSlide(3)"></span>
+                </div>
+            </div>
+            
+            <div class="vertical-section">
+                <p class="product-id smaller-r">DW-FT</p>
+                <h1>Frosted Tumbler</h1>
+                <p class="small-r">Category: <b>Individual Items</b></p>
+                <p class="small-r">MOQ: <b>50 pcs.</b></p>
+                <p class="small-r">Starting Price: <b>₱ 0.00</b></p>
+
+                <div class="divider">
+                    <p>Product Description</p>
+                    <hr>
+                </div>
+                <div class="product-highlight" style="align-self: stretch;">
+                    <p class="small-r">Plastic Material, Capacity: 600 mL</p>
+                </div>
+                
+                <div class="divider">
+                    <p>Color Variations</p>
+                    <hr>
+                </div>
+                <div class="horizontal-input-field">
+                    <div class="product-highlight">
+                        <span style="background: #000000;"></span>
+                        <p class="small-r">#000000</p>
+                    </div>
+                </div>
+
+                <div class="divider">
+                    <hr>
+                </div>
+                <div class="buttons-section">
+                    <a href="" class="button-tertiary small-m">Delete</a>
+                    <a href="" class="button-primary small-m">Edit</a>
+                    <button type="button" class="close-modal button-secondary small-m">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

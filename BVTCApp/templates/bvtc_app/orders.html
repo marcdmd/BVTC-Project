@@ -51,10 +51,10 @@
 </div>
 
 <div class="tracker">
-    <div class="actions">
+    <div class="horizontal-section">
         <form action="" class="filter">
-            <p class="small-r" style="padding: 6px 15px 6px 15px;">Sort by:</p>
-            <input class="filter-input" type="radio" name="sort-by" value="client-name" id="client-name">
+            <p class="small-r filter-name" style="padding: 6px 15px 6px 15px;">Sort by:</p>
+            <input class="filter-input" type="radio" name="sort-by" value="client-name" id="client-name" checked>
             <label class="filter-label small-b" for="client-name">Client Name</label>
 
             <input class="filter-input" type="radio" name="sort-by" value="company-name" id="company-name">
@@ -71,10 +71,7 @@
             <form action="" class="search-area">
                 <input type="search" class="search-bar" placeholder="Search">
             </form>
-
-            <form action="{% url 'add_order' %}">
-                <button type="submit" class="button-primary small-m"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Order</button>
-            </form>
+            <a href="{% url 'add_order' %}" type="submit" class="button-primary small-m"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Order</a>
         </div>
     </div>
 
@@ -107,8 +104,8 @@
                 <td class="small-b">{{ o.account_manager }}</td>
                 <td>
                     <div class="cell-buttons">
-                        <button class="m-button-primary smaller-b">View</button>
-                        <button class="m-button-secondary smaller-b">Edit</button>
+                        <button type="button" class="m-button-primary smaller-b">View</button>
+                        <a href="" class="m-button-secondary smaller-b">Edit</a>
                     </div>
                 </td>
             </tr>
@@ -125,8 +122,8 @@
                 <td class="small-b">{{ o.account_manager }}</td>
                 <td>
                     <div class="cell-buttons">
-                        <button class="m-button-primary smaller-b">View</button>
-                        <button class="m-button-secondary smaller-b">Edit</button>
+                        <button type="button" class="m-button-primary smaller-b">View</button>
+                        <a href="" class="m-button-secondary smaller-b">Edit</a>
                     </div>
                 </td>
             </tr>
@@ -143,8 +140,8 @@
                 <td class="small-b">{{ o.account_manager }}</td>
                 <td>
                     <div class="cell-buttons">
-                        <button class="m-button-primary smaller-b">View</button>
-                        <button class="m-button-secondary smaller-b">Edit</button>
+                        <button type="button" class="m-button-primary smaller-b">View</button>
+                        <a href="" class="m-button-secondary smaller-b">Edit</a>
                     </div>
                 </td>
             </tr>

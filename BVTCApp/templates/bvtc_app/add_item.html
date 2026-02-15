@@ -19,7 +19,6 @@
 {% endblock %}
 
 {% block main %}
-
 <div class="action-bar">
     <div class="horizontal-section">
         <h1>Add Item to Order</h1>
@@ -65,113 +64,136 @@
 </div>
 
 <div class="catalog">
-    <div class="product-card">
+    <div class="product-card" data-modal="add-item-modal">
         <div class="thumbnail">
             <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
         </div>
         <div class="product-details">
-            <span class="smaller-r">Product ID</span>
+            <span class="product-id smaller-r">Product ID</span>
             <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
+            <p class="smaller-b">Starts at ₱ 00.00</p>
         </div>
     </div>
 
-    <div class="product-card">
+    <div class="product-card" data-modal="add-item-modal">
         <div class="thumbnail">
             <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
         </div>
         <div class="product-details">
-            <span class="smaller-r">Product ID</span>
+            <span class="product-id smaller-r">Product ID</span>
             <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
+            <p class="smaller-b">Starts at ₱ 00.00</p>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
+{% block modals %}
+<div class="modal-container" id="add-item-modal">
+    <div class="modal product-view">
+        <div class="horizontal-section">
+            <div class="vertical-section">
+                <div class="slideshow-container">
+                    <!-- Full-width images with number and caption text -->
+                    <div class="mySlides fade">
+                        <img class="img-container" style="aspect-ratio: 3 / 4;" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
+                    </div>
 
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
+                    <div class="mySlides fade">
+                        <img class="img-container" style="aspect-ratio: 3 / 4;" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
+                    </div>
 
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
+                    <div class="mySlides fade">
+                        <img class="img-container" style="aspect-ratio: 3 / 4;" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
+                    </div>
+                    <!-- Next and previous buttons -->
+                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+                </div>
 
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
+                <!-- The dots/circles -->
+                <div style="text-align:center">
+                    <span class="dot" onclick="currentSlide(1)"></span>
+                    <span class="dot" onclick="currentSlide(2)"></span>
+                    <span class="dot" onclick="currentSlide(3)"></span>
+                </div>
+            </div>
+            
+            <div class="vertical-section">
+                <div class="vertical-section" style="align-self: flex-start;">
+                    <p class="product-id smaller-r">DW-FT</p>
+                    <h1>Frosted Tumbler</h1>
+                    <p class="small-r">Category: <b>Individual Items</b></p>
+                    <p class="small-r">MOQ: <b>50 pcs.</b></p>
+                    <p class="small-r">Starting Price: <b>₱ 0.00</b></p>
 
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
+                    <div class="divider">
+                        <p>Product Description</p>
+                        <hr>
+                    </div>
+                    <div class="product-highlight" style="align-self: stretch;">
+                        <p class="small-r">Plastic Material, Capacity: 600 mL</p>
+                    </div>
 
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
+                    <div class="divider">
+                        <p>Customization</p>
+                        <hr>
+                    </div>
+                    <div class="horizontal-input-field">
+                        <label for="color">Color</label>
+                        <select name="color" id="color" class="input"></select>
+                    </div>
 
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
-        </div>
-    </div>
+                    <div class="horizontal-input-field radio-choices">
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="customization" id="embroider" checked>
+                            <label for="embroider">Embroider</label>
+                        </div>
 
-    <div class="product-card">
-        <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
-        </div>
-        <div class="product-details">
-            <span class="smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at Php 00.00</p>
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="customization" id="engrave">
+                            <label for="engrave">Engrave</label>
+                        </div>
+                        
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="customization" id="print">
+                            <label for="print">Print</label> 
+                        </div>
+
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="customization" id="stamp">
+                            <label for="stamp">Stamp</label> 
+                        </div>
+                        
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="customization" id="sticker">
+                            <label for="sticker">Sticker</label> 
+                        </div>
+
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="customization" id="none">
+                            <label for="none">N/A</label> 
+                        </div>        
+                    </div>
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="note">Note:</label>
+                    <input type="text" id="note" name="note" class="input">
+                </div>
+                <div class="horizontal-input-field" style="align-self: flex-start; flex: 0;">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" min="1" placeholder="1" class="input">
+                </div>
+
+                <div class="divider">
+                    <hr>
+                </div>
+                <div class="buttons-section">
+                    <button type="button" class="close-modal button-secondary small-m">Close</button>
+                    <a href="" class="button-primary small-m">Add Item</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

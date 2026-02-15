@@ -94,7 +94,7 @@
                     <label for="full">Full</label>
                 </div>
 
-                <div class="horizontal-input-field">
+                <div class="horizontal-input-field" style="align-self: flex-start;">
                     <label for="budget">Budget:</label>
                     <input class="input" type="number" min="1" placeholder="1" name="budget" id="budget" required>
                 </div>
@@ -128,8 +128,8 @@
                         <td></td>
                         <td>
                             <div class="cell-buttons">
-                                <button class="m-button-primary smaller-b">Edit</button>
-                                <button class="m-button-tertiary smaller-b">Delete</button>
+                                <button type="button" class="m-button-primary smaller-b">Edit</button>
+                                <a href="" class="m-button-tertiary smaller-b">Delete</a>
                             </div>
                         </td>
                     </tr>
@@ -182,15 +182,17 @@
                     <hr>
                 </div>
 
-                <div class="horizontal-input-field">
-                    <label for="production=start">Start of Production:</label>
-                    <input type="date" name="production-start" id="production-start" class="input">
-                </div>
+                <div class="horizontal-section" style="align-self: flex-start;">
+                    <div class="horizontal-input-field" style="align-self: flex-start;">
+                        <label for="production=start">Start of Production:</label>
+                        <input type="date" name="production-start" id="production-start" class="input">
+                    </div>
 
-                <div class="horizontal-input-field">
-                    <label for="dalivery-date">Delivery Date:</label>
-                    <input type="date" name="dalivery-date" id="dalivery-date" class="input">
-                </div>                
+                    <div class="horizontal-input-field" style="align-self: flex-start;">
+                        <label for="dalivery-date">Delivery Date:</label>
+                        <input type="date" name="dalivery-date" id="dalivery-date" class="input">
+                    </div>  
+                </div>              
 
                 <div class="divider">
                     <p>Shipping Details</p>

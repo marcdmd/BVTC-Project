@@ -161,22 +161,41 @@ main .filter {
     border-radius: 3px;
     background: var(--warm-light-gray);
 }
+.product-id {
+    display: flex;
+    padding: 3px 6px;
+    justify-content: center;
+    align-items: center;
+    align-self: flex-start;
+    gap: 9px;
+    border-radius: 3px;
+    color: var(--off-white);
+    white-space: nowrap;
+    background: var(--orient-blue);
+}
+.product-highlight {
+    display: flex;
+    padding: 6px 9px;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    border-radius: 3px;
+    background: var(--warm-light-gray);
+}
+.product-highlight span {
+    width: 16px;
+    aspect-ratio: 1/1;
+    border-radius: 16px;
+    border: 1px solid var(--alternative-black);
+}
 .product-details {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
     align-self: stretch;
-}
-.product-details span {
-    display: flex;
-    padding: 3px 6px;
-    justify-content: center;
-    align-items: center;
-    gap: 9px;
-    border-radius: 3px;
-    color: var(--off-white);
-    background: var(--orient-blue);
 }
 .product-details h2 {
     overflow: hidden;
@@ -291,6 +310,7 @@ main .filter {
     display: flex;
     justify-content: center;
     align-items: center;
+    align-self: stretch;
     gap: 6px;
 }
 .small-database {
@@ -307,7 +327,7 @@ main .filter {
     padding: 6px 12px;
 }
 .small-database td {
-    padding: 9px 3px;
+    padding: 9px 6px;
     justify-content: center;
     align-items: center;
     font-size: 12px;
@@ -401,7 +421,7 @@ main .filter {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: center;
+    align-items: left;
     gap: 12px;
     align-self: stretch;
     flex: 1 0 0;
@@ -480,6 +500,64 @@ main .filter {
 /* For Modal Responsiveness */
 .product-form {
     max-width: 500px;
+}
+.product-view {
+    flex: 0 0 800px;
+}
+
+/* Carousel from w3schools*/
+/* Slideshow container */
+.slideshow-container {
+    position: relative;
+}
+.slideshow-container .img-container {
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 3px;
+    background: var(--warm-light-gray);
+}
+/* Hide the images by default */
+.mySlides {
+    display: none;
+}
+/* Next & previous buttons */
+.prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    margin-top: -22px;
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+}
+/* Position the "next button" to the right */
+.next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover, .next:hover {
+    background-color: var(--alternative-black);
+}
+/* The dots/bullets/indicators */
+.dot {
+    cursor: pointer;
+    height: 9px;
+    width: 9px;
+    margin: 0 2px;
+    background-color: var(--gray);
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.1s ease;
+}
+.active, .dot:hover {
+    background-color: var(--alternative-black);
 }
 
 /* Inputs */
@@ -618,6 +696,20 @@ nav.expand {
 .button-secondary:hover{
     background: var(--gray);
 }
+.button-tertiary {
+    display: flex;
+    padding: 9px 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    border: 0;
+    border-radius: 3px;
+    color: var(--off-white);
+    background: var(--vintage-maroon);
+}
+.button-tertiary:hover {
+    background: var(--dark-maroon);
+}
 .m-button-primary {
     display: flex;
     padding: 6px 9px;
@@ -727,6 +819,7 @@ nav.expand {
         display: none;
     }
     .product-card {
+        padding: 9px;
         max-width: 180px;
     }
     .database th:nth-child(4),
@@ -743,17 +836,42 @@ nav.expand {
         display: none;
     }
 
+    .button-primary,
+    .button-secondary,
+    .button-tertiary {
+        flex: 1 0 0;
+    }
+    .m-button-primary,
+    .m-button-secondary,
+    .m-button-tertiary {
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    main .action-bar {
+        margin-bottom: 9px;
+    }
     .search-bar {
         max-width: 360px;
     }
     .filter-name {
         display: none;
     }
+    .catalog {
+        gap: 9px;
+    }
     .product-card {
-        max-width: 120px;
+        padding: 6px;
+        max-width: 147px;
     }
     .modal-container {
         overflow-y: auto;
+    }
+    .modal {
+        padding: 12px;
+    }
+    .slideshow-container .img-container {
+        aspect-ratio: 4 / 3;
     }
     .action-bar h1 {
         align-self: stretch;
@@ -774,23 +892,19 @@ nav.expand {
     .product-form {
         max-width: calc(100% - 60px);
     }
+    .product-view {
+        max-width: calc(100% - 60px);
+    }
     .file-upload {
         max-height: 30px;
     }
 
     .database th:nth-child(2),
-    .database td:nth-child(2) {
-        display: none;
-    }
-
+    .database td:nth-child(2),
     .small-database th:nth-child(2),
-    .small-database td:nth-child(2) {
-        display: none;
-    }
+    .small-database td:nth-child(2),
     .small-database th:nth-child(3),
-    .small-database td:nth-child(3) {
-        display: none;
-    }
+    .small-database td:nth-child(3),
     .small-database th:nth-child(4),
     .small-database td:nth-child(4) {
         display: none;
