@@ -89,13 +89,21 @@ main .action-bar {
     padding: 9px;
     margin-bottom: 15px;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     gap: 9px;
     align-self: stretch;
     align-items: center;
     border-radius: 3px;
     background: var(--pure-white);
     box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.10);
+}
+.action-bar h1 {
+    align-items: center;
+    text-align: left;
+    flex: 1 0 0;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--zodiac-blue);
 }
 main .filter {
     display: flex;
@@ -356,7 +364,7 @@ main .filter {
 }
 .modal h1 {
     align-self: stretch;
-    font-size: 22px;
+    font-size: 21px;
     font-weight: 700;
     color: var(--zodiac-blue);
 }
@@ -380,7 +388,7 @@ main .filter {
     height: 1px;
     background-color: var(--light-gray);
 }
-.modal .vertical-section {
+.vertical-section {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -389,10 +397,10 @@ main .filter {
     align-self: stretch;
     flex: 1 0 0;
 }
-.modal .horizontal-section {
+.horizontal-section {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     gap: 12px;
     align-self: stretch;
@@ -408,7 +416,7 @@ main .filter {
     border-radius: 2px;
     background: var(--Gallery-White, #EBEBEB);
 }
-.modal .vertical-input-field {
+.vertical-input-field {
     display: flex;
     flex: 1 0 0;
     flex-direction: column;
@@ -417,13 +425,13 @@ main .filter {
     gap: 6px;
     align-self: stretch;
 }
-.modal .horizontal-input-field {
+.horizontal-input-field {
     display: flex;
     flex: 1 0 0;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
     align-self: stretch;
 }
 .modal .content {
@@ -604,6 +612,7 @@ nav.expand {
     gap: 3px;
     border: 0;
     border-radius: 3px;
+    color: var(--alternative-black);
     background: var(--light-gray); 
 }
 .button-secondary:hover{
@@ -695,9 +704,9 @@ nav.expand {
 
 /* Handles Responsiveness */
 @media(max-width: 1200px) {
-    main .filter {
+    /* main .filter {
         display: none;
-    }
+    } */
     .search-area {
         justify-content: flex-start;
     }
@@ -724,19 +733,32 @@ nav.expand {
     .database td:nth-child(4) {
         display: none;
     }
+    .radio-choices {
+        flex: 0;
+        flex-wrap: wrap;
+    }
 }
 @media(max-width: 500px) {
     .username {
         display: none;
     }
 
+    .search-bar {
+        max-width: 360px;
+    }
+    .filter-name {
+        display: none;
+    }
     .product-card {
         max-width: 120px;
     }
     .modal-container {
         overflow-y: auto;
     }
-    .modal .horizontal-section {
+    .action-bar h1 {
+        align-self: stretch;
+    }
+    .horizontal-section {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -744,6 +766,10 @@ nav.expand {
         gap: 12px;
         align-self: stretch;
         flex: 1 0 0;
+    }
+    .radio-choices {
+        flex: 0;
+        flex-wrap: wrap;
     }
     .product-form {
         max-width: calc(100% - 60px);

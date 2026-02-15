@@ -17,3 +17,162 @@
     <p class="button-text small-b">Orders</p>
 </button>
 {% endblock %}
+
+{% block main %}
+
+<div class="action-bar">
+    <div class="horizontal-section">
+        <h1>Add Item to Order</h1>
+        <div class="horizontal-section" style="flex: 0;">
+            <div class="vertical-section" style="flex: 0; gap: 3px;">
+                <p class="small-r" style="white-space: nowrap;">Initial Items (0 Items): <b>₱ 0.00</b></p>
+                <p class="smaller-r" style="color: #898989;" style="white-space: nowrap;">Discounted Total <i>(less 0%)</i>: <b>₱ 0.00</b></p>
+            </div>
+            <div class="horizontal-input-field">
+                <a href="{% url 'add_order' %}" class="button-secondary small-m">Cancel</a>
+                <button class="button-primary small-m">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="action-bar">
+    <div class="horizontal-section">
+        <form action="" class="filter" style="flex-wrap: wrap;">
+            <p class="small-r filter-name" style="padding: 6px 15px 6px 0px;">Filter:</p>
+            <input class="filter-input" type="radio" name="filter" value="all" id="all" checked>
+            <label class="filter-label small-b" for="all">All</label>
+
+            <input class="filter-input" type="radio" name="filter" value="company-profile" id="company-profile">
+            <label class="filter-label small-b" for="company-profile">Company Profile</label>
+
+            <input class="filter-input" type="radio" name="filter" value="individual-items" id="individual-items">
+            <label class="filter-label small-b" for="individual-items">Individual Items</label>
+
+            <input class="filter-input" type="radio" name="filter" value="gift-set" id="gift-set">
+            <label class="filter-label small-b" for="gift-set">Gift Set</label>
+
+            <input class="filter-input" type="radio" name="filter" value="bag" id="bag">
+            <label class="filter-label small-b" for="bag">Bag</label>
+        </form>
+
+        <div class="actions">
+            <form action="" class="search-area">
+                <input type="search" class="search-bar" placeholder="Search">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="catalog">
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="thumbnail">
+            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+        </div>
+        <div class="product-details">
+            <span class="smaller-r">Product ID</span>
+            <h2 class="bold">Product Name</h2>
+            <p class="smaller-b">Starts at Php 00.00</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
