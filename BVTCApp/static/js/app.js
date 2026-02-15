@@ -33,7 +33,8 @@ document.querySelectorAll('[data-modal]').forEach(button => {
 
 // Close modal buttons
 document.querySelectorAll('.close-modal').forEach(button => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (e) => {
+        e.stopPropagation();
         button.closest('.modal-container')
               .classList.remove('show')
     })
@@ -42,6 +43,7 @@ document.querySelectorAll('.close-modal').forEach(button => {
 // Escape key
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+        e.stopPropagation();
         document.querySelectorAll('.modal-container.show')
             .forEach(modal => modal.classList.remove('show'))
     }
@@ -51,6 +53,7 @@ document.addEventListener('keydown', e => {
 document.querySelectorAll('.modal-container').forEach(modal => {
     modal.addEventListener('click', e => {
         if (e.target === modal) {
+            e.stopPropagation();
             modal.classList.remove('show')
         }
     })

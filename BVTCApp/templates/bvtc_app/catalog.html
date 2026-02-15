@@ -45,16 +45,89 @@
 </div>
 
 <div class="catalog">
-    <div class="product-card open-modal" data-modal="product-modal">
+    {% for p in products %}
+    <div class="product-card open-modal" data-modal="product-modal-{{ p.product_id }}">
         <div class="thumbnail">
-            <img src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000" alt="" class="thumbnail">
+            {% with p.productimage_set.first as img %}
+                {% if img %}
+                    <img src="{{ img.product_image.url }}" alt="{{ p.product_name }}" class="thumbnail">
+                {% else %}
+                    <img src="" alt="No Image" class="thumbnail">
+                {% endif %}
+            {% endwith %}
         </div>
         <div class="product-details">
-            <span class="product-id smaller-r">Product ID</span>
-            <h2 class="bold">Product Name</h2>
-            <p class="smaller-b">Starts at ₱ 00.00</p>
+            <span class="product-id smaller-r">{{ p.product_code }}</span>
+            <h2 class="bold">{{ p.product_name }}</h2>
+            <p class="smaller-b">Starts at ₱ {{ p.starting_price }}</p>
+        </div>
+
+        <div class="modal-container" id="product-modal-{{ p.product_id }}">
+            <div class="modal product-view">
+                <div class="horizontal-section">
+                    <div class="vertical-section">
+                        <div class="slideshow-container">
+                            {% for img in p.productimage_set.all %}
+                            <div class="mySlides fade">
+                                <img class="img-container" src="{{ img.product_image.url }}" alt="{{ p.product_name }}">
+                            </div>
+                            {% endfor %}
+                            <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                            <a class="next" onclick="plusSlides(1)">&#10095;</a>
+                        </div>
+
+                        <!-- The dots/circles -->
+                        <div style="text-align:center">
+                            {% for _ in p.productimage_set.all %}
+                            <span class="dot" onclick="currentSlide({{ forloop.counter }})"></span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-section">
+                        <p class="product-id smaller-r">{{ p.product_code }}</p>
+                        <h1>{{ p.product_name }}</h1>
+                        <p class="small-r">Category: <b>{{ p.category }}</b></p>
+                        <p class="small-r">MOQ: <b>{{ p.MOQ }} pcs.</b></p>
+                        <p class="small-r">Starting Price: <b>₱ {{ p.starting_price }}</b></p>
+
+                        <div class="divider">
+                            <p>Product Description</p>
+                            <hr>
+                        </div>
+                        <div class="product-highlight" style="align-self: stretch;">
+                            <p class="small-r">{{ p.description }}</p>
+                        </div>
+                        
+                        <div class="divider">
+                            <p>Color Variations</p>
+                            <hr>
+                        </div>
+                        <div class="horizontal-input-field">
+                            {% for color in p.productcolor_set.all %}
+                            <div class="product-highlight">
+                                <span style="background: {{ color.product_color }};"></span>
+                                <p class="small-r">{{ color.product_color }}</p>
+                            </div>
+                            {% empty %}
+                                <p class="small-r">No colors variations</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="divider">
+                            <hr>
+                        </div>
+                        <div class="buttons-section">
+                            <a href="" class="button-tertiary small-m">Delete</a>
+                            <a href="" class="button-primary small-m">Edit</a>
+                            <button type="button" class="close-modal button-secondary small-m">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    {% endfor %}
 </div>
 {% endblock %}
 
@@ -160,72 +233,5 @@
     </div>
 </div>
 
-<div class="modal-container" id="product-modal">
-    <div class="modal product-view">
-        <div class="horizontal-section">
-            <div class="vertical-section">
-                <div class="slideshow-container">
-                    <!-- Full-width images with number and caption text -->
-                    <div class="mySlides fade">
-                        <img class="img-container" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
-                    </div>
 
-                    <div class="mySlides fade">
-                        <img class="img-container" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
-                    </div>
-
-                    <div class="mySlides fade">
-                        <img class="img-container" src="https://drive.google.com/thumbnail?id=0B6wwyazyzml-OGQ3VUo0Z2thdmc&sz=w1000">
-                    </div>
-                    <!-- Next and previous buttons -->
-                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
-                </div>
-
-                <!-- The dots/circles -->
-                <div style="text-align:center">
-                    <span class="dot" onclick="currentSlide(1)"></span>
-                    <span class="dot" onclick="currentSlide(2)"></span>
-                    <span class="dot" onclick="currentSlide(3)"></span>
-                </div>
-            </div>
-            
-            <div class="vertical-section">
-                <p class="product-id smaller-r">DW-FT</p>
-                <h1>Frosted Tumbler</h1>
-                <p class="small-r">Category: <b>Individual Items</b></p>
-                <p class="small-r">MOQ: <b>50 pcs.</b></p>
-                <p class="small-r">Starting Price: <b>₱ 0.00</b></p>
-
-                <div class="divider">
-                    <p>Product Description</p>
-                    <hr>
-                </div>
-                <div class="product-highlight" style="align-self: stretch;">
-                    <p class="small-r">Plastic Material, Capacity: 600 mL</p>
-                </div>
-                
-                <div class="divider">
-                    <p>Color Variations</p>
-                    <hr>
-                </div>
-                <div class="horizontal-input-field">
-                    <div class="product-highlight">
-                        <span style="background: #000000;"></span>
-                        <p class="small-r">#000000</p>
-                    </div>
-                </div>
-
-                <div class="divider">
-                    <hr>
-                </div>
-                <div class="buttons-section">
-                    <a href="" class="button-tertiary small-m">Delete</a>
-                    <a href="" class="button-primary small-m">Edit</a>
-                    <button type="button" class="close-modal button-secondary small-m">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

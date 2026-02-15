@@ -1,7 +1,9 @@
 from django.shortcuts import render
+from .models import Product, ProductImage, ProductColor, Order, OrderItem, Company, CustomerAccount, ShippingDetails
 
 def catalog(request):
-    return render(request, 'bvtc_app/catalog.html')
+    products = Product.objects.all()
+    return render(request, 'bvtc_app/catalog.html', {'products': products})
 
 def orders(request):
     return render(request, 'bvtc_app/orders.html')
