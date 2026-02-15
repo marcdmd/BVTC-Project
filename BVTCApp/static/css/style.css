@@ -477,14 +477,15 @@ main .filter {
 }
 .modal .file-upload {
     display: flex;
-    height: auto;
+    max-height: 21px;
     padding: 10px;
     justify-content: center;
     align-items: center;
+    overflow-y: hidden;
     gap: 10px;
     align-self: stretch;
-    aspect-ratio: 1/1;
     border-radius: 3px;
+    color: var(--gray);
     background: var(--warm-light-gray);
     flex-wrap: wrap;
 }

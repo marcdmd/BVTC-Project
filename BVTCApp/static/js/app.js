@@ -56,6 +56,24 @@ document.querySelectorAll('.modal-container').forEach(modal => {
     })
 })
 
+// Change Name to File Input
+document.querySelectorAll('.file-upload input[type="file"]')
+    .forEach(input => {
+        input.addEventListener('change', function () {
+
+            const span = this.closest('label')
+                              .querySelector('.file-text');
+
+            if (this.files.length === 0) {
+                span.textContent = "Upload Image";
+                span.style.color = "#898989";
+            } else {
+                span.textContent = this.files[0].name;
+                span.style.color = "#333";
+            }
+        });
+    });
+
 // Carousel
 let slideIndex = 1;
 showSlides(slideIndex);

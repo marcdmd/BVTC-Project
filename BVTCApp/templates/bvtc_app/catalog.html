@@ -70,13 +70,30 @@
             </div>
 
             <div class="horizontal-section">
-                <div class="file-upload">
-                    <label for="photos">
-                        <span style="color: #898989;">Upload Image/s</span>
-                        <input id="photos" name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;" multiple>
-                    </label>
+                <div class="vertical-section" style="flex: 1 0 0;">
+                    <div class="file-upload">
+                        <label>
+                            <span class="file-text">Upload Image/s</span>
+                            <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                        </label>
+                    </div>
+
+                    <div class="file-upload">
+                        <label>
+                            <span class="file-text">Upload Image/s</span>
+                            <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                        </label>
+                    </div>
+
+                    <div class="file-upload">
+                        <label>
+                            <span class="file-text">Upload Image/s</span>
+                            <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                        </label>
+                    </div>
                 </div>
-                <div class="vertical-section">
+
+                <div class="vertical-section" style="flex: 2 0 0;">
                     <div class="horizontal-input-field">
                         <label for="product-id">Product ID:</label>
                         <input type="text" id="product-id" name="product-id" class="input" required>
