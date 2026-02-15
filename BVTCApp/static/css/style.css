@@ -726,6 +726,10 @@ nav.expand {
     }
 }
 @media(max-width: 500px) {
+    .username {
+        display: none;
+    }
+
     .product-card {
         max-width: 120px;
     }

@@ -1,0 +1,19 @@
+{% extends 'bvtc_app/base.html' %}
+{% load static %}
+
+{% block title %}Add Item{% endblock %}
+
+{% block nav %}
+<h1 class="bold">Orders</h1>
+<i class="material-symbols-outlined" style="font-size: 21px;">chevron_forward</i>
+<h1 class="bold">Add New Order</h1>
+<i class="material-symbols-outlined" style="font-size: 21px;">chevron_forward</i>
+<h1 class="bold">Add Item</h1>
+{% endblock %}
+
+{% block orders_button %}
+<button type="submit" style="background: #E9E6E3;">
+    <i class="material-symbols-rounded" style="font-size: 24px;">assignment</i>
+    <p class="button-text small-b">Orders</p>
+</button>
+{% endblock %}
