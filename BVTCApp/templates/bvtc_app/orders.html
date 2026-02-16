@@ -92,59 +92,88 @@
         </thead>
 
         <tbody>
+            {% for o in orders %}
             <tr>
                 <td>
                     <input type="checkbox" name="to-discard" value="{{ o.id }}" class="to-discard" form="discard-form">
                 </td>
                 <td class="small-b">{{ o.order_id }}</td>
-                <td class="small-b">{{ o.customer_name }}</td>
-                <td class="small-b">{{ o.company_name }}</td>
+                <td class="small-b">{{ o.customer_id.customer_name }}</td>
+                <td class="small-b">{{ o.customer_id.company_id.company_name }}</td>
                 <td class="small-r">{{ o.delivery_date }}</td>
-                <td class="small-b">{{ o.status }}</td>
-                <td class="small-b">{{ o.account_manager }}</td>
+                <td class="small-b">{{ o.order_status }}</td>
+                <td class="small-b">{{ o.user_id.user_name }}</td>
                 <td>
                     <div class="cell-buttons">
-                        <button type="button" class="m-button-primary smaller-b">View</button>
+                        <button type="button" data-modal="order-modal-{{ o.order_id }}" class="m-button-primary smaller-b">View</button>
                         <a href="" class="m-button-secondary smaller-b">Edit</a>
                     </div>
                 </td>
-            </tr>
+            
+                <div class="modal-container" id="order-modal-{{ o.order_id }}">
+                    <div class="modal product-view">
+                        <div class="horizontal-section">
+                            <div class="vertical-section" style="flex: 1 0 0;">
+                                <div class="slideshow-container" id="slideshow-{{ o.order_id }}">
+                                    {% for img in o.productimage_set.all %}
+                                    <div class="mySlides fade">
+                                        <img class="img-container" src="{{ o.product_image.url }}" alt="{{ o.product_name }}">
+                                    </div>
+                                    {% empty %}
+                                        <p class="small-r">No Mockups</p>
+                                    {% endfor %}
+                                    <a class="prev" onclick="plusSlides(-1, '{{ p.product_id }}')">&#10094;</a>
+                                    <a class="next" onclick="plusSlides(1, '{{ p.product_id }}')">&#10095;</a>
+                                </div>
+                                <div style="text-align:center">
+                                    {% for _ in p.productimage_set.all %}
+                                    <span class="dot" onclick="currentSlide('{{ forloop.counter }}', '{{ p.product_id }}')"></span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="vertical-section" style="flex: 3 0 0;">
+                                <div class="divider"><p>Client Information</p><hr></div>
+                                <p class="small-r">Client Name: <b>{{ o.customer_id.customer_name }}</b></p>
+                                <p class="small-r">Company Name: <b>{{ o.customer_id.company_id.company_name }}</b></p>
+                                <p class="small-r">Company Address: <b>{{ o.customer_id.company_id.company_address }}</b></p>
 
-            <tr>
-                <td>
-                    <input type="checkbox" name="to-discard" value="{{ o.id }}" class="to-discard" form="discard-form">
-                </td>
-                <td class="small-b">{{ o.order_id }}</td>
-                <td class="small-b">{{ o.customer_name }}</td>
-                <td class="small-b">{{ o.company_name }}</td>
-                <td class="small-r">{{ o.delivery_date }}</td>
-                <td class="small-b">{{ o.status }}</td>
-                <td class="small-b">{{ o.account_manager }}</td>
-                <td>
-                    <div class="cell-buttons">
-                        <button type="button" class="m-button-primary smaller-b">View</button>
-                        <a href="" class="m-button-secondary smaller-b">Edit</a>
-                    </div>
-                </td>
-            </tr>
+                                <div class="divider"><p>Order Details</p><hr></div>
+                                <div class="horizontal-input-field">
+                                    <div class="horizontal-input-field">
+                                        <p class="small-r">Budget: <b>{{ o.budget }}</b></p>
+                                    </div>
 
-            <tr>
-                <td>
-                    <input type="checkbox" name="to-discard" value="{{ o.id }}" class="to-discard" form="discard-form">
-                </td>
-                <td class="small-b">{{ o.order_id }}</td>
-                <td class="small-b">{{ o.customer_name }}</td>
-                <td class="small-b">{{ o.company_name }}</td>
-                <td class="small-r">{{ o.delivery_date }}</td>
-                <td class="small-b">{{ o.status }}</td>
-                <td class="small-b">{{ o.account_manager }}</td>
-                <td>
-                    <div class="cell-buttons">
-                        <button type="button" class="m-button-primary smaller-b">View</button>
-                        <a href="" class="m-button-secondary smaller-b">Edit</a>
+                                    <div class="horizontal-input-field">
+                                        <a href="" class="m-button-primary small-m" style="white-space: nowrap;">View Feasibility Report</a>
+                                        <a href="" class="m-button-primary small-m" style="white-space: nowrap;">View Samples</a>
+                                    </div>
+                                </div>
+
+                                <div class="vertical-section">
+                                    {% for oi in o.orderitems_set.all %}
+                                        <p class="small-r"><b>{{ oi.order_id }}-{{ oi.product_id }}</b>: {{ oi.customization }}, {{ oi.quantity }}, {{ oi.price }}</p>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="divider"><p>Shipping Details</p><hr></div>
+                                <p class="small-r">Delivery Address: <b>{{ o.shipping_id.address_city }}</b></p>
+                                <p class="small-r">Budget: <b>{{ o.budget }}</b></p>
+                                <p class="small-r">Budget: <b>{{ o.budget }}</b></p>
+                                <p class="small-r">Budget: <b>{{ o.budget }}</b></p>
+                                
+                                <div class="divider"><hr></div>
+                                <div class="buttons-section">
+                                    <a href="" class="button-tertiary small-m">Cancel</a>
+                                    <a href="" class="button-primary small-m">Edit</a>
+                                    <button type="button" class="close-modal button-secondary small-m">Close</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </td>
+                </div>
             </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>

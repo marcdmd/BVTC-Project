@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Product, ProductImage, ProductColor
+from .models import Product, ProductImage, ProductColor, Order
 
 def catalog(request):
     if request.method == 'POST':
@@ -37,7 +37,8 @@ def catalog(request):
     return render(request, 'bvtc_app/catalog.html', {'products': products})
 
 def orders(request):
-    return render(request, 'bvtc_app/orders.html')
+    orders = Order.objects.all()
+    return render(request, 'bvtc_app/orders.html', {'orders': orders})
 
 def add_order(request):
     return render(request, 'bvtc_app/add_order.html')
