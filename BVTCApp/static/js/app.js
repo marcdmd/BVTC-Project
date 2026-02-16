@@ -20,6 +20,7 @@ function toggleSidebar() {
 // Open modal
 document.querySelectorAll('[data-modal]').forEach(button => {
     button.addEventListener('click', e => {
+        if (e.target.closest('.modal')) return;
         e.preventDefault()
 
         const modalId = button.dataset.modal
@@ -34,6 +35,7 @@ document.querySelectorAll('[data-modal]').forEach(button => {
 // Close modal buttons
 document.querySelectorAll('.close-modal').forEach(button => {
     button.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         button.closest('.modal-container')
               .classList.remove('show')
