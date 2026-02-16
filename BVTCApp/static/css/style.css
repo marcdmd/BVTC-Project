@@ -188,7 +188,7 @@ main .filter {
     width: 16px;
     aspect-ratio: 1/1;
     border-radius: 16px;
-    border: 1px solid var(--alternative-black);
+    border: 1px solid var(--warm-light-gray);
 }
 .product-details {
     display: flex;
