@@ -34,7 +34,8 @@ def catalog(request):
 
     # fetch all products including admin-inputs
     products = Product.objects.all()
-    return render(request, 'bvtc_app/catalog.html', {'products': products})
+    product_images = ProductImage.objects.all()
+    return render(request, 'bvtc_app/catalog.html', {'products': products, 'product_images': product_images})
 
 def orders(request):
     return render(request, 'bvtc_app/orders.html')
