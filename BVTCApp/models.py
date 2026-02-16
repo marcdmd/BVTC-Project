@@ -3,7 +3,6 @@ from django.utils import timezone
 
 class UserAccount(models.Model):
     USER_TITLES = [
-         
         ('Account Manager', 'Account Manager'),
         ('Production', 'Production'),
         ('Sales Officer', 'Sales Officer'),
@@ -20,16 +19,19 @@ class UserAccount(models.Model):
     
     user_id = models.AutoField(primary_key=True)
     user_name = models.CharField(max_length=50)
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=255) # need to add hashing for passwords
     user_title = models.CharField(max_length=50, choices=USER_TITLES)
     user_role = models.CharField(max_length=100, choices=USER_ROLES, default='Other')
+
+    def __str__(self):
+        return f'{self.user_name} - {self.user_title}'
 
 class Company(models.Model):
     company_id = models.AutoField(primary_key=True)
     company_name = models.CharField(max_length=150)
-    company_logo = models.CharField(max_length=255)
+    company_logo = models.ImageField(upload_to='images/')
     company_address = models.CharField(max_length=255)
-    tin_number = models.CharField(max_length=15, unique=True)
+    tin_number = models.CharField(max_length=15, unique=True) #should make it fixed 9 digits, error if not
     objects = models.Manager()
 
     def __str__(self):
@@ -43,7 +45,7 @@ class CustomerAccount(models.Model):
     company_id = models.ForeignKey(Company, on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=100)
     customer_email = models.CharField(max_length=100)
-    customer_phone_number = models.CharField(max_length=20)
+    customer_phone_number = models.CharField(max_length=20) #should make it fixed 11 digits, error if not (maybe take note of country code or landline stuff)
     messenger = models.CharField(max_length=100, blank=True, null=True)
     viber = models.CharField(max_length=15, blank=True, null=True)
     objects = models.Manager()
@@ -54,7 +56,7 @@ class CustomerAccount(models.Model):
     class Meta:
         verbose_name_plural: str = 'Customer Accounts'
 
-class ShippingDetails(models.Model):
+class ShippingDetails(models.Model): # option to insert details if contact person is same as customer
     shipping_id = models.AutoField(primary_key=True)
     customer_id = models.ForeignKey(CustomerAccount, on_delete=models.CASCADE)
     contact_person_name = models.CharField(max_length=150)
@@ -69,7 +71,7 @@ class ShippingDetails(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        return f'{self.shipping_id} - {self.customer_id}, {self.contact_person}'
+        return f'{self.shipping_id} - {self.customer_id}, {self.contact_person_name}'
 
     class Meta:
         verbose_name_plural: str = 'Shipping Details'
@@ -151,7 +153,7 @@ class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
     customer_id = models.ForeignKey(CustomerAccount, on_delete=models.CASCADE)
     user_id = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
-    shipping_id = models.ForeignKey(ShippingDetails, on_delete=models.CASCADE)
+    shipping_id = models.ForeignKey(ShippingDetails, on_delete=models.CASCADE) # should auto filter to only show addresses that match the customer
     
     mode_of_payment = models.CharField(max_length=50, choices=PAYMENT_MODES)
     payment_terms = models.CharField(max_length=20, choices=PAYMENT_TERMS)
@@ -165,10 +167,10 @@ class Order(models.Model):
     lead_time = models.PositiveIntegerField(default=1)
 
     transaction_platform = models.CharField(max_length=50)
-    link_to_logo = models.CharField(max_length=500)
+    link_to_logo = models.CharField(max_length=500, blank=True, null=True) 
 
     packing_instructions = models.TextField(blank=True, null=True)
-    order_status = models.CharField(max_length=50, choices=ORDER_STATUS, default='Pending')
+    order_status = models.CharField(max_length=50, choices=ORDER_STATUS, default='Under Feasibility')
 
     freight_term = models.BooleanField(default=False)
     delivery_fee = models.BooleanField(default=False)
@@ -237,7 +239,7 @@ class Image(models.Model): #Composite Key
     image_id = models.AutoField(primary_key=True)
     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
-    image_path = models.CharField(max_length=255)
+    image_path = models.ImageField(max_length=255)
     feedback = models.TextField(blank=True, null=True)
     image_type = models.CharField(max_length=20, choices=IMAGE_TYPES)
     image_status = models.CharField(max_length=15, choices=IMAGE_STATUS, default='Pending')
