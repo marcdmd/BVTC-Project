@@ -167,7 +167,7 @@ class Order(models.Model):
     lead_time = models.PositiveIntegerField(default=1)
 
     transaction_platform = models.CharField(max_length=50)
-    link_to_logo = models.CharField(max_length=500, blank=True, null=True) 
+    link_to_logo = models.CharField(max_length=500, blank=True) 
 
     packing_instructions = models.TextField(blank=True, null=True)
     order_status = models.CharField(max_length=50, choices=ORDER_STATUS, default='Under Feasibility')
@@ -180,8 +180,8 @@ class Order(models.Model):
 
     note = models.TextField(blank=True, null=True)
     stock_availability = models.CharField(max_length=20, choices=STOCK_AVAILABILITY, default='Available', null=True)
-    customization_feasibility = models.CharField(max_length=100)
-    lead_time_feasibility = models.PositiveIntegerField(default=0)
+    customization_feasibility = models.CharField(max_length=100, blank=True)
+    lead_time_feasibility = models.PositiveIntegerField(default=0, blank=True, null=True)
 
     actual_total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True)
 
