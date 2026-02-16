@@ -167,7 +167,7 @@ class Order(models.Model):
     lead_time = models.PositiveIntegerField(default=1)
 
     transaction_platform = models.CharField(max_length=50)
-    link_to_logo = models.CharField(max_length=500, blank=True) 
+    link_to_logo = models.CharField(max_length=500, blank=True, null=True)
 
     packing_instructions = models.TextField(blank=True, null=True)
     order_status = models.CharField(max_length=50, choices=ORDER_STATUS, default='Under Feasibility')
