@@ -1,21 +1,21 @@
 from django.db import models
 from django.utils import timezone
 
-class UserAccount(models.Model): ## double check CHOICES match ui
-    USER_TITLES = [
-         ('Admin', 'Admin'),
-         ('Account Manager', 'Account Manager'),
-         ('Production', 'Production'),
-         ('Sales Officer', 'Sales Officer'),
-         ('Marketing Officer', 'Marketing Officer'),
-         ('Graphic Designer', 'Graphic Designer'),
+class UserAccount(models.Model):
+	USER_TITLES = [
+		('Admin', 'Admin'),
+        ('Account Manager', 'Account Manager'),
+        ('Production', 'Production'),
+        ('Sales Officer', 'Sales Officer'),
+        ('Marketing Officer', 'Marketing Officer'),
+        ('Graphic Designer', 'Graphic Designer'),
     ]
-
-    USER_ROLES = [
-         ('Admin', 'Admin'),
-         ('Account Manager', 'Account Manager'),
-         ('Officer', 'Officer'),
-         ('Other', 'Other'),
+	
+	USER_ROLES = [
+        ('Admin', 'Admin'),
+        ('Account Manager', 'Account Manager'),
+        ('Officer', 'Officer'),
+        ('Other', 'Other'),
     ]
     
     user_id = models.AutoField(primary_key=True)
@@ -57,7 +57,7 @@ class CustomerAccount(models.Model):
 class ShippingDetails(models.Model):
     shipping_id = models.AutoField(primary_key=True)
     customer_id = models.ForeignKey(CustomerAccount, on_delete=models.CASCADE)
-    contact_person = models.CharField(max_length=150)
+    contact_person_name = models.CharField(max_length=150)
     contact_person_email = models.EmailField(max_length=100)
     contact_person_number = models.CharField(max_length=20)
     address_province = models.CharField(max_length=60)
@@ -75,10 +75,17 @@ class ShippingDetails(models.Model):
         verbose_name_plural: str = 'Shipping Details'
 
 class Product(models.Model):
+	CATEGORY_CHOICES = [
+        ('Company Profile', 'Company Profile'),
+        ('Individual Items', 'Individual Items'),
+        ('Gift Set', 'Gift Set'),
+        ('Bag', 'Bag'),
+    ]
+	
     product_id = models.AutoField(primary_key=True)
     product_code = models.CharField(max_length=20, unique=True, blank=True)
     product_name = models.CharField(max_length=150)
-    category = models.CharField(max_length=100)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
     description = models.TextField()
     starting_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     MOQ = models.PositiveIntegerField()
@@ -109,7 +116,7 @@ class ProductColor(models.Model):
     class Meta:
         verbose_name_plural: str = 'Product Colors'
 
-class Order(models.Model): ### double check CHOICES match ui
+class Order(models.Model):
     PAYMENT_MODES = [
          ('Metrobank Fund Transfer', 'Metrobank Fund Transfer'),
          ('BPI Bank Transfer', 'BPI Bank Transfer'),
@@ -122,13 +129,17 @@ class Order(models.Model): ### double check CHOICES match ui
     ]
 
     ORDER_STATUS = [
-         ('Pending', 'Pending'),
-         ('Approved for Production', 'Approved for Production'),
-         ('In Production', 'In Production'),
-         ('Completed', 'Completed'),
-         ('Dispatched', 'Dispatched'),
-         ('Delivered', 'Delivered'),
-         ('Cancelled', 'Cancelled'),
+		('Under Feasibility', 'Under Feasibility'),
+        ('Under Quotation', 'Under Quotation'),
+        ('In Production', 'In Production'),
+        ('Sampled', 'Sampled'),
+        ('Packaged', 'Packaged'),
+        ('In Transit', 'In Transit'),
+        ('Under Validation', 'Under Validation'),
+        ('Validated', 'Validated'),
+        ('Sent to Customer', 'Sent to Customer'),
+        ('Signed', 'Signed'),
+        ('Issued', 'Issued'),
     ]
 
     STOCK_AVAILABILITY = [
@@ -166,12 +177,11 @@ class Order(models.Model): ### double check CHOICES match ui
     issue_date = models.DateField(default=timezone.now)
 
     note = models.TextField(blank=True, null=True)
-
-    stock_availability = models.CharField(max_length=20, choices=STOCK_AVAILABILITY, default='Available')
+    stock_availability = models.CharField(max_length=20, choices=STOCK_AVAILABILITY, default='Available', null=True)
     customization_feasibility = models.CharField(max_length=100)
     lead_time_feasibility = models.PositiveIntegerField(default=0)
 
-    actual_total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    actual_total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True)
 
     def __str__(self):
         return f'{self.order_id} - {self.customer_id}'
@@ -192,12 +202,26 @@ class OrderItem(models.Model):
         verbose_name_plural: str = 'Order Items'
 
 class BillingStatement(models.Model):
+	PAYMENT_TERMS = [
+        ('Partial-Initial', 'Partial-Initial'),
+        ('Partial-Final', 'Partial-Final'),
+        ('Full', 'Full'),
+        ]
+   
+    PAYMENT_STATUS = [
+        ('Acknowledged', 'Acknowledged'),
+        ('Issued', 'Issued'),
+        ('Paid', 'Paid'),
+    ]
+
 	billing_statement_id = models.AutoField(primary_key=True)
 	order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
+    payment_term = models.CharField(max_length=50, choices=PAYMENT_TERMS, default='Partial-Initial')
 	billing_date = models.DateField(default=timezone.now)
 	due_date = models.DateField(default=timezone.now)
+    payment_status = models.CharField(max_length=50, choices=PAYMENT_STATUS, default='Acknowledged')
 
-class Image(models.Model): ## double check CHOICES match ui, Composite Key
+class Image(models.Model): #Composite Key
     IMAGE_TYPES = [
          ('Customer Provided', 'Customer Provided'),
          ('In-House', 'In-House'),
