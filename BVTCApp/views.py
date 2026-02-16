@@ -34,8 +34,7 @@ def catalog(request):
 
     # fetch all products including admin-inputs
     products = Product.objects.all()
-    product_images = ProductImage.objects.all()
-    return render(request, 'bvtc_app/catalog.html', {'products': products, 'product_images': product_images})
+    return render(request, 'bvtc_app/catalog.html', {'products': products})
 
 def orders(request):
     return render(request, 'bvtc_app/orders.html')
@@ -44,7 +43,8 @@ def add_order(request):
     return render(request, 'bvtc_app/add_order.html')
 
 def add_item(request):
-    return render(request, 'bvtc_app/add_item.html')
+    products = Product.objects.all()
+    return render(request, 'bvtc_app/add_item.html', {'products': products})
 
 def quotations(request):
     return render(request, 'bvtc_app/quotations.html')
