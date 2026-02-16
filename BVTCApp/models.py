@@ -2,16 +2,16 @@ from django.db import models
 from django.utils import timezone
 
 class UserAccount(models.Model):
-	USER_TITLES = [
-		('Admin', 'Admin'),
+    USER_TITLES = [
+         
         ('Account Manager', 'Account Manager'),
         ('Production', 'Production'),
         ('Sales Officer', 'Sales Officer'),
         ('Marketing Officer', 'Marketing Officer'),
         ('Graphic Designer', 'Graphic Designer'),
     ]
-	
-	USER_ROLES = [
+    
+    USER_ROLES = [
         ('Admin', 'Admin'),
         ('Account Manager', 'Account Manager'),
         ('Officer', 'Officer'),
@@ -75,13 +75,13 @@ class ShippingDetails(models.Model):
         verbose_name_plural: str = 'Shipping Details'
 
 class Product(models.Model):
-	CATEGORY_CHOICES = [
+    CATEGORY_CHOICES = [
         ('Company Profile', 'Company Profile'),
         ('Individual Items', 'Individual Items'),
         ('Gift Set', 'Gift Set'),
         ('Bag', 'Bag'),
     ]
-	
+    
     product_id = models.AutoField(primary_key=True)
     product_code = models.CharField(max_length=20, unique=True, blank=True)
     product_name = models.CharField(max_length=150)
@@ -202,23 +202,23 @@ class OrderItem(models.Model):
         verbose_name_plural: str = 'Order Items'
 
 class BillingStatement(models.Model):
-	PAYMENT_TERMS = [
+    PAYMENT_TERMS = [
         ('Partial-Initial', 'Partial-Initial'),
         ('Partial-Final', 'Partial-Final'),
         ('Full', 'Full'),
         ]
-   
+    
     PAYMENT_STATUS = [
         ('Acknowledged', 'Acknowledged'),
         ('Issued', 'Issued'),
         ('Paid', 'Paid'),
     ]
-
-	billing_statement_id = models.AutoField(primary_key=True)
-	order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
+    
+    billing_statement_id = models.AutoField(primary_key=True)
+    order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
     payment_term = models.CharField(max_length=50, choices=PAYMENT_TERMS, default='Partial-Initial')
-	billing_date = models.DateField(default=timezone.now)
-	due_date = models.DateField(default=timezone.now)
+    billing_date = models.DateField(default=timezone.now)
+    due_date = models.DateField(default=timezone.now)
     payment_status = models.CharField(max_length=50, choices=PAYMENT_STATUS, default='Acknowledged')
 
 class Image(models.Model): #Composite Key
