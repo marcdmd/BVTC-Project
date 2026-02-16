@@ -66,18 +66,20 @@
             <div class="modal product-view">
                 <div class="horizontal-section">
                     <div class="vertical-section">
-                        <div class="slideshow-container">
+                        <div class="slideshow-container" id="slideshow-{{ p.product_id }}">
                             {% for img in p.productimage_set.all %}
                             <div class="mySlides fade">
                                 <img class="img-container" src="{{ img.product_image.url }}" alt="{{ p.product_name }}">
                             </div>
+                            {% empty %}
+                                <p class="small-r">No images</p>
                             {% endfor %}
-                            <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-                            <a class="next" onclick="plusSlides(1)">&#10095;</a>
+                            <a class="prev" onclick="plusSlides(-1, '{{ p.product_id }}')">&#10094;</a>
+                            <a class="next" onclick="plusSlides(1, '{{ p.product_id }}')">&#10095;</a>
                         </div>
                         <div style="text-align:center">
                             {% for _ in p.productimage_set.all %}
-                            <span class="dot" onclick="currentSlide('{{ forloop.counter }}')"></span>
+                            <span class="dot" onclick="currentSlide('{{ forloop.counter }}', '{{ p.product_id }}')"></span>
                             {% endfor %}
                         </div>
                     </div>
@@ -102,7 +104,7 @@
                                 <p class="small-r">{{ color.product_color }}</p>
                             </div>
                             {% empty %}
-                                <p class="small-r">No colors variations</p>
+                                <p class="small-r">No color variations</p>
                             {% endfor %}
                         </div>
 

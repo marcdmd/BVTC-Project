@@ -80,31 +80,46 @@ document.querySelectorAll('.file-upload input[type="file"]')
     });
 
 // Carousel
-let slideIndex = 1;
-showSlides(slideIndex);
+const slideIndexes = {};
 
-// Next/previous controls
-function plusSlides(n) {
-  showSlides(slideIndex += n);
+function plusSlides(n, productId) {
+  if (!slideIndexes[productId]) slideIndexes[productId] = 1;
+  showSlides(slideIndexes[productId] += n, productId);
 }
 
-// Thumbnail image controls
-function currentSlide(n) {
-  showSlides(slideIndex = n);
+function currentSlide(n, productId) {
+  slideIndexes[productId] = n;
+  showSlides(n, productId);
 }
 
-function showSlides(n) {
-  let i;
-  let slides = document.getElementsByClassName("mySlides");
-  let dots = document.getElementsByClassName("dot");
-  if (n > slides.length) {slideIndex = 1}
-  if (n < 1) {slideIndex = slides.length}
-  for (i = 0; i < slides.length; i++) {
+function showSlides(n, productId) {
+  const slideshow = document.getElementById(`slideshow-${productId}`);
+  const slides = slideshow.getElementsByClassName("mySlides");
+  const dots = slideshow.parentElement.querySelectorAll(`#slideshow-${productId} ~ div .dot`);
+
+  if (n > slides.length) slideIndexes[productId] = 1;
+  if (n < 1) slideIndexes[productId] = slides.length;
+
+  for (let i = 0; i < slides.length; i++) {
     slides[i].style.display = "none";
   }
-  for (i = 0; i < dots.length; i++) {
-    dots[i].className = dots[i].className.replace(" active", "");
+
+  for (let i = 0; i < dots.length; i++) {
+    dots[i].classList.remove("active");
   }
-  slides[slideIndex-1].style.display = "block";
-  dots[slideIndex-1].className += " active";
+
+  slides[slideIndexes[productId] - 1].style.display = "block";
+  if (dots[slideIndexes[productId] - 1]) {
+    dots[slideIndexes[productId] - 1].classList.add("active");
+  }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  const slideshows = document.querySelectorAll("[id^='slideshow-']");
+
+  slideshows.forEach(slideshow => {
+    const productId = slideshow.id.replace("slideshow-", "");
+    slideIndexes[productId] = 1;
+    showSlides(1, productId);
+  });
+});
