@@ -75,8 +75,6 @@
                             <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
                             <a class="next" onclick="plusSlides(1)">&#10095;</a>
                         </div>
-
-                        <!-- The dots/circles -->
                         <div style="text-align:center">
                             {% for _ in p.productimage_set.all %}
                             <span class="dot" onclick="currentSlide('{{ forloop.counter }}')"></span>
@@ -91,22 +89,16 @@
                         <p class="small-r">MOQ: <b>{{ p.MOQ }} pcs.</b></p>
                         <p class="small-r">Starting Price: <b>₱ {{ p.starting_price }}</b></p>
 
-                        <div class="divider">
-                            <p>Product Description</p>
-                            <hr>
-                        </div>
+                        <div class="divider"><p>Product Description</p><hr></div>
                         <div class="product-highlight" style="align-self: stretch;">
                             <p class="small-r">{{ p.description }}</p>
                         </div>
                         
-                        <div class="divider">
-                            <p>Color Variations</p>
-                            <hr>
-                        </div>
+                        <div class="divider"><p>Color Variations</p><hr></div>
                         <div class="horizontal-input-field">
                             {% for color in p.productcolor_set.all %}
                             <div class="product-highlight">
-                                <span style="background: {{ color.product_color }};"></span>
+                                <span style="background: {{ color.product_color }}; width: 20px; height: 20px; display: inline-block; border-radius: 50%; border: 1px solid #ccc;"></span>
                                 <p class="small-r">{{ color.product_color }}</p>
                             </div>
                             {% empty %}
@@ -114,9 +106,7 @@
                             {% endfor %}
                         </div>
 
-                        <div class="divider">
-                            <hr>
-                        </div>
+                        <div class="divider"><hr></div>
                         <div class="buttons-section">
                             <a href="" class="button-tertiary small-m">Delete</a>
                             <a href="" class="button-primary small-m">Edit</a>
@@ -134,13 +124,10 @@
 {% block modals %}
 <div class="modal-container" id="add-product-modal">
     <div class="modal product-form">
-        <form action="">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <h1>Add New Product</h1>
-            <div class="divider">
-                <p>Basic Information</p>
-                <hr>
-            </div>
+            <div class="divider"><p>Basic Information</p><hr></div>
 
             <div class="horizontal-section">
                 <div class="vertical-section" style="flex: 1 0 0;">
@@ -150,14 +137,12 @@
                             <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
                         </label>
                     </div>
-
                     <div class="file-upload">
                         <label>
                             <span class="file-text">Upload Image/s</span>
                             <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
                         </label>
                     </div>
-
                     <div class="file-upload">
                         <label>
                             <span class="file-text">Upload Image/s</span>
@@ -171,19 +156,17 @@
                         <label for="product-id">Product ID:</label>
                         <input type="text" id="product-id" name="product-id" class="input" required>
                     </div>
-
                     <div class="horizontal-input-field">
                         <label for="product-name">Product Name:</label>
                         <input type="text" id="product-name" name="product-name" class="input" required>
                     </div>
-
                     <div class="horizontal-input-field">
                         <label for="category">Category:</label>
                         <select class="input" name="category" id="category" required>
-                            <option value="company-profile">Company Profile</option>
-                            <option value="individual-items">Individual Items</option>
-                            <option value="gift-set">Gift Set</option>
-                            <option value="bag">Bag</option>
+                            <option value="Company Profile">Company Profile</option>
+                            <option value="Individual Items">Individual Items</option>
+                            <option value="Gift Set">Gift Set</option>
+                            <option value="Bag">Bag</option>
                         </select>
                     </div>
                 </div>
@@ -194,17 +177,13 @@
                 <input type="text" class="input" name="product-description" id="product-description">
             </div>
 
-            <div class="divider">
-                <p>Sales Information</p>
-                <hr>
-            </div>
+            <div class="divider"><p>Sales Information</p><hr></div>
 
             <div class="horizontal-section">
                 <div class="horizontal-input-field">
                     <label for="moq">MOQ:</label>
                     <input class="input" type="number" min="1" placeholder="1" name="moq" id="moq" required>
                 </div>
-
                 <div class="horizontal-input-field">
                     <label for="starting-price">Starting Price:</label>
                     <input class="input" type="number" min="1" placeholder="1" name="starting-price" id="starting-price" required>
@@ -214,16 +193,14 @@
             <div class="vertical-input-field">
                 <label for="colors">Color Variations:</label>
                 <div class="horizontal-input-field" style="flex-wrap: wrap;">
-                    <input class="input" type="text" placeholder="#000000" id="colors" name="colors[]" style="min-width: 90px;">
-                    <input class="input" type="text" placeholder="#000000" id="colors" name="colors[]" style="min-width: 90px;">
-                    <input class="input" type="text" placeholder="#000000" id="colors" name="colors[]" style="min-width: 90px;">
-                    <input class="input" type="text" placeholder="#000000" id="colors" name="colors[]" style="min-width: 90px;">
+                    <input class="input" type="text" placeholder="#000000" name="colors[]" style="min-width: 90px;">
+                    <input class="input" type="text" placeholder="#000000" name="colors[]" style="min-width: 90px;">
+                    <input class="input" type="text" placeholder="#000000" name="colors[]" style="min-width: 90px;">
+                    <input class="input" type="text" placeholder="#000000" name="colors[]" style="min-width: 90px;">
                 </div>
             </div>
 
-            <div class="divider">
-                <hr>
-            </div>
+            <div class="divider"><hr></div>
 
             <div class="buttons-section">
                 <button type="button" class="close-modal button-secondary small-m">Cancel</button>
@@ -232,6 +209,4 @@
         </form>
     </div>
 </div>
-
-
 {% endblock %}
