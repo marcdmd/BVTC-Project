@@ -39,14 +39,23 @@
             <form action="" class="search-area">
                 <input type="search" class="search-bar" placeholder="Search">
             </form>
-            <button class="button-primary small-m" data-modal="add-product-modal"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Product</button>
+            <button class="button-primary small-m open-add-modal"><i class="material-symbols-outlined open-add-modal" style="font-size: 15px;">add</i>Add Product</button>
         </div>
     </div>
 </div>
 
 <div class="catalog">
     {% for p in products %}
-    <div class="product-card open-modal" data-modal="product-modal-{{ p.product_id }}">
+    <div class="product-card open-view-modal"
+         data-db_id="{{ p.product_id }}"
+         data-images="{% for img in p.productimage_set.all %}{{ img.product_image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
+         data-colors="{% for c in p.productcolor_set.all %}{{ c.product_color }}{% if not forloop.last %},{% endif %}{% endfor %}"
+         data-product_code="{{ p.product_code }}"
+         data-product_name="{{ p.product_name }}"
+         data-category="{{ p.category }}"
+         data-moq="{{ p.MOQ }}"
+         data-starting_price="{{ p.starting_price }}"
+         data-product_description="{{ p.description }}">
         <div class="thumbnail">
             {% with p.productimage_set.first as img %}
                 {% if img %}
@@ -61,144 +70,119 @@
             <h2 class="bold">{{ p.product_name }}</h2>
             <p class="smaller-b">Starts at ₱ {{ p.starting_price }}</p>
         </div>
-
-        <div class="modal-container" id="product-modal-{{ p.product_id }}">
-            <div class="modal product-view">
-                <div class="horizontal-section">
-                    <div class="vertical-section">
-                        <div class="slideshow-container" id="slideshow-{{ p.product_id }}">
-                            {% for img in p.productimage_set.all %}
-                            <div class="mySlides fade">
-                                <img class="img-container" src="{{ img.product_image.url }}" alt="{{ p.product_name }}">
-                            </div>
-                            {% empty %}
-                                <p class="small-r">No images</p>
-                            {% endfor %}
-                            <a class="prev" onclick="plusSlides(-1, '{{ p.product_id }}')">&#10094;</a>
-                            <a class="next" onclick="plusSlides(1, '{{ p.product_id }}')">&#10095;</a>
-                        </div>
-                        <div style="text-align:center">
-                            {% for _ in p.productimage_set.all %}
-                            <span class="dot" onclick="currentSlide('{{ forloop.counter }}', '{{ p.product_id }}')"></span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    
-                    <div class="vertical-section">
-                        <p class="product-id smaller-r">{{ p.product_code }}</p>
-                        <h1>{{ p.product_name }}</h1>
-                        <p class="small-r">Category: <b>{{ p.category }}</b></p>
-                        <p class="small-r">MOQ: <b>{{ p.MOQ }} pcs.</b></p>
-                        <p class="small-r">Starting Price: <b>₱ {{ p.starting_price }}</b></p>
-
-                        <div class="divider"><p>Product Description</p><hr></div>
-                        <div class="product-highlight" style="align-self: stretch;">
-                            <p class="small-r">{{ p.description }}</p>
-                        </div>
-                        
-                        <div class="divider"><p>Color Variations</p><hr></div>
-                        <div class="horizontal-input-field">
-                            {% for color in p.productcolor_set.all %}
-                            <div class="product-highlight">
-                                <span style="background: {{ color.product_color }};"></span>
-                                <p class="small-r">{{ color.product_color }}</p>
-                            </div>
-                            {% empty %}
-                                <p class="small-r">No color variations</p>
-                            {% endfor %}
-                        </div>
-
-                        <div class="divider"><hr></div>
-                        <div class="buttons-section">
-                            <a href="" class="button-tertiary small-m">Delete</a>
-                            <a href="" class="button-primary small-m">Edit</a>
-                            <button type="button" class="close-modal button-secondary small-m">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     {% endfor %}
 </div>
 {% endblock %}
 
 {% block modals %}
-<div class="modal-container" id="add-product-modal">
+<div class="modal-container" id="addProductModal">
     <div class="modal product-form">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <h1>Add New Product</h1>
-            <div class="divider"><p>Basic Information</p><hr></div>
+            <div style="display: flex; flex-direction: row;">
+                <p class="required-message"><span>*</span> Required</p>
+            </div>
 
+            <div class="divider"><p>Basic Information</p><hr></div>
             <div class="horizontal-section">
-                <div class="vertical-section" style="flex: 1 0 0;">
+                <div class="vertical-section" style="flex: 1 0 0; justify-content: center;">
                     <div class="file-upload">
                         <label>
                             <span class="file-text">Upload Image</span>
-                            <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                            <div class="error-wrap">
+                                <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                <span class="error-msg"></span>
+                            </div>
                         </label>
                     </div>
                     <div class="file-upload">
                         <label>
                             <span class="file-text">Upload Image</span>
-                            <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                            <div class="error-wrap">
+                                <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                <span class="error-msg"></span>
+                            </div>
                         </label>
                     </div>
                     <div class="file-upload">
                         <label>
                             <span class="file-text">Upload Image</span>
-                            <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                            <div class="error-wrap">
+                                <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                <span class="error-msg"></span>
+                            </div>
                         </label>
                     </div>
                 </div>
 
                 <div class="vertical-section" style="flex: 2 0 0;">
                     <div class="horizontal-input-field">
-                        <label for="product-id">Product ID:</label>
-                        <input type="text" id="product-id" name="product-id" class="input" required>
+                        <label for="product-id"><span>*</span> Product Code:</label>
+                        <div class="error-wrap">
+                            <input type="text" id="product-id" name="product-id" class="input" required>
+                            <span class="error-msg"></span>                            
+                        </div>
                     </div>
                     <div class="horizontal-input-field">
-                        <label for="product-name">Product Name:</label>
-                        <input type="text" id="product-name" name="product-name" class="input" required>
+                        <label for="product-name"><span>*</span> Product Name:</label>
+                        <div class="error-wrap">
+                            <input type="text" id="product-name" name="product-name" class="input" required>
+                            <span class="error-msg"></span>
+                        </div>
                     </div>
                     <div class="horizontal-input-field">
-                        <label for="category">Category:</label>
-                        <select class="input" name="category" id="category" required>
-                            <option value="Company Profile">Company Profile</option>
-                            <option value="Individual Items">Individual Items</option>
-                            <option value="Gift Set">Gift Set</option>
-                            <option value="Bag">Bag</option>
-                        </select>
+                        <label for="category"><span>*</span> Category:</label>
+                        <div class="error-wrap">
+                            <select class="input" name="category" id="category" required>
+                                <option value="" hidden></option>
+                                <option value="Company Profile">Company Profile</option>
+                                <option value="Individual Items">Individual Items</option>
+                                <option value="Gift Set">Gift Set</option>
+                                <option value="Bag">Bag</option>
+                            </select>
+                            <span class="error-msg"></span>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <div class="vertical-input-field">
                 <label for="product-description">Product Description:</label>
-                <input type="text" class="input" name="product-description" id="product-description">
+                <div class="error-wrap">
+                    <textarea type="text" class="input" name="product-description" id="product-description"></textarea>
+                    <span class="error-msg"></span>
+                </div>
             </div>
 
             <div class="divider"><p>Sales Information</p><hr></div>
 
             <div class="horizontal-section">
                 <div class="horizontal-input-field">
-                    <label for="moq">MOQ:</label>
-                    <input class="input" type="number" min="1" placeholder="1" name="moq" id="moq" required>
+                    <label for="moq"><span>*</span> MOQ:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="number" min="1" placeholder="1" name="moq" id="moq" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
-                <div class="horizontal-input-field">
-                    <label for="starting-price">Starting Price:</label>
-                    <input class="input" type="number" min="1" placeholder="1" name="starting-price" id="starting-price" required>
+                <div class="horizontal-input-field" style="flex: 2;">
+                    <label for="starting-price"><span>*</span> Starting Price:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="number" min="1" placeholder="1" name="starting-price" id="starting-price" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
 
             <div class="vertical-input-field">
                 <label for="colors">Color Variations:</label>
                 <div class="horizontal-input-field" style="flex-wrap: wrap;">
-                    <input class="input" type="text" placeholder="#000000" name="colors[]" style="min-width: 90px;">
-                    <input class="input" type="text" placeholder="#000000" name="colors[]" style="min-width: 90px;">
-                    <input class="input" type="text" placeholder="#000000" name="colors[]" style="min-width: 90px;">
-                    <input class="input" type="text" placeholder="#000000" name="colors[]" style="min-width: 90px;">
+                    <div class="color-input-list" id="add-color-list">
+                        <div class="color-input-row">
+                            <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 21px;">add</i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -209,6 +193,195 @@
                 <button type="submit" class="button-primary small-m">Add Product</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="modal-container" id="viewProductModal">
+    <div class="modal product-view">
+        <div class="horizontal-section">
+            <div class="vertical-section">
+                <div class="slideshow-container" id="slideshow-view">
+                    <!-- JS handles injection of slides -->
+                    <a class="prev" onclick="plusSlides(-1, 'view')">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1, 'view')">&#10095;</a>
+                </div>
+                <div class="dot-container" style="text-align: center">
+                    <!-- JS handles injection of dots -->
+                </div>
+            </div>
+            
+            <div class="vertical-section">
+                <div class="horizontal-input-field" style="flex: 0; justify-content: space-between; align-items: center;">
+                    <p class="product-id smaller-r" id="view_product_code"></p>
+                    <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+                </div>
+                <h1 id="view_product_name"></h1>
+                <p class="small-r">Category: <b id="view_category"></b></p>
+                <p class="small-r">MOQ: <b id="view_moq"></b> <b>pcs.</b></p>
+                <p class="small-r">Starting Price: <b>₱</b> <b id="view_starting_price"></b></p>
+
+                <div class="divider"><p>Product Description</p><hr></div>
+                <div class="product-highlight" style="align-self: stretch;">
+                    <p class="small-r" id="view_product_description"></p>
+                </div>
+                
+                <div class="divider"><p>Color Variations</p><hr></div>
+                <div class="color-container">
+                    <!-- JS handles injection of colors -->
+                </div>
+
+                <div class="divider"><hr></div>
+                <div class="buttons-section">
+                    <button type="button"
+                            class="button-tertiary small-m open-delete-product-modal">
+                            Delete</button>
+                    <button type="button"
+                            class="button-primary small-m open-edit-modal">
+                            Edit</button>
+                    <button type="button"
+                            class="close-modal button-secondary small-m">
+                            Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="editProductModal">
+    <div class="modal product-form">
+        <form method="POST" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h1>Edit <span id=""></span></h1>
+            <div style="display: flex; flex-direction: row;">
+                <p class="required-message"><span>*</span> Required</p>
+            </div>
+
+            <input type="hidden" name="product_id" id="edit_product_db_id">
+
+            <div class="divider"><p>Basic Information</p><hr></div>
+            <div class="horizontal-section">
+                <div class="vertical-section" style="flex: 1 0 0; justify-content: center;">
+                    <div class="file-upload">
+                        <label>
+                            <span class="file-text">Upload Image</span>
+                            <div class="error-wrap">
+                                <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                <span class="error-msg"></span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="file-upload">
+                        <label>
+                            <span class="file-text">Upload Image</span>
+                            <div class="error-wrap">
+                                <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                <span class="error-msg"></span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="file-upload">
+                        <label>
+                            <span class="file-text">Upload Image</span>
+                            <div class="error-wrap">
+                                <input name="photos[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                <span class="error-msg"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="vertical-section" style="flex: 2 0 0;">
+                    <div class="horizontal-input-field">
+                        <label for="product-id"><span>*</span> Product Code:</label>
+                        <div class="error-wrap">
+                            <input type="text" id="edit_product_id" name="product-id" class="input" disabled>
+                            <span class="error-msg"></span>                            
+                        </div>
+                    </div>
+                    <div class="horizontal-input-field">
+                        <label for="product-name"><span>*</span> Product Name:</label>
+                        <div class="error-wrap">
+                            <input type="text" id="edit_product_name" name="product-name" class="input" disabled>
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+                    <div class="horizontal-input-field">
+                        <label for="category"><span>*</span> Category:</label>
+                        <div class="error-wrap">
+                            <select class="input" name="category" id="edit_category" required>
+                                <option value="Company Profile">Company Profile</option>
+                                <option value="Individual Items">Individual Items</option>
+                                <option value="Gift Set">Gift Set</option>
+                                <option value="Bag">Bag</option>
+                            </select>
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vertical-input-field">
+                <label for="product-description">Product Description:</label>
+                <div class="error-wrap">
+                    <textarea type="text" class="input" name="product-description" id="edit_product_description"></textarea>
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+
+            <div class="divider"><p>Sales Information</p><hr></div>
+
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="moq"><span>*</span> MOQ:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="number" min="1" placeholder="1" name="moq" id="edit_moq" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+                <div class="horizontal-input-field" style="flex: 2;">
+                    <label for="starting-price"><span>*</span> Starting Price:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="number" min="1" placeholder="1" name="starting-price" id="edit_starting_price" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vertical-input-field">
+                <label for="colors">Color Variations:</label>
+                <div class="horizontal-input-field" style="flex-wrap: wrap;">
+                    <div class="color-input-list" id="add-color-list">
+                        <div class="color-input-row">
+                            <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 21px;">add</i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"><hr></div>
+
+            <div class="buttons-section">
+                <button type="button" class="close-modal button-secondary small-m">Cancel</button>
+                <button type="submit" class="button-primary small-m">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-container" id="deleteProductModal">
+    <div class="notif-modal">
+        <div class="header-warning">
+            <h1 class="bold">Delete Product?</h1>
+            <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+        </div>
+
+        <div class="body">
+            <p class="regular">Are you sure you want to delete <b id="delete_product_code"></b> - <b id="delete_product_name"></b> from the catalog?</p>
+            <div class="buttons-section">
+                <button type="button" class="button-tertiary small-m" style="flex: 1 0 0;">Yes</button>
+                <button type="button" class="button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
