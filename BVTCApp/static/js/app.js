@@ -1,5 +1,5 @@
 // For toggling sidebar
-const sidebar = document.getElementById('sidebar')
+const sidebar = document.getElementById('sidebar');
 
 document.addEventListener("DOMContentLoaded", () => {
     const isExpanded = localStorage.getItem('sidebar-expanded');
@@ -43,7 +43,49 @@ function showModal(modal) {
 }
 
 // Modal References
-const viewProductModal = document.getElementById('viewProductModal')
+const viewProductModal = document.getElementById('viewProductModal');
+const viewOrderModal = document.getElementById('viewOrderModal');
+
+// Functions
+// Injecting Image Sets
+// function addSlideshow(modal, modalButton) {
+//     const slideContainer = qs('.slideshow-container', modal);
+//     const dotContainer = qs('.dot-container', modal);
+//     const imageUrls = modalButton.dataset.images ? modalButton.dataset.images.split(',') : [];        
+
+//     slideContainer.innerHTML = '';
+//     if (dotContainer) dotContainer.innerHTML = '';
+
+//     imageUrls.forEach((url, index) => {
+//         if (url.trim()) {
+//             const slideDiv = document.createElement('div');
+//             slideDiv.className = 'mySlides fade';
+//             slideDiv.innerHTML = `<img src="${url}" class="img-container">`;
+//             slideContainer.appendChild(slideDiv);
+
+//             if(dotContainer) {
+//                 const dot = document.createElement('span');
+//                 dot.className = 'dot';
+//                 dot.onclick = () => currentSlide(index + 1, 'view');
+//                 dotContainer.appendChild(dot);
+//             }
+//         }
+//     })
+
+//     const prevBtn = document.createElement('a');
+//     prevBtn.className = 'prev';
+//     prevBtn.innerHTML = '&#10094;';
+//     prevBtn.onclick = () => plusSlides(-1, 'view');
+
+//     const nextBtn = document.createElement('a');
+//     nextBtn.className = 'next';
+//     nextBtn.innerHTML = '&#10095;';
+//     nextBtn.onclick = () => plusSlides(1, 'view');
+
+//     slideContainer.appendChild(prevBtn);
+//     slideContainer.appendChild(nextBtn);
+//     slideContainer.id = 'slideshow-view'
+// }
 
 // Event Delegation
 document.addEventListener('click', function (e) {
@@ -52,6 +94,155 @@ document.addEventListener('click', function (e) {
     if (e.target.classList.contains('close-modal')) {
         const modal = e.target.closest('.modal-container');
         if (modal) modal.classList.remove('show');
+    }
+
+    //View Order Modal
+    const viewOrder = e.target.closest('.open-view-order-modal')
+    if (viewOrder && viewOrderModal) {
+        e.preventDefault();
+        const id = viewOrder.dataset.id;
+
+        // For Image Set
+        const slideContainer = qs('.slideshow-container', viewOrderModal);
+        const dotContainer = qs('.dot-container', viewOrderModal);
+        const imageUrls = viewOrder.dataset.images ? viewOrder.dataset.images.split(',') : [];        
+
+        slideContainer.innerHTML = '';
+        if (dotContainer) dotContainer.innerHTML = '';
+
+        imageUrls.forEach((url, index) => {
+            if (url.trim()) {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'mySlides fade';
+                slideDiv.innerHTML = `<img src="${url}" class="img-container">`;
+                slideContainer.appendChild(slideDiv);
+
+                if(dotContainer) {
+                    const dot = document.createElement('span');
+                    dot.className = 'dot';
+                    dot.onclick = () => currentSlide(index + 1, 'view');
+                    dotContainer.appendChild(dot);
+                }
+            }
+        })
+
+        const prevBtn = document.createElement('a');
+        prevBtn.className = 'prev';
+        prevBtn.innerHTML = '&#10094;';
+        prevBtn.onclick = () => plusSlides(-1, 'view');
+
+        const nextBtn = document.createElement('a');
+        nextBtn.className = 'next';
+        nextBtn.innerHTML = '&#10095;';
+        nextBtn.onclick = () => plusSlides(1, 'view');
+
+        slideContainer.appendChild(prevBtn);
+        slideContainer.appendChild(nextBtn);
+        slideContainer.id = 'slideshow-view'
+
+        // Update Status Button
+        const status = viewOrder.dataset.order_status;
+        const statusBtn = qs('.status-btn', viewOrderModal);
+        const statusText = qs('#order_order_status', viewOrderModal);
+
+        const statusStyles = {
+            'Under Feasibility': { color: '#FAF9F6', background: '#0B1E33' },
+            'Under Quotation':   { color: '#FAF9F6', background: '#013C58' },
+            'In Production':     { color: '#FAF9F6', background: '#00537A' },
+            'Sampled':           { color: 'inherit', background: '#F5A201' },
+            'Packaged':          { color: 'inherit', background: '#EDC001' },
+            'In Transit':        { color: 'inherit', background: '#00C27D' }
+        };
+
+        statusText.textContent = status;
+
+        if (statusStyles[status]) {
+            statusBtn.style.backgroundColor = statusStyles[status].background;
+            statusBtn.style.color = statusStyles[status].color;
+        } else {
+            statusBtn.style.backgroundColor = ''; 
+            statusBtn.style.color = '';
+        }
+
+        // Order Items
+        const itemsData = viewOrder.dataset.items;
+        const items = JSON.parse(itemsData || '[]');
+        const tableBody = qs('#order-items-body', viewOrderModal);
+
+        tableBody.innerHTML = ''; 
+        let totalQty = 0;
+        let totalPrice = 0;
+
+        items.forEach(item => {
+            const qty = parseInt(item.qty) || 0;
+            const price = parseFloat(item.price) || 0;
+            totalQty += qty;
+            totalPrice += (qty * price);
+
+            const row = `
+                <tr>
+                    <td class="small-r" style="width: 25%;">${item.code}</td>
+                    <td class="small-r" style="width: 15%;">${item.color || '-'}</td>
+                    <td class="small-r" style="width: 25%;">${item.custom || '-'}</td>
+                    <td class="small-r" style="width: 15%;">${qty}</td>
+                    <td class="small-r" style="width: 15%;">${price.toFixed(2)}</td>
+                    <td style="width: 5%;"><i class="material-symbols-rounded" style="color: #898989; font-size: 15px; cursor: pointer;">close</i></td>
+                </tr>`;
+            tableBody.innerHTML += row;
+        });
+
+        const qtyDisplay = qs('#order_total_qty', viewOrderModal);
+        const priceDisplay = qs('#order_total_price', viewOrderModal);
+
+        if (qtyDisplay) qtyDisplay.textContent = totalQty;
+        if (priceDisplay) {
+            priceDisplay.textContent = totalPrice.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Lead Time
+        const startDateStr = viewOrder.dataset.start_of_production; // e.g., "2023-10-01"
+        const deliveryDateStr = viewOrder.dataset.delivery_date;    // e.g., "2023-10-15"
+
+        if (startDateStr && deliveryDateStr) {
+            const start = new Date(startDateStr);
+            const delivery = new Date(deliveryDateStr);
+
+            // Calculate difference in milliseconds
+            const diffInMs = delivery - start;
+
+            // Convert milliseconds to days (1000ms * 60s * 60m * 24h)
+            const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+
+            // Display the result
+            const leadTimeElement = qs('#order_lead_time', viewOrderModal);
+            leadTimeElement.textContent = diffInDays > 0 ? `${diffInDays} Days` : "0 Days";
+        }
+
+        qs('#order_order_id', viewOrderModal).textContent = viewOrder.dataset.order_id;
+        qs('#order_customer_name', viewOrderModal).textContent = viewOrder.dataset.customer_name;
+        qs('#order_company_name', viewOrderModal).textContent = viewOrder.dataset.company_name;
+        qs('#order_company_address', viewOrderModal).textContent = viewOrder.dataset.company_address;
+        qs('#order_budget', viewOrderModal).textContent = viewOrder.dataset.budget;
+        qs('#order_order_status', viewOrderModal).textContent = viewOrder.dataset.order_status;
+        qs('#order_delivery_address', viewOrderModal).textContent = viewOrder.dataset.delivery_address;
+        qs('#order_contact', viewOrderModal).textContent = viewOrder.dataset.contact;
+        qs('#order_contact_number', viewOrderModal).textContent = viewOrder.dataset.contact_number;
+        qs('#order_contact_email', viewOrderModal).textContent = viewOrder.dataset.contact_email;
+        qs('#order_mode_of_payment', viewOrderModal).textContent = viewOrder.dataset.mode_of_payment;
+        qs('#order_payment_terms', viewOrderModal).textContent = viewOrder.dataset.payment_terms;
+        qs('#order_packing_instructions', viewOrderModal).textContent = viewOrder.dataset.packing_instructions;
+        qs('#order_start_of_production', viewOrderModal).textContent = viewOrder.dataset.start_of_production;
+        qs('#order_delivery_date', viewOrderModal).textContent = viewOrder.dataset.delivery_date;
+        qs('#order_transaction_platform', viewOrderModal).textContent = viewOrder.dataset.transaction_platform;
+        qs('#order_account_manager', viewOrderModal).textContent = viewOrder.dataset.account_manager;
+        viewOrderModal.dataset.currentOrder = JSON.stringify(viewOrder.dataset);
+
+        showModal(viewOrderModal);
+
+        if (typeof showSlides === 'function') showSlides(1, 'view');
     }
 
     // View Product Modal

@@ -145,7 +145,7 @@
                 </tbody>
             </table>
 
-            <a href="{% url 'add_item' %}" class="button-primary small-m" style="flex: 1 0 0;"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Items</a>
+            <a href="{% url 'add_item' %}" class="button-primary small-m" style="flex: 1 0 0; align-self: stretch;"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Items</a>
         </div>
 
         <div class="horizontal-section">
@@ -157,7 +157,7 @@
                 
                 <div class="horizontal-input-field" style="max-height: 34px;">
                     <label for="mockups">Mockup (Optional):</label>
-                    <div class="file-upload" style="display: flex; flex: 1 0 0; aspect-ratio: auto;">
+                    <div class="file-upload">
                         <label for="mockups">
                             <span style="color: #898989;">Upload Image/s</span>
                             <input id="mockups" name="mockups[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;" multiple>
@@ -172,7 +172,7 @@
 
                 <div class="vertical-input-field">
                     <label for="instructions">Packing Instructions (Optional):</label>
-                    <input type="text" id="instructions" name="instructions" class="input">
+                    <textarea type="text" class="input" name="instructions" id="instructions"></textarea>
                 </div>
             </div>
 
