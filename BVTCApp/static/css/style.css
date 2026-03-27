@@ -768,6 +768,27 @@ main .filter {
     background-color: var(--alternative-black);
 }
 
+/* Alerts */
+.alert-box {
+    padding: 12px 20px; 
+    border-radius: 6px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+    margin-bottom: 20px;
+    transition: opacity 0.5s ease;
+}
+.alert-error {
+    background-color: #fdeaea; 
+    color: #d92d20; 
+    border: 1px solid #fecaca;
+}
+.alert-success {
+    background-color: #eefdf3; 
+    color: #027a48; 
+    border: 1px solid #a6f4c5;
+}
+
 /* Inputs */
 .filter-input {
     display: none;

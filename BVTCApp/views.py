@@ -1,40 +1,114 @@
 from django.shortcuts import render, redirect
+from django.db.models import Q
+from django.db import IntegrityError # For TC 5: Duplicate code checking
+from django.contrib import messages  # For alerts
 from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails
 
 def catalog(request):
     if request.method == 'POST':
-        # create product object
-        new_product = Product.objects.create(
-            product_code=request.POST.get('product-id'),
-            product_name=request.POST.get('product-name'),
-            category=request.POST.get('category'),
-            description=request.POST.get('product-description'),
-            starting_price=request.POST.get('starting-price') or 0.00,  #default to 0.00 if no input
-            MOQ=request.POST.get('moq') or 1 #default to 1 if no input
+        try:
+            # Attempt to create the product (NO DEFAULTS for Price/MOQ)
+            new_product = Product.objects.create(
+                product_code=request.POST.get('product-id'),
+                product_name=request.POST.get('product-name'),
+                category=request.POST.get('category'),
+                description=request.POST.get('product-description'),
+                starting_price=request.POST.get('starting-price'), 
+                MOQ=request.POST.get('moq')                        
+            )
+
+            # create ProductColor objects for each color input
+            color_list = request.POST.getlist('colors[]')
+            for color_val in color_list:
+                if color_val.strip():
+                    ProductColor.objects.create(
+                        product_id=new_product, 
+                        product_color=color_val
+                    )
+
+            # Append Images
+            image_files = request.FILES.getlist('photos[]')
+            if image_files:
+                for img in image_files:
+                    ProductImage.objects.create(product_id=new_product, product_image=img)
+
+            # Success message
+            messages.success(request, "Product added successfully!")
+            return redirect('catalog')
+
+        except IntegrityError:
+            # TC 5: Catches duplicate product code error
+            messages.error(request, "Product Code already exists.")
+            return redirect('catalog')
+
+    # --- GET REQUEST: FETCHING, SEARCHING, AND FILTERING ---
+    products = Product.objects.all()
+
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        products = products.filter(
+            Q(product_name__icontains=search_query) | 
+            Q(product_code__icontains=search_query)
         )
 
-        # create ProductColor objects for each color input
+    category_filter = request.GET.get('filter', 'all')
+    if category_filter != 'all':
+        category_mapping = {
+            'company-profile': 'Company Profile',
+            'individual-items': 'Individual Items',
+            'gift-set': 'Gift Set',
+            'bag': 'Bag'
+        }
+        mapped_category = category_mapping.get(category_filter)
+        if mapped_category:
+            products = products.filter(category=mapped_category)
+
+    return render(request, 'bvtc_app/catalog.html', {'products': products})
+
+def edit_product(request, pk):
+    # Fetch the specific product we want to edit
+    product = Product.objects.get(product_id=pk)
+
+    if request.method == 'POST':
+        product.product_name = request.POST.get('product-name', product.product_name)
+        product.category = request.POST.get('category', product.category)
+        product.description = request.POST.get('product-description', product.description)
+        
+        product.starting_price = request.POST.get('starting-price') or product.starting_price
+        product.MOQ = request.POST.get('moq') or product.MOQ
+        
+        product.save()
+
+        ProductColor.objects.filter(product_id=product).delete()
+        
         color_list = request.POST.getlist('colors[]')
         for color_val in color_list:
             if color_val.strip():
-                ProductColor.objects.create(
-                    product_id=new_product, 
-                    product_color=color_val
-                )
+                ProductColor.objects.create(product_id=product, product_color=color_val)
 
-        # create ProductImage objects for each
         image_files = request.FILES.getlist('photos[]')
-        for img in image_files:
-            ProductImage.objects.create(
-                product_id=new_product, 
-                product_image=img
-            )
+        if image_files:
+            for img in image_files:
+                ProductImage.objects.create(product_id=product, product_image=img)
 
-        return redirect('catalog')
+        # edit success message popup
+        messages.success(request, "Product updated successfully!")
 
-    # fetch all products including admin-inputs
-    products = Product.objects.all()
-    return render(request, 'bvtc_app/catalog.html', {'products': products})
+    return redirect('catalog')
+
+
+def delete_product(request, pk):
+    product = Product.objects.get(product_id=pk)
+    
+    # save product name for deletion message
+    deleted_name = product.product_name 
+    
+    product.delete()
+
+    #delete success message
+    messages.success(request, f"'{deleted_name}' was deleted successfully!")
+    
+    return redirect('catalog')
 
 def orders(request):
     orders = Order.objects.all()
