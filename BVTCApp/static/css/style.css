@@ -608,7 +608,7 @@ main .filter {
 }
 .modal .file-upload {
     display: flex;
-    height: 41px;
+    height: 34px;
     max-width: 100%;
     padding: 0 9px;
     justify-content: center;
@@ -702,13 +702,17 @@ main .filter {
 /* Slideshow container */
 .slideshow-container {
     position: relative;
+    width: 100%;
+    /* max-width: 350px; */
+    margin: 0 auto;
 }
 .slideshow-container .img-container {
-    max-width: 100%;
+    width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: 3px;
     background: var(--warm-light-gray);
+    display: block;
 }
 /* Hide the images by default */
 .mySlides {
@@ -769,17 +773,28 @@ main .filter {
     display: none;
 }
 .filter-input:checked + .filter-label {
-    background: var(--warm-light-gray);
+    background: var(--cool-light-gray);
 }
-.filter-label {
+.filter-input:checked + .color-filter-label {
+    background: var(--cool-light-gray);
+    padding: 5px 8px;
+    border: 1px solid var(--gray);
+}
+.filter-label,
+.color-filter-label {
     display: inline-flex;
     padding: 6px 9px;
     justify-content: center;
     align-items: center;
     gap: 10px;
     border-radius: 3px;
+    cursor: pointer;
 }
-.filter-label:hover {
+.color-filter-label {
+    background: var(--warm-light-gray);
+}
+.filter-label:hover,
+.color-filter-label:hover {
     background: var(--warm-light-gray);
 }
 .search-bar {

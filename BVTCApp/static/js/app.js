@@ -45,47 +45,7 @@ function showModal(modal) {
 // Modal References
 const viewProductModal = document.getElementById('viewProductModal');
 const viewOrderModal = document.getElementById('viewOrderModal');
-
-// Functions
-// Injecting Image Sets
-// function addSlideshow(modal, modalButton) {
-//     const slideContainer = qs('.slideshow-container', modal);
-//     const dotContainer = qs('.dot-container', modal);
-//     const imageUrls = modalButton.dataset.images ? modalButton.dataset.images.split(',') : [];        
-
-//     slideContainer.innerHTML = '';
-//     if (dotContainer) dotContainer.innerHTML = '';
-
-//     imageUrls.forEach((url, index) => {
-//         if (url.trim()) {
-//             const slideDiv = document.createElement('div');
-//             slideDiv.className = 'mySlides fade';
-//             slideDiv.innerHTML = `<img src="${url}" class="img-container">`;
-//             slideContainer.appendChild(slideDiv);
-
-//             if(dotContainer) {
-//                 const dot = document.createElement('span');
-//                 dot.className = 'dot';
-//                 dot.onclick = () => currentSlide(index + 1, 'view');
-//                 dotContainer.appendChild(dot);
-//             }
-//         }
-//     })
-
-//     const prevBtn = document.createElement('a');
-//     prevBtn.className = 'prev';
-//     prevBtn.innerHTML = '&#10094;';
-//     prevBtn.onclick = () => plusSlides(-1, 'view');
-
-//     const nextBtn = document.createElement('a');
-//     nextBtn.className = 'next';
-//     nextBtn.innerHTML = '&#10095;';
-//     nextBtn.onclick = () => plusSlides(1, 'view');
-
-//     slideContainer.appendChild(prevBtn);
-//     slideContainer.appendChild(nextBtn);
-//     slideContainer.id = 'slideshow-view'
-// }
+const viewItemModal = document.getElementById('viewItemModal');
 
 // Event Delegation
 document.addEventListener('click', function (e) {
@@ -164,7 +124,7 @@ document.addEventListener('click', function (e) {
             statusBtn.style.color = '';
         }
 
-        // Order Items
+        // Order Items Table
         const itemsData = viewOrder.dataset.items;
         const items = JSON.parse(itemsData || '[]');
         const tableBody = qs('#order-items-body', viewOrderModal);
@@ -181,12 +141,11 @@ document.addEventListener('click', function (e) {
 
             const row = `
                 <tr>
-                    <td class="small-r" style="width: 25%;">${item.code}</td>
+                    <td class="small-r" style="width: 30%;">${item.code}</td>
                     <td class="small-r" style="width: 15%;">${item.color || '-'}</td>
                     <td class="small-r" style="width: 25%;">${item.custom || '-'}</td>
                     <td class="small-r" style="width: 15%;">${qty}</td>
                     <td class="small-r" style="width: 15%;">${price.toFixed(2)}</td>
-                    <td style="width: 5%;"><i class="material-symbols-rounded" style="color: #898989; font-size: 15px; cursor: pointer;">close</i></td>
                 </tr>`;
             tableBody.innerHTML += row;
         });
@@ -202,21 +161,17 @@ document.addEventListener('click', function (e) {
             });
         }
 
-        // Lead Time
-        const startDateStr = viewOrder.dataset.start_of_production; // e.g., "2023-10-01"
-        const deliveryDateStr = viewOrder.dataset.delivery_date;    // e.g., "2023-10-15"
+        const startDateStr = viewOrder.dataset.start_of_production;
+        const deliveryDateStr = viewOrder.dataset.delivery_date;
 
         if (startDateStr && deliveryDateStr) {
             const start = new Date(startDateStr);
             const delivery = new Date(deliveryDateStr);
 
-            // Calculate difference in milliseconds
             const diffInMs = delivery - start;
 
-            // Convert milliseconds to days (1000ms * 60s * 60m * 24h)
             const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
 
-            // Display the result
             const leadTimeElement = qs('#order_lead_time', viewOrderModal);
             leadTimeElement.textContent = diffInDays > 0 ? `${diffInDays} Days` : "0 Days";
         }
@@ -287,7 +242,7 @@ document.addEventListener('click', function (e) {
 
         slideContainer.appendChild(prevBtn);
         slideContainer.appendChild(nextBtn);
-        slideContainer.id = 'slideshow-view'
+        slideContainer.id = 'slideshow-view';
 
         // For Color Set
         const colorContainer = qs('.color-container', viewProductModal);
@@ -317,6 +272,117 @@ document.addEventListener('click', function (e) {
         viewProductModal.dataset.currentProduct = JSON.stringify(viewProduct.dataset);
         
         showModal(viewProductModal);
+
+        if (typeof showSlides === 'function') showSlides(1, 'view');
+    }
+
+    // View Item Modal
+    const viewItem = e.target.closest('.open-view-item-modal');
+    if (viewItem && viewItemModal) {
+        e.preventDefault();
+        // FIX: Changed viewProduct to viewItem
+        const id = viewItem.dataset.id;
+        viewItemModal.dataset.currentDbId = id;
+        // For Image Set
+        // FIX: Changed viewProductModal to viewItemModal
+        const slideContainer = qs('.slideshow-container', viewItemModal);
+        const dotContainer = qs('.dot-container', viewItemModal);
+        const imageUrls = viewItem.dataset.images ? viewItem.dataset.images.split(',') : [];        
+
+        slideContainer.innerHTML = '';
+        if (dotContainer) dotContainer.innerHTML = '';
+
+        imageUrls.forEach((url, index) => {
+            if (url.trim()) {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'mySlides fade';
+                slideDiv.innerHTML = `<img src="${url}" class="img-container">`;
+                slideContainer.appendChild(slideDiv);
+
+                if(dotContainer) {
+                    const dot = document.createElement('span');
+                    dot.className = 'dot';
+                    dot.onclick = () => currentSlide(index + 1, 'view');
+                    dotContainer.appendChild(dot);
+                }
+            }
+        })
+
+        const prevBtn = document.createElement('a');
+        prevBtn.className = 'prev';
+        prevBtn.innerHTML = '&#10094;';
+        prevBtn.onclick = () => plusSlides(-1, 'view');
+
+        const nextBtn = document.createElement('a');
+        nextBtn.className = 'next';
+        nextBtn.innerHTML = '&#10095;';
+        nextBtn.onclick = () => plusSlides(1, 'view');
+
+        slideContainer.appendChild(prevBtn);
+        slideContainer.appendChild(nextBtn);
+        slideContainer.id = 'slideshow-view';
+
+        // For Color Set
+        const colorContainer = qs('.color-container', viewItemModal);
+        const colors = viewItem.dataset.colors ? viewItem.dataset.colors.split(',') : [];
+
+        colorContainer.innerHTML = '';
+
+        colors.forEach((color) => {
+            const trimmedColor = color.trim();
+            if (trimmedColor) {
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'product-highlight'; 
+                colorDiv.style.cursor = 'pointer'; 
+                
+                colorDiv.innerHTML = `
+                    <span style="background: ${trimmedColor}; border: 1px solid #ddd;"></span>
+                    <p class="smaller-r">${trimmedColor}</p>
+                `;
+
+                colorDiv.onclick = () => {
+                    const isAlreadySelected = colorDiv.classList.contains('selected-color');
+
+                    // 1. Reset ALL items to their default state first
+                    colorContainer.querySelectorAll('.product-highlight').forEach(el => {
+                        el.style.outline = 'none';
+                        el.style.background = '#FAF9F6'; // Reset background
+                        el.classList.remove('selected-color');
+                    });
+
+                    // 2. Toggle: If it wasn't selected before, select it now
+                    // If it WAS selected, it stays reset (unselected)
+                    if (!isAlreadySelected) {
+                        colorDiv.style.outline = '1px solid #898989';
+                        colorDiv.style.background = '#CBCBCB'; 
+                        colorDiv.classList.add('selected-color');
+                    }
+                };
+
+                colorContainer.appendChild(colorDiv);
+            }
+        });
+
+        qs('#view_item_code', viewItemModal).textContent = viewItem.dataset.product_code;
+        qs('#view_item_name', viewItemModal).textContent = viewItem.dataset.product_name;
+        qs('#view_category', viewItemModal).textContent = viewItem.dataset.category;
+        qs('#view_moq', viewItemModal).textContent = viewItem.dataset.moq;
+        
+        // Set MOQ value for Min Quantity input
+        const moqValue = viewItem.dataset.moq;
+
+        qs('#view_moq_2', viewItemModal).textContent = moqValue;
+
+        const quantityInput = qs('#quantity', viewItemModal);
+
+        quantityInput.placeholder = moqValue;
+        quantityInput.min = moqValue;
+        quantityInput.value = moqValue;
+        quantityInput.removeAttribute('max');
+
+        viewItemModal.dataset.currentProduct = JSON.stringify(viewItem.dataset);
+
+        showModal(viewItemModal);
 
         if (typeof showSlides === 'function') showSlides(1, 'view');
     }
@@ -433,6 +499,89 @@ document.addEventListener('click', function (e) {
     }
 });
 
+// Add to Order Button Logic
+function saveItemToOrder() {
+    console.log("Button clicked!"); // Check your browser console (F12) for this!
+
+    // 1. Safe extraction with Optional Chaining (?.)
+    const selectedColorEl = document.querySelector('.color-container .selected-color p');
+    const selectedColor = selectedColorEl ? selectedColorEl.textContent.trim() : '-';
+    
+    const selectedCustomEl = document.querySelector('input[name="customization"]:checked');
+    const selectedCustom = selectedCustomEl ? selectedCustomEl.value : '-';
+    
+    const qtyInput = document.getElementById('quantity');
+    const qty = qtyInput ? parseInt(qtyInput.value) : 0;
+    
+    // 2. Get Price safely (from dataset or a default)
+    const viewItemModal = document.getElementById('viewItemModal');
+    let price = 0;
+    if (viewItemModal.dataset.currentProduct) {
+        const data = JSON.parse(viewItemModal.dataset.currentProduct);
+        price = parseFloat(data.starting_price) || 0;
+    }
+
+    // 3. Create the item object
+    const newItem = {
+        code: document.getElementById('view_item_code')?.textContent || 'N/A',
+        name: document.getElementById('view_item_name')?.textContent || 'N/A',
+        color: selectedColor,
+        custom: selectedCustom,
+        qty: qty,
+        price: price
+    };
+
+    // 4. Save to localStorage
+    const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
+    currentOrder.push(newItem);
+    localStorage.setItem('pendingOrderItems', JSON.stringify(currentOrder));
+
+    console.log("Item saved to storage:", newItem);
+
+    updateOrderSummary();
+    
+    // 5. UI: Close and Redirect
+    if (typeof closeAllModals === 'function') {
+        closeAllModals();
+    }
+}
+
+function updateOrderSummary() {
+    // 1. Get items from storage
+    const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
+    
+    // 2. Calculate Totals
+    let totalQty = 0;
+    let subtotal = 0;
+    
+    currentOrder.forEach(item => {
+        totalQty += item.qty;
+        subtotal += (item.qty * item.price);
+    });
+
+    // Assume 0% for now (you can change this to a dynamic variable later)
+    const discountPercent = 0; 
+    const discountAmount = (discountPercent / 100) * subtotal;
+    const finalTotal = subtotal - discountAmount;
+
+    // 3. Format Currency (₱ 0.00)
+    const formatter = new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+    });
+
+    // 4. Update the UI
+    const itemsLabel = document.getElementById('initial-items-label');
+    const totalLabel = document.getElementById('discounted-total-label');
+
+    if (itemsLabel) {
+        itemsLabel.innerHTML = `Initial Items (${totalQty} Items): <b>${formatter.format(subtotal)}</b>`;
+    }
+    if (totalLabel) {
+        totalLabel.innerHTML = `Discounted Total <i>(less ${discountPercent}%)</i>: <b>${formatter.format(finalTotal)}</b>`;
+    }
+}
+
 // Escape key
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
@@ -455,22 +604,6 @@ document.querySelectorAll('.modal-container').forEach(modal => {
     });
 });
 
-// Change Name to File Input
-document.addEventListener('change', function (e) {
-    const input = e.target.closest('.file-upload input[type="file"]');
-    if (!input) return;
-
-    const span = input.closest('label').querySelector('.file-text');
-
-    if (input.files.length === 0) {
-        span.textContent = "Upload Image";
-        span.style.color = "#898989";
-    } else {
-        span.textContent = input.files[0].name;
-        span.style.color = "#333";
-    }
-});
-
 // Validator for All Modals
 const modalForms = document.querySelectorAll('.modal-container form');
 
@@ -478,6 +611,9 @@ modalForms.forEach(form => {
     // Validate on input (Real-time)
     form.addEventListener('input', function (e) {
         const field = e.target;
+
+        if (field.hasAttribute('hx-get')) return; 
+
         if (field.classList.contains('input') || field.type === 'file') {
             validateField(field);
         }
@@ -521,39 +657,55 @@ function validateField(field) {
     }
 }
 
+// Change Name to File Input
+document.addEventListener('change', function (e) {
+    const input = e.target.closest('.file-upload input[type="file"]');
+    if (!input) return;
+    
+    const span = input.closest('label').querySelector('.file-text');
+    
+    if (input.files.length === 0) {
+        span.textContent = "Upload Image";
+        span.style.color = "#898989";
+    } else {
+        span.textContent = input.files[0].name;
+        span.style.color = "#333";
+    }
+});
+
 // Carousel
 const slideIndexes = {};
 
 function plusSlides(n, productId) {
-  if (!slideIndexes[productId]) slideIndexes[productId] = 1;
-  showSlides(slideIndexes[productId] += n, productId);
+    if (!slideIndexes[productId]) slideIndexes[productId] = 1;
+    showSlides(slideIndexes[productId] += n, productId);
 }
 
 function currentSlide(n, productId) {
-  slideIndexes[productId] = n;
-  showSlides(n, productId);
+    slideIndexes[productId] = n;
+    showSlides(n, productId);
 }
 
 function showSlides(n, productId) {
-  const slideshow = document.getElementById(`slideshow-${productId}`);
-  const slides = slideshow.getElementsByClassName("mySlides");
-  const dots = slideshow.parentElement.querySelectorAll(`#slideshow-${productId} ~ div .dot`);
-
-  if (n > slides.length) slideIndexes[productId] = 1;
-  if (n < 1) slideIndexes[productId] = slides.length;
-
-  for (let i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-
-  for (let i = 0; i < dots.length; i++) {
-    dots[i].classList.remove("active");
-  }
-
-  slides[slideIndexes[productId] - 1].style.display = "block";
-  if (dots[slideIndexes[productId] - 1]) {
-    dots[slideIndexes[productId] - 1].classList.add("active");
-  }
+    const slideshow = document.getElementById(`slideshow-${productId}`);
+    const slides = slideshow.getElementsByClassName("mySlides");
+    const dots = slideshow.parentElement.querySelectorAll(`#slideshow-${productId} ~ div .dot`);
+    
+    if (n > slides.length) slideIndexes[productId] = 1;
+    if (n < 1) slideIndexes[productId] = slides.length;
+    
+    for (let i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+    }
+    
+    for (let i = 0; i < dots.length; i++) {
+        dots[i].classList.remove("active");
+    }
+    
+    slides[slideIndexes[productId] - 1].style.display = "block";
+    if (dots[slideIndexes[productId] - 1]) {
+        dots[slideIndexes[productId] - 1].classList.add("active");
+    }
 }
 
 // Add Color Helper Function
@@ -564,22 +716,28 @@ function addColorRow(container, value, isFirst) {
         <div class="error-wrap">
             <!-- ADD value="${value}" BELOW -->
             <input class="input" type="text" value="${value}" placeholder="#000000" name="colors[]" style="min-width: 90px;"
-                    pattern="^#[A-Fa-f0-9]{6}$" data-error="Please enter a valid hex code (e.g. #FFFFFF)">
+            pattern="^#[A-Fa-f0-9]{6}$" data-error="Please enter a valid hex code (e.g. #FFFFFF)">
             <span class="error-msg"></span>
-        </div>
-        <button type="button" class="${isFirst ? 'add-color-btn' : 'remove-color-btn'}">
+            </div>
+            <button type="button" class="${isFirst ? 'add-color-btn' : 'remove-color-btn'}">
             <i class="material-symbols-rounded" style="font-size: 21px;">${isFirst ? 'add' : 'remove'}</i>
-        </button>
+            </button>
     `;
     container.appendChild(div);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const slideshows = document.querySelectorAll("[id^='slideshow-']");
+    const slideshows = document.querySelectorAll("[id^='slideshow-']");
 
-  slideshows.forEach(slideshow => {
-    const productId = slideshow.id.replace("slideshow-", "");
-    slideIndexes[productId] = 1;
-    showSlides(1, productId);
-  });
+    slideshows.forEach(slideshow => {
+        const productId = slideshow.id.replace("slideshow-", "");
+        slideIndexes[productId] = 1;
+        showSlides(1, productId);
+    });
+
+    const existingDiv = document.querySelector('.for-existing');
+    
+    if (existingDiv) {
+        htmx.process(existingDiv);
+    }
 });

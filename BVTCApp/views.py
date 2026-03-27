@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Product, ProductImage, ProductColor, Order
+from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails
 
 def catalog(request):
     if request.method == 'POST':
@@ -41,7 +41,27 @@ def orders(request):
     return render(request, 'bvtc_app/orders.html', {'orders': orders})
 
 def add_order(request):
-    return render(request, 'bvtc_app/add_order.html')
+    companies = Company.objects.all()
+    customers = CustomerAccount.objects.all()
+    return render(request, 'bvtc_app/add_order.html', {'companies': companies, 'all_customers': customers})
+
+def load_customers(request):
+    company_id = request.GET.get('company-id')
+    if company_id:
+        customers = CustomerAccount.objects.filter(company_id_id=company_id).order_by('customer_name')
+    else:
+        customers = CustomerAccount.objects.none()
+    
+    return render(request, 'bvtc_app/partials/customer_options.html', {'customers': customers})
+
+def load_shipping(request):
+    customer_id = request.GET.get('customer-id') 
+    if customer_id:
+        addresses = ShippingDetails.objects.filter(customer_id_id=customer_id)
+    else:
+        addresses = ShippingDetails.objects.none()
+
+    return render(request, 'bvtc_app/partials/shipping_options.html', {'addresses': addresses})
 
 def add_item(request):
     products = Product.objects.all()
