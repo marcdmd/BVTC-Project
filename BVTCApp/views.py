@@ -54,10 +54,9 @@ def catalog(request):
     category_filter = request.GET.get('filter', 'all')
     if category_filter != 'all':
         category_mapping = {
-            'company-profile': 'Company Profile',
             'individual-items': 'Individual Items',
             'gift-set': 'Gift Set',
-            'bag': 'Bag'
+            'bags': 'Bags'
         }
         mapped_category = category_mapping.get(category_filter)
         if mapped_category:

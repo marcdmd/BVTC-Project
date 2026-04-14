@@ -141,21 +141,19 @@ main .filter {
 }
 .product-card {
     display: flex;
-    padding: 12px;
+    /* padding: 12px; */
     max-width: 250px;
     align-self: stretch;
     flex-direction: column;
     align-items: flex-start;
     border-radius: 3px;
-    gap: 12px;
-    color: var(--alternative-black);
+    /* gap: 12px; */
     background: var(--pure-white);
     box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.10);
     cursor: pointer;
 }
 .product-card:hover {
-    padding: 11px;
-    border: 1px solid var(--orient-blue);
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.25);
 }
 .thumbnail {
     max-width: 100%;
@@ -199,6 +197,7 @@ main .filter {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+    padding: 12px;
     align-self: stretch;
 }
 .product-details h2 {

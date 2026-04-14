@@ -1,6 +1,11 @@
-// For toggling sidebar
+// Variables
 const sidebar = document.getElementById('sidebar');
 
+const viewProductModal = document.getElementById('viewProductModal');
+const viewOrderModal = document.getElementById('viewOrderModal');
+const viewItemModal = document.getElementById('viewItemModal');
+
+// For toggling sidebar
 document.addEventListener("DOMContentLoaded", () => {
     const isExpanded = localStorage.getItem('sidebar-expanded');
     
@@ -42,10 +47,6 @@ function showModal(modal) {
     modal.classList.add('show');
 }
 
-// Modal References
-const viewProductModal = document.getElementById('viewProductModal');
-const viewOrderModal = document.getElementById('viewOrderModal');
-const viewItemModal = document.getElementById('viewItemModal');
 
 // Event Delegation
 document.addEventListener('click', function (e) {
@@ -488,11 +489,10 @@ document.addEventListener('click', function (e) {
         if (nameDisplay) nameDisplay.textContent = data.product_name;
 
         // Handle the "Yes" (Confirm) button action
-        const confirmBtn = deleteProductModal.querySelector('.button-tertiary');
+        const confirmBtn = deleteProductModal.querySelector('.confirm_delete');
         if (confirmBtn) {
-            confirmBtn.onclick = () => {
-                window.location.href = `catalog/delete/${data.db_id}/`;
-            };
+            // This injects the ID into the URL and lets the link work naturally
+            confirmBtn.href = `/catalog/delete/${data.db_id}/`;
         }
 
         showModal(deleteProductModal);
@@ -688,9 +688,16 @@ function currentSlide(n, productId) {
 
 function showSlides(n, productId) {
     const slideshow = document.getElementById(`slideshow-${productId}`);
+    if (!slideshow) return; // Exit if slideshow container is missing
+
     const slides = slideshow.getElementsByClassName("mySlides");
+    if (slides.length === 0) return; // Exit if no slides found
+
     const dots = slideshow.parentElement.querySelectorAll(`#slideshow-${productId} ~ div .dot`);
     
+    // Ensure the index is initialized
+    if (!slideIndexes[productId]) slideIndexes[productId] = 1;
+
     if (n > slides.length) slideIndexes[productId] = 1;
     if (n < 1) slideIndexes[productId] = slides.length;
     
@@ -702,7 +709,12 @@ function showSlides(n, productId) {
         dots[i].classList.remove("active");
     }
     
-    slides[slideIndexes[productId] - 1].style.display = "block";
+    // Safety check before accessing the style property
+    const currentSlide = slides[slideIndexes[productId] - 1];
+    if (currentSlide) {
+        currentSlide.style.display = "block";
+    }
+    
     if (dots[slideIndexes[productId] - 1]) {
         dots[slideIndexes[productId] - 1].classList.add("active");
     }

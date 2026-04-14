@@ -16,6 +16,39 @@
 
 {% block main %}
 
+<div class="action-bar">
+    <div class="horizontal-section">
+        <form action="" method="GET" class="filter" style="flex-wrap: wrap;" onchange="this.submit()">
+            <p class="small-r filter-name" style="padding: 6px 15px 6px 0px;">Filter:</p>
+            
+            <input class="filter-input" type="radio" name="filter" value="all" id="all" {% if request.GET.filter == 'all' or not request.GET.filter %}checked{% endif %}>
+            <label class="filter-label small-b" for="all">All</label>
+
+            <!-- <input class="filter-input" type="radio" name="filter" value="company-profile" id="company-profile" {% if request.GET.filter == 'company-profile' %}checked{% endif %}>
+            <label class="filter-label small-b" for="company-profile">Company Profile</label> -->
+
+            <input class="filter-input" type="radio" name="filter" value="individual-items" id="individual-items" {% if request.GET.filter == 'individual-items' %}checked{% endif %}>
+            <label class="filter-label small-b" for="individual-items">Individual Items</label>
+
+            <input class="filter-input" type="radio" name="filter" value="gift-set" id="gift-set" {% if request.GET.filter == 'gift-set' %}checked{% endif %}>
+            <label class="filter-label small-b" for="gift-set">Gift Set</label>
+
+            <input class="filter-input" type="radio" name="filter" value="bags" id="bags" {% if request.GET.filter == 'bag' %}checked{% endif %}>
+            <label class="filter-label small-b" for="bags">Bags</label>
+        </form>
+
+        <div class="actions">
+            <form action="" method="GET" class="search-area">
+                <input type="search" name="search" class="search-bar" placeholder="Search" value="{{ request.GET.search }}">
+                {% if request.GET.filter %}
+                <input type="hidden" name="filter" value="{{ request.GET.filter }}">
+                {% endif %}
+            </form>
+            <button class="button-primary small-m open-add-modal"><i class="material-symbols-outlined open-add-modal" style="font-size: 15px;">add</i>Add Product</button>
+        </div>
+    </div>
+</div>
+
 {% if messages %}
     <div id="toast-container">
         {% for message in messages %}
@@ -38,39 +71,6 @@
         }, 3500);
     </script>
 {% endif %}
-
-<div class="action-bar">
-    <div class="horizontal-section">
-        <form action="" method="GET" class="filter" style="flex-wrap: wrap;" onchange="this.submit()">
-            <p class="small-r filter-name" style="padding: 6px 15px 6px 0px;">Filter:</p>
-            
-            <input class="filter-input" type="radio" name="filter" value="all" id="all" {% if request.GET.filter == 'all' or not request.GET.filter %}checked{% endif %}>
-            <label class="filter-label small-b" for="all">All</label>
-
-            <input class="filter-input" type="radio" name="filter" value="company-profile" id="company-profile" {% if request.GET.filter == 'company-profile' %}checked{% endif %}>
-            <label class="filter-label small-b" for="company-profile">Company Profile</label>
-
-            <input class="filter-input" type="radio" name="filter" value="individual-items" id="individual-items" {% if request.GET.filter == 'individual-items' %}checked{% endif %}>
-            <label class="filter-label small-b" for="individual-items">Individual Items</label>
-
-            <input class="filter-input" type="radio" name="filter" value="gift-set" id="gift-set" {% if request.GET.filter == 'gift-set' %}checked{% endif %}>
-            <label class="filter-label small-b" for="gift-set">Gift Set</label>
-
-            <input class="filter-input" type="radio" name="filter" value="bag" id="bag" {% if request.GET.filter == 'bag' %}checked{% endif %}>
-            <label class="filter-label small-b" for="bag">Bag</label>
-        </form>
-
-        <div class="actions">
-            <form action="" method="GET" class="search-area">
-                <input type="search" name="search" class="search-bar" placeholder="Search" value="{{ request.GET.search }}">
-                {% if request.GET.filter %}
-                <input type="hidden" name="filter" value="{{ request.GET.filter }}">
-                {% endif %}
-            </form>
-            <button class="button-primary small-m open-add-modal"><i class="material-symbols-outlined open-add-modal" style="font-size: 15px;">add</i>Add Product</button>
-        </div>
-    </div>
-</div>
 
 <div class="catalog">
     {% for p in products %}
@@ -170,10 +170,15 @@
                         <div class="error-wrap">
                             <select class="input" name="category" id="category" required>
                                 <option value="" hidden></option>
-                                <option value="Company Profile">Company Profile</option>
+                                <option value="drinkware">Drinkware</option>
+                                <option value="eco-item">Eco Item</option>
+                                <option value="coffee-&-wine-item">Coffee & Wine Item</option>
+                                <option value="office-item">Office Item</option>
+                                <option value="gadgets-&-electronics">Gadgets and Electronics</option>
+                                <option value="wellness-&-travel">Wellness and Travel</option>
                                 <option value="Individual Items">Individual Items</option>
-                                <option value="Gift Set">Gift Set</option>
-                                <option value="Bag">Bag</option>
+                                <option value="leather-item">Leather Item</option>
+                                <option value="bag">Bag</option>
                             </select>
                             <span class="error-msg"></span>
                         </div>
@@ -337,10 +342,16 @@
                         <label for="category"><span>*</span> Category:</label>
                         <div class="error-wrap">
                             <select class="input" name="category" id="edit_category" required>
-                                <option value="Company Profile">Company Profile</option>
+                                <option value="" hidden></option>
+                                <option value="drinkware">Drinkware</option>
+                                <option value="eco-item">Eco Item</option>
+                                <option value="coffee-&-wine-item">Coffee & Wine Item</option>
+                                <option value="office-item">Office Item</option>
+                                <option value="gadgets-&-electronics">Gadgets and Electronics</option>
+                                <option value="wellness-&-travel">Wellness and Travel</option>
                                 <option value="Individual Items">Individual Items</option>
-                                <option value="Gift Set">Gift Set</option>
-                                <option value="Bag">Bag</option>
+                                <option value="leather-item">Leather Item</option>
+                                <option value="bag">Bag</option>
                             </select>
                             <span class="error-msg"></span>
                         </div>
@@ -406,7 +417,7 @@
         <div class="body">
             <p class="regular">Are you sure you want to delete <b id="delete_product_code"></b> - <b id="delete_product_name"></b> from the catalog?</p>
             <div class="buttons-section">
-                <button type="button" class="m-button-tertiary small-m" style="flex: 1 0 0;">Yes</button>
+                <a href="" class="m-button-tertiary small-m confirm_delete" style="flex: 1 0 0;">Yes</a>
                 <button type="button" class="m-button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
             </div>
         </div>
