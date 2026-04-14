@@ -78,16 +78,25 @@ class ShippingDetails(models.Model): # option to insert details if contact perso
 
 class Product(models.Model):
     CATEGORY_CHOICES = [
-        ('Company Profile', 'Company Profile'),
-        ('Individual Items', 'Individual Items'),
-        ('Gift Set', 'Gift Set'),
+        ('Apparel', 'Apparel'),
+        ('Awards & Recognition', 'Awards & Recognition'),
         ('Bag', 'Bag'),
+        ('Coffee & Wine Item', 'Coffee & Wine Item'),
+        ('Drinkware', 'Drinkware'),
+        ('Eco Item', 'Eco Item'),
+        ('Gadgets & Electronics', 'Gadgets & Electronics'),
+        ('Individual Item', 'Individual Item'),
+        ('Leather Item', 'Leather Item'),
+        ('Office Item', 'Office Item'),
+        ('Packaging Item', 'Packaging Item'),
+        ('Wellness & Travel', 'Wellness & Travel'),
+        ('Others', 'Others')
     ]
     
     product_id = models.AutoField(primary_key=True)
     product_code = models.CharField(max_length=20, unique=True, blank=True)
     product_name = models.CharField(max_length=150)
-    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='others')
     description = models.TextField()
     starting_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     MOQ = models.PositiveIntegerField()

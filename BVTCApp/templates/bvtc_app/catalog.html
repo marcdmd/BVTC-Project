@@ -19,22 +19,28 @@
 <div class="action-bar">
     <div class="horizontal-section">
         <form action="" method="GET" class="filter" style="flex-wrap: wrap;" onchange="this.submit()">
-            <p class="small-r filter-name" style="padding: 6px 15px 6px 0px;">Filter:</p>
-            
-            <input class="filter-input" type="radio" name="filter" value="all" id="all" {% if request.GET.filter == 'all' or not request.GET.filter %}checked{% endif %}>
-            <label class="filter-label small-b" for="all">All</label>
-
-            <!-- <input class="filter-input" type="radio" name="filter" value="company-profile" id="company-profile" {% if request.GET.filter == 'company-profile' %}checked{% endif %}>
-            <label class="filter-label small-b" for="company-profile">Company Profile</label> -->
-
-            <input class="filter-input" type="radio" name="filter" value="individual-items" id="individual-items" {% if request.GET.filter == 'individual-items' %}checked{% endif %}>
-            <label class="filter-label small-b" for="individual-items">Individual Items</label>
-
-            <input class="filter-input" type="radio" name="filter" value="gift-set" id="gift-set" {% if request.GET.filter == 'gift-set' %}checked{% endif %}>
-            <label class="filter-label small-b" for="gift-set">Gift Set</label>
-
-            <input class="filter-input" type="radio" name="filter" value="bags" id="bags" {% if request.GET.filter == 'bag' %}checked{% endif %}>
-            <label class="filter-label small-b" for="bags">Bags</label>
+            <label class="small-r filter-name" for="filter" style="padding: 6px 15px 6px 0px;">Filter:</label>
+            <select name="filter" id="filter" onchange="this.form.submit()"
+                    style="display: flex;
+                           flex: 1;
+                           max-width: 25%;
+                           min-width: 0;
+                           padding: 9px;
+                           padding-right: 35px;
+                           align-items: center;
+                           gap: 12px;
+                           border-radius: 3px;
+                           border: 1px solid #B5B0AD;
+                           font-weight: 700;">
+                <!-- Manually add the 'All' option -->
+                <option value="all" {% if request.GET.filter == 'all' or not request.GET.filter %}selected{% endif %}>All</option>
+                
+                {% for value, label in category_choices %}
+                    <option value="{{ value }}" {% if request.GET.filter == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
         </form>
 
         <div class="actions">
@@ -170,15 +176,9 @@
                         <div class="error-wrap">
                             <select class="input" name="category" id="category" required>
                                 <option value="" hidden></option>
-                                <option value="drinkware">Drinkware</option>
-                                <option value="eco-item">Eco Item</option>
-                                <option value="coffee-&-wine-item">Coffee & Wine Item</option>
-                                <option value="office-item">Office Item</option>
-                                <option value="gadgets-&-electronics">Gadgets and Electronics</option>
-                                <option value="wellness-&-travel">Wellness and Travel</option>
-                                <option value="Individual Items">Individual Items</option>
-                                <option value="leather-item">Leather Item</option>
-                                <option value="bag">Bag</option>
+                                {% for value, label in category_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                             <span class="error-msg"></span>
                         </div>
@@ -343,15 +343,9 @@
                         <div class="error-wrap">
                             <select class="input" name="category" id="edit_category" required>
                                 <option value="" hidden></option>
-                                <option value="drinkware">Drinkware</option>
-                                <option value="eco-item">Eco Item</option>
-                                <option value="coffee-&-wine-item">Coffee & Wine Item</option>
-                                <option value="office-item">Office Item</option>
-                                <option value="gadgets-&-electronics">Gadgets and Electronics</option>
-                                <option value="wellness-&-travel">Wellness and Travel</option>
-                                <option value="Individual Items">Individual Items</option>
-                                <option value="leather-item">Leather Item</option>
-                                <option value="bag">Bag</option>
+                                {% for value, label in category_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                             <span class="error-msg"></span>
                         </div>

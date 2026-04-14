@@ -53,16 +53,18 @@ def catalog(request):
 
     category_filter = request.GET.get('filter', 'all')
     if category_filter != 'all':
-        category_mapping = {
-            'individual-items': 'Individual Items',
-            'gift-set': 'Gift Set',
-            'bags': 'Bags'
-        }
-        mapped_category = category_mapping.get(category_filter)
+        category_dict = dict(Product.CATEGORY_CHOICES)
+        mapped_category = category_dict.get(category_filter)
+        
         if mapped_category:
             products = products.filter(category=mapped_category)
 
-    return render(request, 'bvtc_app/catalog.html', {'products': products})
+    context = {
+        'products': products,
+        'category_choices': Product.CATEGORY_CHOICES,
+    }
+
+    return render(request, 'bvtc_app/catalog.html', context)
 
 def edit_product(request, pk):
     # Fetch the specific product we want to edit
