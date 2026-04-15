@@ -1,4 +1,4 @@
-<option value="" disabled selected>Select Shipping Address</option>
+<option value="" hidden selected>Select Shipping Address</option>
 {% for addr in addresses %}
     <option value="{{ addr.shipping_id }}">
         {{ addr.contact_person_name }} - {{ addr.address_city }}, {{ addr.address_province }}

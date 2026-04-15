@@ -57,7 +57,6 @@
                            border-radius: 3px;
                            border: 1px solid #B5B0AD;
                            font-weight: 700;">
-                <!-- Manually add the 'All' option -->
                 <option value="all" {% if request.GET.filter == 'all' or not request.GET.filter %}selected{% endif %}>All</option>
                 {% for value, label in category_choices %}
                     <option value="{{ value }}" {% if request.GET.filter == value %}selected{% endif %}>
@@ -166,7 +165,10 @@
     
                     <div class="divider"><p>Quantity</p><hr></div>
                     <div class="horizontal-input-field">
-                        <input class="input" type="number" name="quantity" id="quantity" required>
+                        <div class="error-wrap">
+                            <input class="input" type="number" name="quantity" id="quantity" required>
+                            <span class="error-msg"></span>
+                        </div>
                         <label for="quantity" style="flex: 2 0 0; color: #898989;">MOQ: <b id="view_moq_2"></b> <b>pcs.</b></label>
                     </div>
     
@@ -235,7 +237,7 @@
 
         <div class="buttons-section">
             <button type="button" class="close-modal m-button-secondary small-m">Close</button>
-            <a href="{% url 'add_order' %}" class="m-button-primary small-m">Done</a>
+            <a href="{% url 'add_order' %}" class="m-button-primary small-m">Go to Order Form</a>
         </div>
     </div>
 </div>
@@ -263,23 +265,22 @@
                 
                 <div class="divider"><p>Customizations</p><hr></div>
                 <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
-                    <!-- Added '-edit' suffix to IDs and for-attributes -->
-                    <input class="filter-input" type="radio" name="customization" id="cut-&-sew-edit" value="Cut & Sew" checked>
+                    <input class="filter-input radio-input" type="radio" name="customization" id="cut-&-sew-edit" value="Cut & Sew" checked>
                     <label class="color-filter-label small-b" for="cut-&-sew-edit">Cut & Sew</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="silkscreen-print-edit" value="Silkscreen Print">
+                    <input class="filter-input radio-input" type="radio" name="customization" id="silkscreen-print-edit" value="Silkscreen Print">
                     <label class="color-filter-label small-b" for="silkscreen-print-edit">Silkscreen Print</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="digital-print-edit" value="Digital Print">
+                    <input class="filter-input radio-input" type="radio" name="customization" id="digital-print-edit" value="Digital Print">
                     <label class="color-filter-label small-b" for="digital-print-edit">Digital Print</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="laser-engrave-edit" value="Laser Engrave">
+                    <input class="filter-input radio-input" type="radio" name="customization" id="laser-engrave-edit" value="Laser Engrave">
                     <label class="color-filter-label small-b" for="laser-engrave-edit">Laser Engrave</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="leather-stamp-edit" value="Leather Stamp">
+                    <input class="filter-input radio-input" type="radio" name="customization" id="leather-stamp-edit" value="Leather Stamp">
                     <label class="color-filter-label small-b" for="leather-stamp-edit">Leather Stamp</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="none-edit" value="N/A">
+                    <input class="filter-input radio-input" type="radio" name="customization" id="none-edit" value="N/A">
                     <label class="color-filter-label small-b" for="none-edit">None</label>
                 </div>
 
@@ -290,7 +291,10 @@
 
                 <div class="divider"><p>Quantity</p><hr></div>
                 <div class="horizontal-input-field">
-                    <input class="input" type="number" name="quantity" id="edit_quantity" required>
+                    <div class="error-wrap">
+                        <input class="input" type="number" name="quantity" id="edit_quantity" required>
+                        <span class="error-msg"></span>
+                    </div>
                     <label for="edit_quantity" style="flex: 2 0 0; color: #898989;">MOQ: <b id="edit_moq_2"></b> <b>pcs.</b></label>
                 </div>
 
@@ -304,7 +308,3 @@
     </div>
 </div>
 {% endblock %}
-
-<script>
-document.addEventListener('DOMContentLoaded', updateOrderSummary);
-</script>

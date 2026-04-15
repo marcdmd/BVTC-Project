@@ -5,7 +5,7 @@
         hx-get="{% url 'load_shipping' %}" 
         hx-target="#shipping-address-select" 
         hx-trigger="change">
-    <option value="" disabled selected>Select Customer</option>
+    <option value="" hidden selected>Select Customer</option>
     {% for customer in customers %}
     <option value="{{ customer.customer_id }}">{{ customer.customer_name }}</option>
     {% endfor %}

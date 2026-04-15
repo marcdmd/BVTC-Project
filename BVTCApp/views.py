@@ -121,6 +121,7 @@ def add_order(request):
     return render(request, 'bvtc_app/add_order.html', {'companies': companies, 'all_customers': customers})
 
 def load_customers(request):
+    print("You called?")
     company_id = request.GET.get('company-id')
     if company_id:
         customers = CustomerAccount.objects.filter(company_id_id=company_id).order_by('customer_name')

@@ -9,6 +9,13 @@
 <h1 class="bold">Add New Order</h1>
 {% endblock %}
 
+{% block catalog_button %}
+<button type="submit">
+    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">browse</i>
+    <p style="color: #898989;" class="button-text small-b">Catalog</p>
+</button>
+{% endblock %}
+
 {% block orders_button %}
 <button type="submit" style="background: #E9E6E3;">
     <i class="material-symbols-rounded" style="font-size: 24px;">assignment</i>
@@ -16,8 +23,36 @@
 </button>
 {% endblock %}
 
+{% block quotations_button %}
+<button type="submit">
+    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">request_quote</i>
+    <p style="color: #898989;" class="button-text small-b">Quotations</p>
+</button>
+{% endblock %}
+
+{% block billings_button %}
+<button type="submit">
+    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">receipt</i>
+    <p style="color: #898989;" class="button-text small-b">Billings</p>
+</button>
+{% endblock %}
+
+{% block customers_button %}
+<button type="submit">
+    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">group</i>
+    <p style="color: #898989;" class="button-text small-b">Customers</p>
+</button>
+{% endblock %}
+
+{% block profile_button %}
+<button type="submit">
+    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">account_box</i>
+    <p style="color: #898989;" class="button-text small-b">Profile</p>
+</button>
+{% endblock %}
+
 {% block main %}
-<div class="modal">
+<div class="modal" id="addOrderForm">
     <form action="" method="POST">
         {% csrf_token %}
         <h1>Add New Order</h1>
@@ -59,12 +94,11 @@
                                         hx-get="{% url 'load_customers' %}" 
                                         hx-target="#customer-name" 
                                         hx-trigger="change">
-                                    <option value="" disabled selected>Select Company</option>
+                                    <option value="" hidden selected>Select Company</option>
                                     {% for company in companies %}
                                         <option value="{{ company.company_id }}">{{ company.company_name }}</option>
                                     {% endfor %}
                                 </select>
-
                             </div>
 
                             <div class="horizontal-input-field" id="customer-name">
@@ -72,7 +106,7 @@
                                 <select class="input" >
                                     <option value="" disabled selected>Select a Company First</option>
                                 </select>
-                                <!-- This was populated by the first HTMX call -->
+                                <!-- This will be populated by the first HTMX call -->
                             </div>
                         </div>
                     </div>
@@ -117,7 +151,10 @@
 
                 <div class="horizontal-input-field" style="align-self: flex-start;">
                     <label for="budget"><span>*</span> Budget:</label>
-                    <input class="input" type="number" min="1" placeholder="1" name="budget" id="budget" required>
+                    <div class="error-wrap">
+                        <input class="input" type="number" min="1" placeholder="1" name="budget" id="budget" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -183,7 +220,7 @@
                     <label for="mockups">Mockup (Optional):</label>
                     <div class="file-upload" style="width: 100%;">
                         <label for="mockups">
-                            <span style="color: #898989;">Upload Image/s</span>
+                            <span class="file-text" style="color: #898989;">Upload Image/s</span>
                             <input id="mockups" name="mockups[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;" multiple>
                         </label>
                     </div>
@@ -191,7 +228,10 @@
 
                 <div class="horizontal-input-field" style="max-height: 34px;">
                     <label for="logo-link">Link to Logo (Optional):</label>
-                    <input type="text" id="logo-link" name="logo-link" class="input">
+                    <div class="error-wrap">
+                        <input type="url" id="logo-link" name="logo-link" class="input">
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
 
                 <div class="vertical-input-field">
@@ -206,15 +246,21 @@
                     <hr>
                 </div>
 
-                <div class="horizontal-section" style="align-self: flex-start;">
+                <div class="horizontal-input-field" style="align-self: flex-start;">
                     <div class="horizontal-input-field" style="align-self: flex-start;">
-                        <label for="production=start"><span>*</span> Start of Production:</label>
-                        <input type="date" name="production-start" id="production-start" class="input">
+                        <label for="production-start"><span>*</span> Start of Production:</label>
+                        <div class="error-wrap">
+                            <input type="date" name="production-start" id="production-start" class="input" required>
+                            <span class="error-msg"></span>
+                        </div>
                     </div>
 
                     <div class="horizontal-input-field" style="align-self: flex-start;">
-                        <label for="dalivery-date"><span>*</span> Delivery Date:</label>
-                        <input type="date" name="dalivery-date" id="dalivery-date" class="input">
+                        <label for="delivery-date"><span>*</span> Delivery Date:</label>
+                        <div class="error-wrap">
+                            <input type="date" name="dalivery-date" id="delivery-date" class="input" required>
+                            <span class="error-msg"></span>
+                        </div>
                     </div>  
                 </div>              
 
@@ -250,7 +296,7 @@
                 <div class="horizontal-input-field">
                     <label for="courier"><span>*</span> Courier:</label>
                     <select name="courier" id="courier" class="input" required>
-                        <option value="" disabled selected>Select a Courier</option>
+                        <option value="" hidden selected>Select a Courier</option>
                         <option value="j&t">J&T</option>
                         <option value="lalamove">Lalamove</option>
                         <option value="lbc">LBC</option>
@@ -315,7 +361,7 @@
         </div>
 
         <div class="buttons-section">
-            <a href="{% url 'orders' %}" class="m-button-secondary small-m">Cancel</a>
+            <button type="button" class="m-button-secondary small-m open-cancel-add-modal">Cancel</button>
             <button type="submit" class="m-button-primary small-m">Add Order</button>
         </div>
     </form>
@@ -323,19 +369,21 @@
 {% endblock %}
 
 {% block modals %}
-<div class="modal-container" id="viewItemModal">        
-    <div class="modal product-view" style="max-width: 500px;"> <!-- Narrowed since images are gone -->
-        <form id="viewItemForm">
+<div class="modal-container" id="editSummaryItemModal">        
+    <div class="modal product-view" style="max-width: 500px;">
+        <form id="editItemForm">
             <div class="vertical-section">
                 <div class="horizontal-input-field" style="flex: 0; justify-content: space-between; align-items: center;">
-                    <p class="product-id smaller-r" id="view_item_code"></p>
-                    <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+                    <!-- Unique ID: edit_item_code -->
+                    <p class="product-id smaller-r" id="edit_item_code"></p>
+                    <i class="material-symbols-outlined close-modal close-btn">close</i>
                 </div>
 
-                <h1 id="view_item_name">Product Name</h1>
-                <p class="small-r">Category: <b id="view_category"></b></p>
-                <p class="small-r">MOQ: <b id="view_moq"></b> <b>pcs.</b></p>
-                <p class="small-r">Price: <b>₱</b> <b id="view_price"></b></p>
+                <!-- Unique ID: edit_item_name, edit_category, etc. -->
+                <h1 id="edit_item_name">Product Name</h1>
+                <p class="small-r">Category: <b id="edit_category"></b></p>
+                <p class="small-r">MOQ: <b id="edit_moq"></b> <b>pcs.</b></p>
+                <p class="small-r">Price: <b>₱</b> <b id="edit_price"></b></p>
 
                 <div class="divider"><p>Color Variations</p><hr></div>
                 <div class="color-container" style="height: max-content;">
@@ -344,43 +392,115 @@
                 
                 <div class="divider"><p>Customizations</p><hr></div>
                 <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
-                    <input class="filter-input" type="radio" name="customization" id="cut-&-sew" value="Cut & Sew" checked>
-                    <label class="color-filter-label small-b" for="cut-&-sew">Cut & Sew</label>
+                    <input class="filter-input radio-input" type="radio" name="customization" id="cut-&-sew-edit" value="Cut & Sew" checked>
+                    <label class="color-filter-label small-b" for="cut-&-sew-edit">Cut & Sew</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="silkscreen-print" value="Silkscreen Print">
-                    <label class="color-filter-label small-b" for="silkscreen-print">Silkscreen Print</label>
+                    <input class="filter-input radio-input" type="radio" name="customization" id="silkscreen-print-edit" value="Silkscreen Print">
+                    <label class="color-filter-label small-b" for="silkscreen-print-edit">Silkscreen Print</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="digital-print" value="Digital Print">
-                    <label class="color-filter-label small-b" for="digital-print">Digital Print</label>
+                    <input class="filter-input radio-input" type="radio" name="customization" id="digital-print-edit" value="Digital Print">
+                    <label class="color-filter-label small-b" for="digital-print-edit">Digital Print</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="laser-engrave" value="Laser Engrave">
-                    <label class="color-filter-label small-b" for="laser-engrave">Laser Engrave</label>
+                    <input class="filter-input radio-input" type="radio" name="customization" id="laser-engrave-edit" value="Laser Engrave">
+                    <label class="color-filter-label small-b" for="laser-engrave-edit">Laser Engrave</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="leather-stamp" value="Leather Stamp">
-                    <label class="color-filter-label small-b" for="leather-stamp">Leather Stamp</label>
+                    <input class="filter-input radio-input" type="radio" name="customization" id="leather-stamp-edit" value="Leather Stamp">
+                    <label class="color-filter-label small-b" for="leather-stamp-edit">Leather Stamp</label>
 
-                    <input class="filter-input" type="radio" name="customization" id="none" value="N/A">
-                    <label class="color-filter-label small-b" for="none">None</label>
+                    <input class="filter-input radio-input" type="radio" name="customization" id="none-edit" value="N/A">
+                    <label class="color-filter-label small-b" for="none-edit">None</label>
                 </div>
 
                 <div class="vertical-input-field">
-                    <label for="note">Note:</label>
-                    <textarea class="input" name="note" id="note" placeholder="Add specific instructions..."></textarea>
+                    <label for="edit_note">Note:</label>
+                    <textarea class="input" name="note" id="edit_note" placeholder="Add specific instructions..."></textarea>
                 </div>                
 
                 <div class="divider"><p>Quantity</p><hr></div>
                 <div class="horizontal-input-field">
-                    <input class="input" type="number" name="quantity" id="quantity" required>
-                    <label for="quantity" style="flex: 2 0 0; color: #898989;">MOQ: <b id="view_moq_2"></b> <b>pcs.</b></label>
+                    <div class="error-wrap">
+                        <input class="input" type="number" name="quantity" id="edit_quantity" required>
+                        <span class="error-msg"></span>
+                    </div>
+                    <label for="edit_quantity" style="flex: 2 0 0; color: #898989;">MOQ: <b id="edit_moq_2"></b> <b>pcs.</b></label>
                 </div>
 
                 <div class="divider"><hr></div>
                 <div class="buttons-section">
-                    <button type="button" id="saveItemBtn" onclick="saveItemToOrder()" class="m-button-primary small-m">Add to Order</button>
-                    <button type="button" class="close-modal m-button-secondary small-m">Close</button>
+                    <button type="button" id="saveItemBtn" onclick="saveItemToOrder()" class="m-button-primary small-m">Update Item</button>
+                    <button type="button" class="close-modal close-btn m-button-secondary small-m">Close</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
+<div class="modal-container" id="cancelAddModal">
+    <div class="notif-modal">
+        <div class="header-warning">
+            <h1 class="bold">Cancel Adding Order?</h1>
+            <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+        </div>
+
+        <div class="body">
+            <p class="regular">Are you sure you want to cancel? Your progress will be lost</p>
+            <div class="buttons-section">
+                <a href="" class="m-button-tertiary small-m confirm_cancel" style="flex: 1 0 0;">Yes</a>
+                <button type="button" class="m-button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const orderForm = document.querySelector('#addOrderForm'); 
+    if (!orderForm) return;
+
+    const storageKey = 'addOrderFormData';
+
+    // 1. Load and Restore
+    const savedData = JSON.parse(sessionStorage.getItem(storageKey));
+    if (savedData) {
+        Object.keys(savedData).forEach(name => {
+            const fields = orderForm.querySelectorAll(`[name="${name}"]`);
+            
+            fields.forEach(field => {
+                if (field.type === 'radio') {
+                    // Check the radio only if its value matches what we saved
+                    field.checked = (field.value === savedData[name]);
+                } else if (field.type === 'checkbox') {
+                    field.checked = savedData[name];
+                } else {
+                    field.value = savedData[name];
+                }
+            });
+        });
+    }
+
+    // 2. Save on Input
+    orderForm.addEventListener('input', (e) => {
+        const formData = JSON.parse(sessionStorage.getItem(storageKey)) || {};
+        const field = e.target;
+        
+        if (field.name) {
+            // For radios, only save the value if it's the one currently checked
+            if (field.type === 'radio') {
+                if (field.checked) formData[field.name] = field.value;
+            } else if (field.type === 'checkbox') {
+                formData[field.name] = field.checked;
+            } else {
+                formData[field.name] = field.value;
+            }
+            sessionStorage.setItem(storageKey, JSON.stringify(formData));
+        }
+    });
+
+    orderForm.addEventListener('submit', () => {
+        sessionStorage.removeItem(storageKey);
+    });
+});
+</script>
 {% endblock %}

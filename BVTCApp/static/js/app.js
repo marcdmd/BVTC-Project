@@ -5,7 +5,9 @@ const viewProductModal = document.getElementById('viewProductModal');
 const viewOrderModal = document.getElementById('viewOrderModal');
 const viewItemModal = document.getElementById('viewItemModal');
 
-const modalForms = document.querySelectorAll('.modal-container form'); // For validator
+const modalForms = document.querySelectorAll('.modal form'); // For validator
+
+const orderBody = document.getElementById('order-items-body');
 
 const slideIndexes = {}; // For slideshow
 
@@ -487,6 +489,20 @@ document.addEventListener('click', function (e) {
             showModal(summaryModal); // Use your existing helper
         }
     }
+
+    // Cancel Adding Order Modal
+    const cancelAddBtn = e.target.closest('.open-cancel-add-modal');
+    if (cancelAddBtn) {
+        const cancelAddModal = document.getElementById('cancelAddModal');
+        
+        const confirmBtn = cancelAddModal.querySelector('.confirm_cancel');
+        if (confirmBtn) {
+            confirmBtn.href = `/orders`;
+            localStorage.removeItem('pendingOrderItems');
+        }
+
+        showModal(cancelAddModal)
+    }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -494,6 +510,35 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (isExpanded === 'true') {
         sidebar.classList.add('expand');
+    }
+
+    // 1. Get today's local date in YYYY-MM-DD format
+    const today = new Date().toLocaleDateString('en-CA'); 
+
+    // 2. Target the elements
+    const productionStart = document.getElementById('production-start');
+    const deliveryDate = document.getElementById('delivery-date');
+
+    // 3. Set initial minimums and logic
+    if (productionStart && deliveryDate) {
+        // Set both to minimum of today initially
+        productionStart.setAttribute('min', today);
+        deliveryDate.setAttribute('min', today);
+
+        // Update Delivery Date's minimum whenever Production Start changes
+        productionStart.addEventListener('change', function() {
+            const selectedStartDate = this.value;
+            deliveryDate.setAttribute('min', selectedStartDate);
+
+            // If current delivery date is now earlier than production start, clear it
+            if (deliveryDate.value && deliveryDate.value < selectedStartDate) {
+                deliveryDate.value = "";
+                // Trigger your validation function to show the error message
+                if (typeof validateField === "function") {
+                    validateField(deliveryDate);
+                }
+            }
+        });
     }
 });
 
@@ -547,19 +592,21 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // For Order tables
-document.getElementById('order-items-body').addEventListener('click', function(event) {
-    // 1. Check if the clicked element is an 'Edit' button
-    if (event.target.classList.contains('edit-btn')) {
-        const index = event.target.getAttribute('data-index');
-        editItemFromSummary(parseInt(index));
-    }
-
-    // 2. Check if the clicked element is a 'Delete' button
-    if (event.target.classList.contains('delete-btn')) {
-        const index = event.target.getAttribute('data-index');
-        deleteOrderItem(parseInt(index)); // Assuming you have this function
-    }
-});
+if (orderBody) {
+    orderBody.addEventListener('click', function(event) {
+        // 1. Check if the clicked element is an 'Edit' button
+        if (event.target.classList.contains('edit-btn')) {
+            const index = event.target.getAttribute('data-index');
+            editItemFromSummary(parseInt(index));
+        }
+    
+        // 2. Check if the clicked element is a 'Delete' button
+        if (event.target.classList.contains('delete-btn')) {
+            const index = event.target.getAttribute('data-index');
+            deleteOrderItem(parseInt(index)); // Assuming you have this function
+        }
+    });
+}
 
 // For closing modals
 window.addEventListener('click', function(event) {
@@ -659,14 +706,14 @@ function saveItemToOrder(editIndex = null) {
     const newItem = {
         code: activeModal.querySelector(`#${prefix}_item_code`)?.textContent?.trim() || 'N/A',
         name: productData.name || activeModal.querySelector(`#${prefix}_item_name`)?.textContent?.trim(),
-        category: productData.category || '',
+        category: productData.category || activeModal.querySelector(`#${prefix}_category`)?.textContent?.trim(),
         color: activeModal.querySelector('.selected-color p')?.textContent?.trim() || '-',
         custom: activeModal.querySelector('input[name="customization"]:checked')?.value || '-',
         qty: parseInt(activeModal.querySelector(isEdit ? '#edit_quantity' : '#quantity')?.value) || 0,
         note: activeModal.querySelector(isEdit ? '#edit_note' : '#note')?.value?.trim() || '',
         price: parseFloat(productData.starting_price) || 0,
         all_colors: productData.colors || '',
-        moq: productData.moq || '0'
+        moq: productData.moq || activeModal.querySelector(`#${prefix}_moq`)?.textContent?.trim() || '0'
     };
 
     console.log("New Item Object built:", newItem);
@@ -705,6 +752,7 @@ function saveItemToOrder(editIndex = null) {
     }
 
     console.groupEnd();
+    updateOrderSummary();
 }
 
 function updateOrderSummary() {
@@ -882,7 +930,7 @@ function editItemFromSummary(index) {
 
     // Attach metadata
     modal.setAttribute('data-current-product', JSON.stringify({
-        name: item.name, // Add this!
+        name: item.name,
         colors: item.all_colors || "",
         starting_price: item.price || 0
     }));
@@ -890,23 +938,42 @@ function editItemFromSummary(index) {
     // Populate Fields
     const codeEl = modal.querySelector('#edit_item_code');
     if (codeEl) { codeEl.textContent = item.code; console.log("Set code to:", item.code); }
-    else { console.warn("Element #edit_item_code missing"); }
-
-    const qtyEl = modal.querySelector('#edit_quantity');
-    if (qtyEl) { qtyEl.value = item.qty; console.log("Set quantity to:", item.qty); }
-
+    const nameE1 = modal.querySelector('#edit_item_name');
+    if (nameE1) { nameE1.textContent = item.name; console.log("Set name to:", item.name); }
+    const categoryE1 = modal.querySelector('#edit_category');
+    if (categoryE1) { categoryE1.textContent = item.category; console.log("Set category to:", item.category); }
+    const moqE1 = modal.querySelector('#edit_moq');
+    if (moqE1) { moqE1.textContent = item.moq; console.log("Set moq to:", item.moq); }
+    const priceE1 = modal.querySelector('#edit_price');
+    if (priceE1) { priceE1.textContent = item.price; console.log("Set price to:", item.price); }
     const noteEl = modal.querySelector('#edit_note');
     if (noteEl) noteEl.value = item.note || '';
+    const qtyEl = modal.querySelector('#edit_quantity');
+    if (qtyEl) {
+        qtyEl.value = item.qty;
+        qtyEl.min = item.moq;
+        console.log("Set quantity to:", item.qty); }
+    const moq2E1 = modal.querySelector('#edit_moq_2');
+    if (moq2E1) { moq2E1.textContent = item.moq; console.log("Set moq2 to:", item.moq); }
+
+    // Customization
+    console.log("Attempting to auto-select customization:", item.custom);
+    const customRadios = modal.querySelectorAll('.radio-input');
+    setTimeout(() => {
+        customRadios.forEach(radio => {
+            if (radio.value.trim() === item.custom) {
+                radio.checked = true;
+            }
+        });
+    }, 150);
 
     // Colors
     if (typeof renderModalColors === 'function') {
         renderModalColors(modal, item.all_colors);
         setTimeout(() => {
-            console.log("Attempting to auto-select color:", item.color);
             const colorDivs = modal.querySelectorAll('.product-highlight');
             colorDivs.forEach(div => {
                 if (div.querySelector('p')?.textContent.trim() === item.color) {
-                    console.log("Color match found, clicking div...");
                     div.click();
                 }
             });
@@ -915,6 +982,7 @@ function editItemFromSummary(index) {
 
     showModal(modal);
     console.groupEnd();
+    updateOrderSummary();
 }
 
 function deleteOrderItem(index) {
@@ -937,7 +1005,7 @@ function renderModalColors(modal, colorString) {
         if (trimmed) {
             const div = document.createElement('div');
             div.className = 'product-highlight';
-            div.innerHTML = `<span style="background: ${trimmed}; border: 1px solid #ddd;"></span><p class="smaller-r">${trimmed}</p>`;
+            div.innerHTML = `<span style="background: ${trimmed}; border: 1px solid #898989;"></span><p class="smaller-r">${trimmed}</p>`;
 
             div.onclick = () => {
                 colorContainer.querySelectorAll('.product-highlight').forEach(el => {
@@ -1002,6 +1070,7 @@ function resetItemModal() {
 
 // Validator
 function validateField(field) {
+    console.log('Validating:', field.name, 'Result:', field.checkValidity());
     const errorWrap = field.closest('.error-wrap');
     const errorMsg = errorWrap ? errorWrap.querySelector('.error-msg') : null;
     
