@@ -34,32 +34,37 @@
                 </p>
             </div>
             <div class="horizontal-input-field" style="width: max-content; max-width: max-content;">
-                <a href="{% url 'add_order' %}" class="button-secondary small-m">Cancel</a>
+                <button type="button" class="button-secondary small-m open-quick-summary">View Cart</button>
                 <a href="{% url 'add_order' %}" class="button-primary small-m">Done</a>
             </div>
         </div>
     </div>
 </div>
 
-
 <div class="action-bar">
     <div class="horizontal-section">
-        <form action="" class="filter" style="flex-wrap: wrap;">
-            <p class="small-r filter-name" style="padding: 6px 15px 6px 0px;">Filter:</p>
-            <input class="filter-input" type="radio" name="filter" value="all" id="all" checked>
-            <label class="filter-label small-b" for="all">All</label>
-
-            <input class="filter-input" type="radio" name="filter" value="company-profile" id="company-profile">
-            <label class="filter-label small-b" for="company-profile">Company Profile</label>
-
-            <input class="filter-input" type="radio" name="filter" value="individual-items" id="individual-items">
-            <label class="filter-label small-b" for="individual-items">Individual Items</label>
-
-            <input class="filter-input" type="radio" name="filter" value="gift-set" id="gift-set">
-            <label class="filter-label small-b" for="gift-set">Gift Set</label>
-
-            <input class="filter-input" type="radio" name="filter" value="bag" id="bag">
-            <label class="filter-label small-b" for="bag">Bag</label>
+        <form action="" method="GET" class="filter" style="flex-wrap: wrap;" onchange="this.submit()">
+            <label class="small-r filter-name" for="filter" style="padding: 6px 15px 6px 0px;">Filter:</label>
+            <select name="filter" id="filter" onchange="this.form.submit()"
+                    style="display: flex;
+                           flex: 1;
+                           max-width: 25%;
+                           min-width: 0;
+                           padding: 9px;
+                           padding-right: 35px;
+                           align-items: center;
+                           gap: 12px;
+                           border-radius: 3px;
+                           border: 1px solid #B5B0AD;
+                           font-weight: 700;">
+                <!-- Manually add the 'All' option -->
+                <option value="all" {% if request.GET.filter == 'all' or not request.GET.filter %}selected{% endif %}>All</option>
+                {% for value, label in category_choices %}
+                    <option value="{{ value }}" {% if request.GET.filter == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
         </form>
 
         <div class="actions">
@@ -135,20 +140,20 @@
                     
                     <div class="divider"><p>Customizations</p><hr></div>
                     <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
-                        <input class="filter-input" type="radio" name="customization" id="embroider" value="Embroider" checked>
-                        <label class="color-filter-label small-b" for="embroider">Embroider</label>
+                        <input class="filter-input" type="radio" name="customization" id="cut-&-sew" value="Cut & Sew" checked>
+                        <label class="color-filter-label small-b" for="cut-&-sew">Cut & Sew</label>
     
-                        <input class="filter-input" type="radio" name="customization" id="engrave" value="Engrave">
-                        <label class="color-filter-label small-b" for="engrave">Engrave</label>
+                        <input class="filter-input" type="radio" name="customization" id="silkscreen-print" value="Silkscreen Print">
+                        <label class="color-filter-label small-b" for="silkscreen-print">Silkscreen Print</label>
     
-                        <input class="filter-input" type="radio" name="customization" id="print" value="Print">
-                        <label class="color-filter-label small-b" for="print">Print</label>
+                        <input class="filter-input" type="radio" name="customization" id="digital-print" value="Digital Print">
+                        <label class="color-filter-label small-b" for="digital-print">Digital Print</label>
     
-                        <input class="filter-input" type="radio" name="customization" id="stamp" value="Stamp">
-                        <label class="color-filter-label small-b" for="stamp">Stamp</label>
+                        <input class="filter-input" type="radio" name="customization" id="laser-engrave" value="Laser Engrave">
+                        <label class="color-filter-label small-b" for="laser-engrave">Laser Engrave</label>
     
-                        <input class="filter-input" type="radio" name="customization" id="sticker" value="Sticker">
-                        <label class="color-filter-label small-b" for="sticker">Sticker</label>
+                        <input class="filter-input" type="radio" name="customization" id="leather-stamp" value="Leather Stamp">
+                        <label class="color-filter-label small-b" for="leather-stamp">Leather Stamp</label>
 
                         <input class="filter-input" type="radio" name="customization" id="none" value="N/A">
                         <label class="color-filter-label small-b" for="none">None</label>
@@ -170,6 +175,129 @@
                         <button type="button" onclick="saveItemToOrder()" class="m-button-primary small-m">Add to Order</button>
                         <button type="button" class="close-modal m-button-secondary small-m">Close</button>
                     </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-container" id="viewQuickSummary">
+    <div class="modal summary-view" style="max-width: 800px;">
+        <div class="horizontal-input-field" style="flex: 0; justify-content: space-between; align-items: center;">
+            <h1>Cart Summary</h1>
+            <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+        </div>
+
+        <div class="divider"><hr></div>
+
+        <table class="small-database">
+            <thead>
+                <tr>
+                    <th>PRODUCT</th>
+                    <th>COLOR</th>
+                    <th>CUSTOMIZATION</th>
+                    <th>UNIT PRICE</th>
+                    <th>QUANTITY</th>
+                    <th>SUBTOTAL</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+
+            <tbody id="order-items-body">
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <div class="cell-buttons">
+                            <button type="button" class="m-button-primary smaller-b">View/Edit</button>
+                            <a href="" class="m-button-tertiary smaller-b">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>TOTAL:</td>
+                    <td></td>
+                    <td><b>Php 0.00</b></td>
+                    <td></td>
+                </tr>                    
+            </tbody>
+        </table>
+
+        <div class="divider"><hr></div>
+
+        <div class="buttons-section">
+            <button type="button" class="close-modal m-button-secondary small-m">Close</button>
+            <a href="{% url 'add_order' %}" class="m-button-primary small-m">Done</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="editSummaryItemModal">        
+    <div class="modal product-view" style="max-width: 500px;">
+        <form id="editItemForm">
+            <div class="vertical-section">
+                <div class="horizontal-input-field" style="flex: 0; justify-content: space-between; align-items: center;">
+                    <!-- Unique ID: edit_item_code -->
+                    <p class="product-id smaller-r" id="edit_item_code"></p>
+                    <i class="material-symbols-outlined close-modal close-btn">close</i>
+                </div>
+
+                <!-- Unique ID: edit_item_name, edit_category, etc. -->
+                <h1 id="edit_item_name">Product Name</h1>
+                <p class="small-r">Category: <b id="edit_category"></b></p>
+                <p class="small-r">MOQ: <b id="edit_moq"></b> <b>pcs.</b></p>
+                <p class="small-r">Price: <b>₱</b> <b id="edit_price"></b></p>
+
+                <div class="divider"><p>Color Variations</p><hr></div>
+                <div class="color-container" style="height: max-content;">
+                    <!-- JS handles injection of colors -->
+                </div>
+                
+                <div class="divider"><p>Customizations</p><hr></div>
+                <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
+                    <!-- Added '-edit' suffix to IDs and for-attributes -->
+                    <input class="filter-input" type="radio" name="customization" id="cut-&-sew-edit" value="Cut & Sew" checked>
+                    <label class="color-filter-label small-b" for="cut-&-sew-edit">Cut & Sew</label>
+
+                    <input class="filter-input" type="radio" name="customization" id="silkscreen-print-edit" value="Silkscreen Print">
+                    <label class="color-filter-label small-b" for="silkscreen-print-edit">Silkscreen Print</label>
+
+                    <input class="filter-input" type="radio" name="customization" id="digital-print-edit" value="Digital Print">
+                    <label class="color-filter-label small-b" for="digital-print-edit">Digital Print</label>
+
+                    <input class="filter-input" type="radio" name="customization" id="laser-engrave-edit" value="Laser Engrave">
+                    <label class="color-filter-label small-b" for="laser-engrave-edit">Laser Engrave</label>
+
+                    <input class="filter-input" type="radio" name="customization" id="leather-stamp-edit" value="Leather Stamp">
+                    <label class="color-filter-label small-b" for="leather-stamp-edit">Leather Stamp</label>
+
+                    <input class="filter-input" type="radio" name="customization" id="none-edit" value="N/A">
+                    <label class="color-filter-label small-b" for="none-edit">None</label>
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="edit_note">Note:</label>
+                    <textarea class="input" name="note" id="edit_note" placeholder="Add specific instructions..."></textarea>
+                </div>                
+
+                <div class="divider"><p>Quantity</p><hr></div>
+                <div class="horizontal-input-field">
+                    <input class="input" type="number" name="quantity" id="edit_quantity" required>
+                    <label for="edit_quantity" style="flex: 2 0 0; color: #898989;">MOQ: <b id="edit_moq_2"></b> <b>pcs.</b></label>
+                </div>
+
+                <div class="divider"><hr></div>
+                <div class="buttons-section">
+                    <button type="button" id="saveItemBtn" onclick="saveItemToOrder()" class="m-button-primary small-m">Update Item</button>
+                    <button type="button" class="close-modal close-btn m-button-secondary small-m">Close</button>
                 </div>
             </div>
         </form>

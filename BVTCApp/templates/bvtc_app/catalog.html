@@ -34,7 +34,6 @@
                            font-weight: 700;">
                 <!-- Manually add the 'All' option -->
                 <option value="all" {% if request.GET.filter == 'all' or not request.GET.filter %}selected{% endif %}>All</option>
-                
                 {% for value, label in category_choices %}
                     <option value="{{ value }}" {% if request.GET.filter == value %}selected{% endif %}>
                         {{ label }}
@@ -82,14 +81,14 @@
     {% for p in products %}
     <div class="product-card open-view-modal"
          data-db_id="{{ p.product_id }}"
-         data-images="{% for img in p.productimage_set.all %}{{ img.product_image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-         data-colors="{% for c in p.productcolor_set.all %}{{ c.product_color }}{% if not forloop.last %},{% endif %}{% endfor %}"
          data-product_code="{{ p.product_code }}"
          data-product_name="{{ p.product_name }}"
          data-category="{{ p.category }}"
          data-moq="{{ p.MOQ }}"
          data-starting_price="{{ p.starting_price }}"
-         data-product_description="{{ p.description }}">
+         data-product_description="{{ p.description }}"
+         data-images="{% for img in p.productimage_set.all %}{{ img.product_image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
+         data-colors="{% for c in p.productcolor_set.all %}{{ c.product_color }}{% if not forloop.last %},{% endif %}{% endfor %}">
         <div class="thumbnail">
             {% with p.productimage_set.first as img %}
                 {% if img %}

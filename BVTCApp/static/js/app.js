@@ -5,56 +5,30 @@ const viewProductModal = document.getElementById('viewProductModal');
 const viewOrderModal = document.getElementById('viewOrderModal');
 const viewItemModal = document.getElementById('viewItemModal');
 
-// For toggling sidebar
-document.addEventListener("DOMContentLoaded", () => {
-    const isExpanded = localStorage.getItem('sidebar-expanded');
-    
-    if (isExpanded === 'true') {
-        sidebar.classList.add('expand');
-    }
-});
+const modalForms = document.querySelectorAll('.modal-container form'); // For validator
 
-function toggleSidebar() {
-    sidebar.classList.toggle('expand')
+const slideIndexes = {}; // For slideshow
 
-    const isExpanded = sidebar.classList.contains('expand');
-    localStorage.setItem('sidebar-expanded', isExpanded);
-}
+// EVENT LISTENERS
 
-// For modals
-// Helper Functions
-function qs(selector, parent = document) {
-    return parent.querySelector(selector);
-}
-
-function qsa(selector, parent = document) {
-    return parent.querySelectorAll(selector);
-}
-
-function closeAllModals() {
-    qsa('.modal-container.show').forEach(m => m.classList.remove('show'))
-}
-
-function showModal(modal) {
-    const isNotif = modal.querySelector('.notif-modal');
-
-    if (!isNotif) {
-        document.querySelectorAll('.modal-container.show').forEach(m => {
-            m.classList.remove('show');
-        });
-    }
-
-    modal.classList.add('show');
-}
-
-
-// Event Delegation
+// Event Delegation for Modals
 document.addEventListener('click', function (e) {
-
+    
     // Close Modal Buttons
     if (e.target.classList.contains('close-modal')) {
+        // 1. Find the modal that specifically contains THIS button
         const modal = e.target.closest('.modal-container');
-        if (modal) modal.classList.remove('show');
+        
+        if (modal) {
+            // 2. Hide the modal
+            modal.classList.remove('show');
+            modal.style.display = 'none'; // Ensure display is reset
+            
+            // 3. NEW: If this was the Edit modal, don't forget to reset it
+            if (modal.id === 'viewItemModal' || modal.id === 'editSummaryItemModal') {
+                if (typeof resetItemModal === 'function') resetItemModal();
+            }
+        }
     }
 
     //View Order Modal
@@ -337,7 +311,7 @@ document.addEventListener('click', function (e) {
                 colorDiv.style.cursor = 'pointer'; 
                 
                 colorDiv.innerHTML = `
-                    <span style="background: ${trimmedColor}; border: 1px solid #ddd;"></span>
+                    <span style="background: ${trimmedColor}; border: 1px solid #898989;"></span>
                     <p class="smaller-r">${trimmedColor}</p>
                 `;
 
@@ -347,7 +321,7 @@ document.addEventListener('click', function (e) {
                     // 1. Reset ALL items to their default state first
                     colorContainer.querySelectorAll('.product-highlight').forEach(el => {
                         el.style.outline = 'none';
-                        el.style.background = '#FAF9F6'; // Reset background
+                        el.style.background = '#E9E6E3'; // Reset background
                         el.classList.remove('selected-color');
                     });
 
@@ -363,6 +337,12 @@ document.addEventListener('click', function (e) {
                 colorContainer.appendChild(colorDiv);
             }
         });
+
+        // Auto-select the first color
+        const firstColor = colorContainer.querySelector('.product-highlight');
+        if (firstColor) {
+            firstColor.click();
+        }
 
         qs('#view_item_code', viewItemModal).textContent = viewItem.dataset.product_code;
         qs('#view_item_name', viewItemModal).textContent = viewItem.dataset.product_name;
@@ -497,53 +477,234 @@ document.addEventListener('click', function (e) {
 
         showModal(deleteProductModal);
     }
+
+    // Open Quick Summary Modal
+    const openSummary = e.target.closest('.open-quick-summary');
+    if (openSummary) {
+        const summaryModal = document.getElementById('viewQuickSummary');
+        if (summaryModal) {
+            renderOrderTable(); // Refresh table data before showing
+            showModal(summaryModal); // Use your existing helper
+        }
+    }
 });
 
-// Add to Order Button Logic
-function saveItemToOrder() {
-    console.log("Button clicked!"); // Check your browser console (F12) for this!
+document.addEventListener("DOMContentLoaded", () => {
+    const isExpanded = localStorage.getItem('sidebar-expanded');
+    
+    if (isExpanded === 'true') {
+        sidebar.classList.add('expand');
+    }
+});
 
-    // 1. Safe extraction with Optional Chaining (?.)
-    const selectedColorEl = document.querySelector('.color-container .selected-color p');
-    const selectedColor = selectedColorEl ? selectedColorEl.textContent.trim() : '-';
-    
-    const selectedCustomEl = document.querySelector('input[name="customization"]:checked');
-    const selectedCustom = selectedCustomEl ? selectedCustomEl.value : '-';
-    
-    const qtyInput = document.getElementById('quantity');
-    const qty = qtyInput ? parseInt(qtyInput.value) : 0;
-    
-    // 2. Get Price safely (from dataset or a default)
-    const viewItemModal = document.getElementById('viewItemModal');
-    let price = 0;
-    if (viewItemModal.dataset.currentProduct) {
-        const data = JSON.parse(viewItemModal.dataset.currentProduct);
-        price = parseFloat(data.starting_price) || 0;
+// For rendering order table
+document.addEventListener('DOMContentLoaded', renderOrderTable);
+
+// Initialize totals and table whenever any page loads
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Update the Summary Bar (Top right of your Add Item page)
+    if (document.getElementById('initial-items-label')) {
+        updateOrderSummary();
     }
 
-    // 3. Create the item object
+    // 2. Update the Table (If on the Add Order page)
+    if (document.getElementById('order-items-body')) {
+        renderOrderTable();
+    }
+});
+
+// Change Name to File Input
+document.addEventListener('change', function (e) {
+    const input = e.target.closest('.file-upload input[type="file"]');
+    if (!input) return;
+    
+    const span = input.closest('label').querySelector('.file-text');
+    
+    if (input.files.length === 0) {
+        span.textContent = "Upload Image";
+        span.style.color = "#898989";
+    } else {
+        span.textContent = input.files[0].name;
+        span.style.color = "#333";
+    }
+});
+
+// For slideshow
+document.addEventListener("DOMContentLoaded", function () {
+    const slideshows = document.querySelectorAll("[id^='slideshow-']");
+
+    slideshows.forEach(slideshow => {
+        const productId = slideshow.id.replace("slideshow-", "");
+        slideIndexes[productId] = 1;
+        showSlides(1, productId);
+    });
+
+    const existingDiv = document.querySelector('.for-existing');
+    
+    if (existingDiv) {
+        htmx.process(existingDiv);
+    }
+});
+
+// For Order tables
+document.getElementById('order-items-body').addEventListener('click', function(event) {
+    // 1. Check if the clicked element is an 'Edit' button
+    if (event.target.classList.contains('edit-btn')) {
+        const index = event.target.getAttribute('data-index');
+        editItemFromSummary(parseInt(index));
+    }
+
+    // 2. Check if the clicked element is a 'Delete' button
+    if (event.target.classList.contains('delete-btn')) {
+        const index = event.target.getAttribute('data-index');
+        deleteOrderItem(parseInt(index)); // Assuming you have this function
+    }
+});
+
+// For closing modals
+window.addEventListener('click', function(event) {
+    // 1. Check if the click was on the dark background container
+    if (event.target.classList.contains('modal-container')) {
+        const container = event.target;
+        
+        // 2. THE FIX: Check if there is a form inside this specific modal
+        // If it contains a form, we RETURN and do nothing (preventing the close)
+        if (container.querySelector('form')) {
+            console.log("Modal contains a form. Ignoring backdrop click to prevent data loss.");
+            return; 
+        }
+
+        // 3. If there is NO form (like your Cart Summary), proceed with closing
+        container.classList.remove('show');
+        container.style.display = 'none';
+        
+        if (typeof resetItemModal === 'function') resetItemModal();
+    }
+});
+
+// FUNCTIONS
+// For toggling sidebar
+function toggleSidebar() {
+    sidebar.classList.toggle('expand')
+
+    const isExpanded = sidebar.classList.contains('expand');
+    localStorage.setItem('sidebar-expanded', isExpanded);
+}
+
+// Helper Functions for modals
+function qs(selector, parent = document) {
+    return parent.querySelector(selector);
+}
+
+function qsa(selector, parent = document) {
+    return parent.querySelectorAll(selector);
+}
+
+function closeAllModals() {
+    const modals = document.querySelectorAll('.modal-container');
+    modals.forEach(m => {
+        // This is the most important line:
+        m.style.display = 'none'; 
+        
+        // This handles your animations/classes
+        m.classList.remove('show'); 
+    });
+    
+    // Optional: Reset the item modals so they're fresh for next time
+    if (typeof resetItemModal === 'function') resetItemModal();
+}
+
+function showModal(modal) {
+    // 1. Check if this is a notification (like your Delete modal)
+    const isNotif = modal.querySelector('.notif-modal');
+    
+    // 2. NEW: Check if this is the specific Edit Modal we want to stack
+    const isStackable = isNotif || modal.id === 'editSummaryItemModal';
+
+    // 3. Only close other modals if the new one is NOT stackable
+    if (!isStackable) {
+        document.querySelectorAll('.modal-container.show').forEach(m => {
+            m.classList.remove('show');
+            // If you use inline styles for display, reset them too
+            m.style.display = 'none'; 
+        });
+    }
+
+    // 4. Show the current modal
+    modal.classList.add('show');
+    modal.style.display = 'flex'; // Ensures visibility regardless of CSS state
+}
+
+// For orders and items
+function saveItemToOrder(editIndex = null) {
+    console.group("DEBUG: saveItemToOrder Execution");
+    
+    // 1. Identify which modal to pull data from
+    const modalId = (editIndex !== null) ? 'editSummaryItemModal' : 'viewItemModal';
+    const activeModal = document.getElementById(modalId);
+    
+    if (!activeModal) {
+        console.error("FAILED: Could not find modal:", modalId);
+        console.groupEnd();
+        return;
+    }
+
+    const isEdit = (editIndex !== null);
+    const prefix = isEdit ? 'edit' : 'view';
+    console.log("Saving from modal:", activeModal.id, "| Prefix used:", prefix);
+
+    const productData = JSON.parse(activeModal.getAttribute('data-current-product') || '{}');
+    
+    // 2. Data Extraction
     const newItem = {
-        code: document.getElementById('view_item_code')?.textContent || 'N/A',
-        name: document.getElementById('view_item_name')?.textContent || 'N/A',
-        color: selectedColor,
-        custom: selectedCustom,
-        qty: qty,
-        price: price
+        code: activeModal.querySelector(`#${prefix}_item_code`)?.textContent?.trim() || 'N/A',
+        name: productData.name || activeModal.querySelector(`#${prefix}_item_name`)?.textContent?.trim(),
+        category: productData.category || '',
+        color: activeModal.querySelector('.selected-color p')?.textContent?.trim() || '-',
+        custom: activeModal.querySelector('input[name="customization"]:checked')?.value || '-',
+        qty: parseInt(activeModal.querySelector(isEdit ? '#edit_quantity' : '#quantity')?.value) || 0,
+        note: activeModal.querySelector(isEdit ? '#edit_note' : '#note')?.value?.trim() || '',
+        price: parseFloat(productData.starting_price) || 0,
+        all_colors: productData.colors || '',
+        moq: productData.moq || '0'
     };
 
-    // 4. Save to localStorage
+    console.log("New Item Object built:", newItem);
+
+    // 3. Retrieve and Update Cart
     const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
-    currentOrder.push(newItem);
+
+    if (editIndex !== null) {
+        console.log("MODE: UPDATE. Overwriting index:", editIndex);
+        currentOrder[editIndex] = newItem;
+    } else {
+        console.log("MODE: ADD. Creating new item.");
+        currentOrder.push(newItem);
+    }
+
+    // 4. Save to LocalStorage
     localStorage.setItem('pendingOrderItems', JSON.stringify(currentOrder));
 
-    console.log("Item saved to storage:", newItem);
+    // 5. Refresh the Table
+    if (typeof renderOrderTable === 'function') renderOrderTable();
 
-    updateOrderSummary();
-    
-    // 5. UI: Close and Redirect
-    if (typeof closeAllModals === 'function') {
-        closeAllModals();
+    // 6. CLOSE THE MODAL
+    activeModal.classList.remove('show');
+    activeModal.style.display = 'none';
+
+    // 7. THE CONDITIONAL RE-OPEN (Ghost is gone, only Summary re-opens if editing)
+    if (editIndex !== null) {
+        const summaryModal = document.getElementById('viewQuickSummary');
+        if (summaryModal) {
+            summaryModal.classList.add('show');
+            summaryModal.style.display = 'flex';
+            console.log("Returning to Cart Summary.");
+        }
+    } else {
+        console.log("Item added. Summary remains hidden.");
     }
+
+    console.groupEnd();
 }
 
 function updateOrderSummary() {
@@ -556,7 +717,8 @@ function updateOrderSummary() {
     
     currentOrder.forEach(item => {
         totalQty += item.qty;
-        subtotal += (item.qty * item.price);
+        // Calculation happens here
+        subtotal += (item.qty * item.price); 
     });
 
     // Assume 0% for now (you can change this to a dynamic variable later)
@@ -575,6 +737,7 @@ function updateOrderSummary() {
     const totalLabel = document.getElementById('discounted-total-label');
 
     if (itemsLabel) {
+        // Ensure you are using the 'subtotal' variable here, NOT 'item.price'
         itemsLabel.innerHTML = `Initial Items (${totalQty} Items): <b>${formatter.format(subtotal)}</b>`;
     }
     if (totalLabel) {
@@ -582,59 +745,260 @@ function updateOrderSummary() {
     }
 }
 
-// Escape key
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-container.show').forEach(modal => {
-            if (!modal.querySelector('form')) {
-                modal.classList.remove('show');
-            }
-        });
+function renderOrderTable() {
+    const orderItemsBody = document.getElementById('order-items-body');
+    if (!orderItemsBody) return;
+
+    const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
+    let grandTotal = 0;
+    let totalQty = 0; // Track total items
+
+    const formatter = new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+    });
+
+    orderItemsBody.innerHTML = '';
+
+    currentOrder.forEach((item, index) => {
+        const subtotal = item.qty * item.price;
+        grandTotal += subtotal;
+        totalQty += item.qty;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.code} - ${item.name}</td>
+            <td>${item.color}</td>
+            <td>${item.custom}</td>
+            <td>${formatter.format(item.price)}</td>
+            <td>${item.qty}</td>
+            <td><b>${formatter.format(subtotal)}</b></td>
+            <td>
+                <div class="cell-buttons">
+                    <!-- REMOVED onclick, ADDED data-index -->
+                    <button type="button" class="m-button-primary smaller-b edit-btn" 
+                        data-index="${index}">View/Edit</button>
+                    <button type="button" class="m-button-tertiary smaller-b delete-btn" 
+                        data-index="${index}">Delete</button>
+                </div>
+            </td>
+        `;
+
+        orderItemsBody.appendChild(row);
+    });
+
+    // FOOTER ROW: Aligned to new headers
+    const footerRow = document.createElement('tr');
+    footerRow.innerHTML = `
+        <td colspan="3"></td>
+        <td style="text-align: right;"><b>TOTAL:</b></td>
+        <td><b>${totalQty}</b></td> <!-- Total Qty under Quantity column -->
+        <td><b>${formatter.format(grandTotal)}</b></td> <!-- Grand Total under Subtotal column -->
+        <td></td>
+    `;
+    orderItemsBody.appendChild(footerRow);
+}
+
+function editItem(index) {
+    const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
+    const item = currentOrder[index];
+    const modal = document.getElementById('viewItemModal');
+    if (!item || !modal) return; // Safety check
+
+    modal.dataset.editIndex = index;
+
+    // 1. Rebuild the product data
+    modal.dataset.currentProduct = JSON.stringify({
+        colors: item.all_colors || "",
+        category: item.category || "",
+        moq: item.moq || "",
+        starting_price: item.price || 0
+    });
+
+    // 2. Draw ONLY the colors
+    renderModalColors(modal, item.all_colors);
+
+    // 3. Fill text fields (with safety checks)
+    const setTxt = (id, val) => { const el = modal.querySelector(id); if(el) el.textContent = val; };
+    setTxt('#view_item_code', item.code);
+    setTxt('#view_item_name', item.name);
+    setTxt('#view_price', item.price);
+    setTxt('#view_category', item.category);
+    setTxt('#view_moq', item.moq);
+    setTxt('#view_moq_2', item.moq);
+    
+    const noteEl = modal.querySelector('#note');
+    if (noteEl) noteEl.value = item.note || '';
+    
+    const qtyEl = modal.querySelector('#quantity');
+    if (qtyEl) qtyEl.value = item.qty;
+
+    // 4. FIX: Select Radio (Handles spaces and case-sensitivity better)
+    const radios = modal.querySelectorAll('input[name="customization"]');
+    let found = false;
+    radios.forEach(radio => {
+        // Compare trimmed, lowercase versions to be safe
+        if (radio.value.trim().toLowerCase() === item.custom.trim().toLowerCase()) {
+            radio.checked = true;
+            found = true;
+        }
+    });
+    // Default to first if not found
+    if (!found && radios.length > 0) radios[0].checked = true;
+
+    // 5. Select color circle
+    const colorDivs = modal.querySelectorAll('.product-highlight');
+    colorDivs.forEach(div => {
+        const colorName = div.querySelector('p')?.textContent.trim();
+        if (colorName === item.color) div.click();
+    });
+
+    const saveBtn = modal.querySelector('#saveItemBtn');
+    if (saveBtn) saveBtn.textContent = "Update Item";
+
+    showModal(modal);
+}
+
+function editItemFromSummary(index) {
+    console.group("DEBUG: Opening Edit Modal");
+    const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
+    const item = currentOrder[index];
+    const modal = document.getElementById('editSummaryItemModal'); 
+    
+    if (!item) { console.error("FAILED: No item found in localStorage at index", index); console.groupEnd(); return; }
+    if (!modal) { console.error("FAILED: Modal #editSummaryItemModal not found in DOM"); console.groupEnd(); return; }
+
+    console.log("Item found:", item);
+    console.log("Setting Update button to index:", index);
+
+    // DYNAMICALLY UPDATE THE BUTTON
+    const saveBtn = modal.querySelector('#saveItemBtn');
+    if (saveBtn) {
+        saveBtn.setAttribute('onclick', `saveItemToOrder(${index})`);
+        console.log("Button onclick set to:", saveBtn.getAttribute('onclick'));
+    } else {
+        console.error("FAILED: #saveItemBtn not found inside modal");
     }
-})
 
-// Backdrop click
-document.querySelectorAll('.modal-container').forEach(modal => {
-    modal.addEventListener('click', e => {
-        if (e.target === modal) {
-            if (!modal.querySelector('form')) {
-                modal.classList.remove('show');
+    // Attach metadata
+    modal.setAttribute('data-current-product', JSON.stringify({
+        name: item.name, // Add this!
+        colors: item.all_colors || "",
+        starting_price: item.price || 0
+    }));
+
+    // Populate Fields
+    const codeEl = modal.querySelector('#edit_item_code');
+    if (codeEl) { codeEl.textContent = item.code; console.log("Set code to:", item.code); }
+    else { console.warn("Element #edit_item_code missing"); }
+
+    const qtyEl = modal.querySelector('#edit_quantity');
+    if (qtyEl) { qtyEl.value = item.qty; console.log("Set quantity to:", item.qty); }
+
+    const noteEl = modal.querySelector('#edit_note');
+    if (noteEl) noteEl.value = item.note || '';
+
+    // Colors
+    if (typeof renderModalColors === 'function') {
+        renderModalColors(modal, item.all_colors);
+        setTimeout(() => {
+            console.log("Attempting to auto-select color:", item.color);
+            const colorDivs = modal.querySelectorAll('.product-highlight');
+            colorDivs.forEach(div => {
+                if (div.querySelector('p')?.textContent.trim() === item.color) {
+                    console.log("Color match found, clicking div...");
+                    div.click();
+                }
+            });
+        }, 150);
+    }
+
+    showModal(modal);
+    console.groupEnd();
+}
+
+function deleteOrderItem(index) {
+    const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
+    if (confirm("Are you sure you want to remove this item?")) {
+        currentOrder.splice(index, 1); // Remove the specific item
+        localStorage.setItem('pendingOrderItems', JSON.stringify(currentOrder));
+        renderOrderTable(); // Refresh the table
+    }
+}
+
+// Function to rebuild colors specifically
+function renderModalColors(modal, colorString) {
+    const colorContainer = modal.querySelector('.color-container');
+    const colors = colorString ? colorString.split(',') : [];
+    colorContainer.innerHTML = '';
+
+    colors.forEach(color => {
+        const trimmed = color.trim();
+        if (trimmed) {
+            const div = document.createElement('div');
+            div.className = 'product-highlight';
+            div.innerHTML = `<span style="background: ${trimmed}; border: 1px solid #ddd;"></span><p class="smaller-r">${trimmed}</p>`;
+
+            div.onclick = () => {
+                colorContainer.querySelectorAll('.product-highlight').forEach(el => {
+                    el.style.background = '#E9E6E3';
+                    el.style.outline = 'none';
+                    el.classList.remove('selected-color');
+                    el.style.cursor = 'pointer';
+                });
+                div.style.background = '#CBCBCB';
+                div.style.outline = '1px solid #898989';
+                div.classList.add('selected-color');
+            };
+            colorContainer.appendChild(div);
+        }
+    });
+}
+
+function resetItemModal() {
+    // 1. Get both potential modals
+    const viewModal = document.getElementById('viewItemModal');
+    const editModal = document.getElementById('editSummaryItemModal');
+    const modals = [viewModal, editModal].filter(m => m !== null);
+
+    modals.forEach(modal => {
+        // 2. Clear all inputs (numbers, textareas, and text inputs)
+        const inputs = modal.querySelectorAll('input[type="number"], input[type="text"], textarea');
+        inputs.forEach(input => {
+            input.value = '';
+            // If it's a number input, also reset the min/placeholder if needed
+            if (input.type === 'number') {
+                input.min = "";
+                input.placeholder = "0";
             }
-        }
-    });
-});
-
-// Validator for All Modals
-const modalForms = document.querySelectorAll('.modal-container form');
-
-modalForms.forEach(form => {
-    // Validate on input (Real-time)
-    form.addEventListener('input', function (e) {
-        const field = e.target;
-
-        if (field.hasAttribute('hx-get')) return; 
-
-        if (field.classList.contains('input') || field.type === 'file') {
-            validateField(field);
-        }
-    });
-
-    // Validate on submit (Final check)
-    form.addEventListener('submit', function (e) {
-        const fields = form.querySelectorAll('.input, input[type="file"]');
-        let isValid = true;
-
-        fields.forEach(field => {
-            if (!validateField(field)) isValid = false;
         });
 
-        // Stop submission if anything is invalid
-        if (!isValid) {
-            e.preventDefault();
-            console.log("Form validation failed.");
+        // 3. Reset Customization Radios to the first option
+        const radios = modal.querySelectorAll('input[name="customization"]');
+        radios.forEach((radio, index) => {
+            radio.checked = (index === 0); 
+        });
+
+        // 4. Clear Color Selection Container
+        const colorContainer = modal.querySelector('.color-container');
+        if (colorContainer) {
+            colorContainer.innerHTML = ''; 
         }
+
+        // 5. Reset the Button Text and Title (Specific to the Add Modal)
+        if (modal.id === 'viewItemModal') {
+            const saveBtn = modal.querySelector('button[onclick="saveItemToOrder()"]');
+            if (saveBtn) saveBtn.textContent = "Add to Order";
+            
+            const title = modal.querySelector('h1');
+            if (title) title.textContent = "Add Item to Order";
+        }
+
+        // 6. Wipe the stored data and markers
+        delete modal.dataset.editIndex;
+        delete modal.dataset.currentProduct;
     });
-});
+}
 
 // Validator
 function validateField(field) {
@@ -657,25 +1021,7 @@ function validateField(field) {
     }
 }
 
-// Change Name to File Input
-document.addEventListener('change', function (e) {
-    const input = e.target.closest('.file-upload input[type="file"]');
-    if (!input) return;
-    
-    const span = input.closest('label').querySelector('.file-text');
-    
-    if (input.files.length === 0) {
-        span.textContent = "Upload Image";
-        span.style.color = "#898989";
-    } else {
-        span.textContent = input.files[0].name;
-        span.style.color = "#333";
-    }
-});
-
 // Carousel
-const slideIndexes = {};
-
 function plusSlides(n, productId) {
     if (!slideIndexes[productId]) slideIndexes[productId] = 1;
     showSlides(slideIndexes[productId] += n, productId);
@@ -738,18 +1084,63 @@ function addColorRow(container, value, isFirst) {
     container.appendChild(div);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const slideshows = document.querySelectorAll("[id^='slideshow-']");
+// OTHERS
+document.querySelectorAll('.close-modal').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // ... your existing code to hide the modal (e.g., modal.style.display = 'none')
+        resetItemModal(); 
+    });
+});
 
-    slideshows.forEach(slideshow => {
-        const productId = slideshow.id.replace("slideshow-", "");
-        slideIndexes[productId] = 1;
-        showSlides(1, productId);
+// Escape key
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-container.show').forEach(modal => {
+            if (!modal.querySelector('form')) {
+                modal.classList.remove('show');
+            }
+        });
+    }
+})
+
+// Backdrop click
+document.querySelectorAll('.modal-container').forEach(modal => {
+    modal.addEventListener('click', e => {
+        if (e.target === modal) {
+            if (!modal.querySelector('form')) {
+                modal.classList.remove('show');
+            }
+        }
+    });
+});
+
+// SPECIALS
+// Validator for All Modals
+modalForms.forEach(form => {
+    // Validate on input (Real-time)
+    form.addEventListener('input', function (e) {
+        const field = e.target;
+
+        if (field.hasAttribute('hx-get')) return; 
+
+        if (field.classList.contains('input') || field.type === 'file') {
+            validateField(field);
+        }
     });
 
-    const existingDiv = document.querySelector('.for-existing');
-    
-    if (existingDiv) {
-        htmx.process(existingDiv);
-    }
+    // Validate on submit (Final check)
+    form.addEventListener('submit', function (e) {
+        const fields = form.querySelectorAll('.input, input[type="file"]');
+        let isValid = true;
+
+        fields.forEach(field => {
+            if (!validateField(field)) isValid = false;
+        });
+
+        // Stop submission if anything is invalid
+        if (!isValid) {
+            e.preventDefault();
+            console.log("Form validation failed.");
+        }
+    });
 });

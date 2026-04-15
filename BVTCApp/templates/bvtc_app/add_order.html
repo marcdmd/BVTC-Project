@@ -134,8 +134,9 @@
                         <th>PRODUCT</th>
                         <th>COLOR</th>
                         <th>CUSTOMIZATION</th>
+                        <th>UNIT PRICE</th>
                         <th>QUANTITY</th>
-                        <th>PRICE</th>
+                        <th>SUBTOTAL</th>
                         <th>ACTIONS</th>
                     </tr>
                 </thead>
@@ -147,15 +148,17 @@
                         <td></td>
                         <td></td>
                         <td></td>
+                        <td></td>
                         <td>
                             <div class="cell-buttons">
-                                <button type="button" class="m-button-primary smaller-b">Edit</button>
+                                <button type="button" class="m-button-primary smaller-b">View/Edit</button>
                                 <a href="" class="m-button-tertiary smaller-b">Delete</a>
                             </div>
                         </td>
                     </tr>
 
                     <tr>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td>TOTAL:</td>
@@ -317,65 +320,67 @@
         </div>
     </form>
 </div>
+{% endblock %}
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const tableBody = document.getElementById('order-items-body');
-    if (!tableBody) return;
+{% block modals %}
+<div class="modal-container" id="viewItemModal">        
+    <div class="modal product-view" style="max-width: 500px;"> <!-- Narrowed since images are gone -->
+        <form id="viewItemForm">
+            <div class="vertical-section">
+                <div class="horizontal-input-field" style="flex: 0; justify-content: space-between; align-items: center;">
+                    <p class="product-id smaller-r" id="view_item_code"></p>
+                    <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+                </div>
 
-    // FIX: Changed 'pendingOrder' to 'pendingOrderItems'
-    const savedData = localStorage.getItem('pendingOrderItems'); 
-    if (!savedData) {
-        console.log("No items found in localStorage under 'pendingOrderItems'");
-        return;
-    }
+                <h1 id="view_item_name">Product Name</h1>
+                <p class="small-r">Category: <b id="view_category"></b></p>
+                <p class="small-r">MOQ: <b id="view_moq"></b> <b>pcs.</b></p>
+                <p class="small-r">Price: <b>₱</b> <b id="view_price"></b></p>
 
-    const items = JSON.parse(savedData);
-    let totalQty = 0;
-    let totalPrice = 0;
+                <div class="divider"><p>Color Variations</p><hr></div>
+                <div class="color-container" style="height: max-content;">
+                    <!-- JS handles injection of colors -->
+                </div>
+                
+                <div class="divider"><p>Customizations</p><hr></div>
+                <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
+                    <input class="filter-input" type="radio" name="customization" id="cut-&-sew" value="Cut & Sew" checked>
+                    <label class="color-filter-label small-b" for="cut-&-sew">Cut & Sew</label>
 
-    tableBody.innerHTML = ''; // Clear placeholder rows
+                    <input class="filter-input" type="radio" name="customization" id="silkscreen-print" value="Silkscreen Print">
+                    <label class="color-filter-label small-b" for="silkscreen-print">Silkscreen Print</label>
 
-    items.forEach((item, index) => {
-        const qty = parseInt(item.qty) || 0;
-        const price = parseFloat(item.price) || 0;
-        totalQty += qty;
-        totalPrice += (qty * price);
+                    <input class="filter-input" type="radio" name="customization" id="digital-print" value="Digital Print">
+                    <label class="color-filter-label small-b" for="digital-print">Digital Print</label>
 
-        const row = `
-            <tr>
-                <td>${item.code}</td>
-                <td>${item.color}</td>
-                <td>${item.custom}</td>
-                <td>${qty}</td>
-                <td>Php ${price.toFixed(2)}</td>
-                <td>
-                    <div class="cell-buttons">
-                        <button type="button" class="m-button-tertiary smaller-b" onclick="removeItem(${index})">Delete</button>
-                    </div>
-                </td>
-            </tr>`;
-        tableBody.insertAdjacentHTML('beforeend', row);
-    });
+                    <input class="filter-input" type="radio" name="customization" id="laser-engrave" value="Laser Engrave">
+                    <label class="color-filter-label small-b" for="laser-engrave">Laser Engrave</label>
 
-    // Append the Total Row
-    tableBody.insertAdjacentHTML('beforeend', `
-        <tr style="font-weight: bold; background: #fdfdfd;">
-            <td colspan="2"></td>
-            <td><b>TOTAL:</b></td>
-            <td><b>${totalQty}</b></td>
-            <td><b>Php ${totalPrice.toLocaleString(undefined, {minimumFractionDigits: 2})}</b></td>
-            <td></td>
-        </tr>
-    `);
-});
+                    <input class="filter-input" type="radio" name="customization" id="leather-stamp" value="Leather Stamp">
+                    <label class="color-filter-label small-b" for="leather-stamp">Leather Stamp</label>
 
-// FIX: Updated key here as well
-window.removeItem = (index) => {
-    let items = JSON.parse(localStorage.getItem('pendingOrderItems') || '[]');
-    items.splice(index, 1);
-    localStorage.setItem('pendingOrderItems', JSON.stringify(items));
-    location.reload();
-};
-</script>
+                    <input class="filter-input" type="radio" name="customization" id="none" value="N/A">
+                    <label class="color-filter-label small-b" for="none">None</label>
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="note">Note:</label>
+                    <textarea class="input" name="note" id="note" placeholder="Add specific instructions..."></textarea>
+                </div>                
+
+                <div class="divider"><p>Quantity</p><hr></div>
+                <div class="horizontal-input-field">
+                    <input class="input" type="number" name="quantity" id="quantity" required>
+                    <label for="quantity" style="flex: 2 0 0; color: #898989;">MOQ: <b id="view_moq_2"></b> <b>pcs.</b></label>
+                </div>
+
+                <div class="divider"><hr></div>
+                <div class="buttons-section">
+                    <button type="button" id="saveItemBtn" onclick="saveItemToOrder()" class="m-button-primary small-m">Add to Order</button>
+                    <button type="button" class="close-modal m-button-secondary small-m">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
