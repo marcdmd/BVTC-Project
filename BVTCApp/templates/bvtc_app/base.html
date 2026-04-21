@@ -81,7 +81,7 @@
         {% endblock %}
         
         {% block billings_button %}
-        <form action="" style="display: flex; align-self: stretch;">
+        <form action="{% url 'billings' %}" style="display: flex; align-self: stretch;">
             <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
                 <i class="material-symbols-outlined" style="font-size: 24px;">receipt</i>
                 <p class="button-text small-b">Billings</p>
@@ -90,7 +90,7 @@
         {% endblock %}
 
         {% block customers_button %}
-        <form action="" style="display: flex; align-self: stretch;">
+        <form action="{% url 'customers' %}" style="display: flex; align-self: stretch;">
             <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
                 <i class="material-symbols-outlined" style="font-size: 24px;">group</i>
                 <p class="button-text small-b">Customers</p>
@@ -99,7 +99,7 @@
         {% endblock %}
 
         {% block profile_button %}
-        <form action="" style="display: flex; align-self: stretch;">
+        <form action="{% url 'profile' %}" style="display: flex; align-self: stretch;">
             <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
                 <i class="material-symbols-outlined" style="font-size: 24px;">account_box</i>
                 <p class="button-text small-b">Profile</p>

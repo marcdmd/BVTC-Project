@@ -1,0 +1,86 @@
+{% extends 'bvtc_app/base.html' %}
+{% load static %}
+
+{% block title %}Billings{% endblock %}
+
+{% block nav %}
+<h1 class="bold">Billing Statements</h1>
+{% endblock %}
+
+{% block billings_button %}
+<button type="submit" style="background: #E9E6E3;">
+    <i class="material-symbols-rounded" style="font-size: 24px;">receipt</i>
+    <p class="button-text small-b">Billings</p>
+</button>
+{% endblock %}
+
+{% block main %}
+<div class="dashboard">
+    <h1>Billing Statement Status</h1>
+    <div class="numbers">
+        <div class="number-card">
+            <div class="number" style="color: #0B1E33;">00</div>
+            <p>Issued</p>
+        </div>
+
+        <div class="number-card">
+            <div class="number" style="color: #013C58;">00</div>
+            <p>Paid</p>
+        </div>
+
+        <div class="number-card">
+            <div class="number" style="color: #00537A;">00</div>
+            <p>Acknowledged</p>
+        </div>
+    </div>
+</div>
+
+<div class="tracker">
+    <div class="horizontal-section">
+        <form action="" class="filter">
+            <p class="small-r filter-name" style="padding: 6px 15px 6px 15px;">Sort by:</p>
+            <input class="filter-input" type="radio" name="sort-by" value="client-name" id="client-name" checked>
+            <label class="filter-label small-b" for="client-name">Client Name</label>
+
+            <input class="filter-input" type="radio" name="sort-by" value="company-name" id="company-name">
+            <label class="filter-label small-b" for="company-name">Company Name</label>
+
+            <p class="small-r filter-name" style="padding: 6px 15px 6px 15px;">Filter:</p>
+            <input class="filter-input" type="radio" name="filter" value="full" id="full">
+            <label class="filter-label small-b" for="full">Full</label>
+
+            <input class="filter-input" type="radio" name="filter" value="partial" id="partial">
+            <label class="filter-label small-b" for="partial">Partial</label>
+        </form>
+
+        <div class="actions">
+            <form action="" class="search-area">
+                <input type="search" class="search-bar" placeholder="Search">
+            </form>
+            <a href="" type="submit" class="button-primary small-m"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add New Bill</a>
+        </div>
+    </div>
+
+    <table class="database">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" id="select-all">
+                </th>
+                <th>NO.</th>
+                <th>ORDER ID</th>
+                <th>CUSTOMER NAME</th>
+                <th>COMPANY NAME</th>
+                <th>PAYMENT TERM</th>
+                <th>PAYMENT STATUS</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <!-- {% for b in billings %} -->
+            <!-- {% endfor %} -->
+        </tbody>
+    </table>
+</div>
+{% endblock %}

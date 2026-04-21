@@ -1,0 +1,59 @@
+{% extends 'bvtc_app/base.html' %}
+{% load static %}
+
+{% block title %}Customers{% endblock %}
+
+{% block nav %}
+<h1 class="bold">Customer Accounts</h1>
+{% endblock %}
+
+{% block customers_button %}
+<button type="submit" style="background: #E9E6E3;">
+    <i class="material-symbols-rounded" style="font-size: 24px;">group</i>
+    <p class="button-text small-b">Customers</p>
+</button>
+{% endblock %}
+
+{% block main %}
+<div class="tracker">
+    <div class="horizontal-section">
+        <form action="" class="filter">
+            <p class="small-r filter-name" style="padding: 6px 15px 6px 15px;">Sort by:</p>
+            <input class="filter-input" type="radio" name="sort-by" value="client-name" id="client-name" checked>
+            <label class="filter-label small-b" for="client-name">Client Name</label>
+
+            <input class="filter-input" type="radio" name="sort-by" value="company-name" id="company-name">
+            <label class="filter-label small-b" for="company-name">Company Name</label>
+        </form>
+
+        <div class="actions">
+            <form action="" class="search-area">
+                <input type="search" class="search-bar" placeholder="Search">
+            </form>
+            <a href="" type="submit" class="button-primary small-m"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add New Customer</a>
+        </div>
+    </div>
+
+    <table class="database">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" id="select-all">
+                </th>
+                <th>NO.</th>
+                <th>ORDER ID</th>
+                <th>CUSTOMER NAME</th>
+                <th>COMPANY NAME</th>
+                <th>EMAIL ADDRESS</th>
+                <th>CONTACT NUMBER</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <!-- {% for c in customers %} -->
+            <!-- {% endfor %} -->
+        </tbody>
+    </table>
+</div>
+{% endblock %}

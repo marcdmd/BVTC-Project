@@ -97,7 +97,6 @@ def edit_product(request, pk):
 
     return redirect('catalog')
 
-
 def delete_product(request, pk):
     product = Product.objects.get(product_id=pk)
     
@@ -145,3 +144,12 @@ def add_item(request):
 
 def quotations(request):
     return render(request, 'bvtc_app/quotations.html')
+
+def billings(request):
+    return render(request, 'bvtc_app/billings.html')
+
+def customers(request):
+    return render(request, 'bvtc_app/customers.html')
+
+def profile(request):
+    return render(request, 'bvtc_app/profile.html')
