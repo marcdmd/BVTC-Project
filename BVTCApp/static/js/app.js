@@ -503,8 +503,23 @@ document.addEventListener('click', function (e) {
 
         showModal(cancelAddModal)
     }
+
+    // Add Customer Modal
+    const addCustomer = e.target.closest('.open-add-customer-modal');
+    if (addCustomer) {
+        const addCustomerModal = document.getElementById('addCustomerModal');
+        if (addCustomerModal) showModal(addCustomerModal);
+    }
+
+    // Add Shipping Details
+    const addShipping = e.target.closest('.open-add-shipping-modal');
+    if (addShipping) {
+        const addShippingModal = document.getElementById('addShippingModal');
+        if (addShippingModal) showModal(addShippingModal);
+    }
 });
 
+// For side bar
 document.addEventListener("DOMContentLoaded", () => {
     const isExpanded = localStorage.getItem('sidebar-expanded');
     

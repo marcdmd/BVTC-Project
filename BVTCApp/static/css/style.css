@@ -702,6 +702,13 @@ main .filter {
 .order-view {
     flex: 0 0 1080px;
 }
+.customer-form {
+    max-width: 600px;
+}
+.shipping-form {
+    width: 500px;
+    max-width: 500px;
+}
 
 /* Carousel from w3schools*/
 /* Slideshow container */
@@ -854,6 +861,12 @@ main .filter {
     display: flex;
 }
 .vertical-section:has(#existing-shipping:checked) .for-existing-shipping {
+    display: flex;
+}
+.vertical-section:has(#new-company:checked) .for-new-company {
+    display: flex;
+}
+.vertical-section:has(#existing-company:checked) .for-existing-company {
     display: flex;
 }
 
