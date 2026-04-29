@@ -1,18 +1,12 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q
-<<<<<<< Updated upstream
 from django.db import IntegrityError 
 from django.contrib import messages  
-from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails
 from .models import Province, City, Barangay
-=======
-from django.db import IntegrityError # For TC 5: Duplicate code checking
-from django.contrib import messages  # For alerts
 from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails, OrderItem
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
->>>>>>> Stashed changes
 
 def catalog(request):
     if request.method == 'POST':
