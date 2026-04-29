@@ -59,7 +59,10 @@
                 <td>{{ c.customer_email }}</td>
                 <td>{{ c.customer_phone_number }}</td>
                 <td>
-                    <button class="button-tertiary small-m">View</button>
+                    <div class="cell-buttons">
+                        <button type="button" class="m-button-secondary small-m">View</button>
+                        <button type="button" class="m-button-primary small-m">Edit</button>
+                    </div>
                 </td>
             </tr>
             {% empty %}
@@ -147,7 +150,10 @@
 
                         <div class="horizontal-input-field">
                             <label for="tin-number">Tin Number:</label>
-                            <input type="number" class="input" id="tin-number" name="tin-number">
+                            <div class="error-wrap">
+                                <input type="number" class="input" id="tin-number" name="tin-number">
+                                <span class="error-msg"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -169,37 +175,49 @@
             <div class="horizontal-section">
                 <div class="horizontal-input-field">
                     <label for="email-address"><span>*</span> Email Address:</label>
-                    <input class="input" type="email" name="email-address" id="email-address" required>
+                    <div class="error-wrap">
+                        <input class="input" type="email" name="email-address" id="email-address" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
 
                 <div class="horizontal-input-field">
                     <label for="contact-number"><span>*</span> Contact Number:</label>
-                    <input class="input" type="text" name="contact-number" id="contact-number" required>
+                    <div class="error-wrap">
+                        <input class="input" type="text" name="contact-number" id="contact-number" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
 
             <div class="horizontal-section">
                 <div class="horizontal-input-field">
                     <label for="messenger"><span>*</span> Messenger:</label>
-                    <input class="input" type="text" name="messenger" id="messenger" required>
+                    <div class="error-wrap">
+                        <input class="input" type="url" name="messenger" id="messenger" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
 
                 <div class="horizontal-input-field">
                     <label for="viber">Viber:</label>
-                    <input class="input" type="text" name="viber" id="viber">
+                    <div class="error-wrap">
+                        <input class="input" type="url" name="viber" id="viber">
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
 
             <div class="horizontal-input-field">
                 <label for="transaction-platforms">Transaction Platforms:</label>
                 
-                <input type="checkbox" name="email-transaction" value="email" id="email-transaction">
+                <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
                 <label class="small-r" for="email-transaction">Email</label>
 
-                <input type="checkbox" name="messenger-transaction" value="messenger" id="messenger-transaction">
+                <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction">
                 <label class="small-r" for="messenger-transaction">Messenger</label>
 
-                <input type="checkbox" name="viber-transaction" value="viber" id="viber-transaction">
+                <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction">
                 <label class="small-r" for="viber-transaction">Viber</label>
             </div>
 
