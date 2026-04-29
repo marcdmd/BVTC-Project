@@ -103,9 +103,9 @@
                 <td class="small-r">{{ o.delivery_date }}</td>
                 <td style="vertical-align: middle;">
                     {% if o.order_status == 'Under Feasibility' %}
-                    <span class="status-pill" style="color: #FAF9F6; border: 2px solid #0B1E33;">
+                    <span class="status-pill" style="color: #0B1E33; border: 1px solid #0B1E33;">
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-r" >{{ o.order_status }}</p>
+                        <p class="smaller-b" >{{ o.order_status }}</p>
                     </span>
                     {% elif o.order_status == 'Under Quotation' %}
                     <span class="status-pill" style="color: #013C58; border: 1px solid #013C58;">

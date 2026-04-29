@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.db import IntegrityError 
 from django.contrib import messages  
-from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails
+from django.utils import timezone
+from .models import Product, ProductImage, ProductColor, Order, OrderItem, Company, CustomerAccount, ShippingDetails
 from .models import Province, City, Barangay
+import json
 
 def catalog(request):
     if request.method == 'POST':
@@ -82,6 +84,103 @@ def orders(request):
     return render(request, 'bvtc_app/orders.html', {'orders': Order.objects.all()})
 
 def add_order(request):
+    if request.method == 'POST':
+        print("--- POST received ---")
+        print("POST data:", request.POST)
+        try:
+            # get variables
+            customer_id = request.POST.get('customer-id')  # value from the select
+            customer = CustomerAccount.objects.get(customer_id=customer_id)
+
+            shipping_id = request.POST.get('shipping')
+            shipping = ShippingDetails.objects.get(shipping_id=shipping_id)
+
+            order_data_raw = request.POST.get('order_data', '[]')
+
+            print("customer_id wow:", customer_id)          # Checkpoint 2: is the customer ID coming through?
+            print("shipping_id zing:", shipping_id)          # Checkpoint 3: is the shipping ID coming through?
+            print("order_data_raw hoo:", order_data_raw)
+
+            # TEMPORARY, CHANGE ONCE LOGIN IS IMPLEMENTED ------------------------------------------------------------------------------------------------------------------
+            from .models import UserAccount
+            user = UserAccount.objects.first()  # swap out once auth is added
+
+            # map form values to model field choices
+            payment_mode_map = {
+                'metrobank': 'Metrobank Fund Transfer',
+                'bpi': 'BPI Bank Transfer',
+                'gcash': 'GCash Payment',
+            }
+            payment_terms_map = {
+                'partial': 'Partial',
+                'full': 'Full',
+            }
+            platform_map = {
+                'email': 'Email',
+                'messenger': 'Messenger',
+                'viber': 'Viber',
+            }
+
+            # create order instance
+            print("Attempting to create order...")
+            new_order = Order.objects.create(
+                customer_id=customer,
+                user_id=user,
+                shipping_id=shipping,
+                mode_of_payment=payment_mode_map.get(request.POST.get('payment-mode'), 'Metrobank Fund Transfer'),
+                payment_terms=payment_terms_map.get(request.POST.get('payment-terms'), 'Partial'),
+                budget=request.POST.get('budget') or 0,
+                start_of_production=request.POST.get('production-start') or timezone.now().date(),
+                delivery_date=request.POST.get('delivery-date') or None,
+                transaction_platform=platform_map.get(request.POST.get('transaction-platform'), 'Email'),
+                link_to_logo=request.POST.get('logo-link') or None,
+                packing_instructions=request.POST.get('instructions') or None,
+                courier=request.POST.get('courier', 'N/A'),
+            )
+            print("Order created with ID:", new_order.order_id)
+
+            # create order item rows ---
+            order_items = json.loads(order_data_raw)
+
+            total = 0
+            for item in order_items:
+                product = Product.objects.get(product_id=item['db_id'])
+                qty   = int(item.get('qty', 1))
+                price = float(item.get('price', 0))
+
+                OrderItem.objects.create(
+                    order_id=new_order,
+                    product_id=product,
+                    color=item.get('color', ''),
+                    customization=item.get('custom', ''),
+                    quantity=qty,
+                    price=price,
+                )
+                total += qty * price
+
+            # computed total save to order
+            new_order.initial_total_price = total
+            new_order.total_amount = total
+            new_order.save()
+
+            messages.success(request, f"Order #{new_order.order_id} created successfully!")
+            return redirect('orders')
+
+        except CustomerAccount.DoesNotExist:
+            messages.error(request, "Selected customer not found.")
+        except ShippingDetails.DoesNotExist:
+            messages.error(request, "Selected shipping address not found.")
+        except json.JSONDecodeError:
+            messages.error(request, "Cart data was corrupted. Please re-add your items.")
+        except Exception as e:
+            print("ERROR:", type(e).__name__, "-", e)
+            messages.error(request, f"Something went wrong: {e}")
+
+        return redirect('orders')
+
+    # --- GET: just render the form ---
+    companies = Company.objects.all()
+    customers = CustomerAccount.objects.all()
     return render(request, 'bvtc_app/add_order.html', {'companies': Company.objects.all(), 'all_customers': CustomerAccount.objects.all(), 'provinces': Province.objects.all().order_by('name')})
 
 # --- UC-19: ADD CUSTOMER LOGIC ---

@@ -53,7 +53,7 @@
 
 {% block main %}
 <div class="modal">
-    <form action="" method="POST" id="addOrderForm">
+    <form action="{% url 'add_order' %}" method="POST" enctype="multipart/form-data" id="addOrderForm">
         {% csrf_token %}
         <h1>Add New Order</h1>
         <div style="display: flex; flex-direction: row;">
@@ -103,7 +103,7 @@
 
                             <div class="horizontal-input-field" id="customer-name">
                                 <label><span>*</span> Customer Name:</label>
-                                <select class="input"  name="customer-name">
+                                <select class="input" name="customer-id">
                                     <option value="" disabled selected>Select a Company First</option>
                                     <!-- This will be populated by the first HTMX call -->
                                 </select>
@@ -289,7 +289,7 @@
                 </div>
 
                 <div class="for-existing-shipping details" style="width: 100%;">
-                    <select class="input" name="shipping" id="shipping-address-select">
+                    <select class="input" name="shipping-id" id="shipping-address-select">
                         <option value="" disabled selected>Select a Customer First</option>
                         <!-- JS will handle injection of existing options -->
                     </select>
@@ -317,18 +317,18 @@
 
                     <div class="horizontal-input-field radio-choices">
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" value="email" id="email" checked>
-                            <label for="email">Email</label>
+                            <input type="radio" name="transaction-platform" value="email" id="email-option" checked>
+                            <label for="email-option">Email</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" value="radio" id="messenger">
-                            <label for="messenger">Messenger</label>
+                            <input type="radio" name="transaction-platform" value="messenger" id="messenger-option">
+                            <label for="messenger-option">Messenger</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" value="viber" id="viber">
-                            <label for="viber">Viber</label> 
+                            <input type="radio" name="transaction-platform" value="viber" id="viber-option">
+                            <label for="viber-option">Viber</label> 
                         </div>
                     </div>               
                 </div>
@@ -362,7 +362,7 @@
 
         <div class="buttons-section">
             <button type="button" class="m-button-secondary small-m open-cancel-add-modal">Cancel</button>
-            <button type="submit" class="m-button-primary small-m">Add Order</button>
+            <button type="submit" onclick="submitDjangoOrder()" class="m-button-primary small-m">Add Order</button>
         </div>
     </form>
 </div>
@@ -538,7 +538,7 @@
                 <div class="for-existing-company details" id="existingCompanyFields" style="width: 100%; display: none;">
                     <div class="horizontal-input-field">
                         <label for="modal-company"><span>*</span> Company Name:</label>
-                        <select class="input" name="modal-company" id="company">
+                        <select class="input" name="company" id="modal-company">
                             <option value="" hidden>Select a company</option>
                             {% for comp in companies %}
                                 <option value="{{ comp.company_id }}">{{ comp.company_name }}</option>
@@ -579,14 +579,14 @@
                 <div class="horizontal-input-field">
                     <label for="modal-viber">Viber:</label>
                     <div class="error-wrap">
-                        <input class="input" type="text" name="contact-number" id="contact-number" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <input class="input" type="text" name="viber" id="modal-viber" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
                         <span class="error-msg"></span>
                     </div>
                 </div>
             </div>
 
             <div class="horizontal-input-field">
-                <label for="transaction-platforms">Transaction Platforms:</label>
+                <label>Transaction Platforms:</label>
                 
                 <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
                 <label class="small-r" for="email-transaction">Email</label>
@@ -724,114 +724,85 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const orderForm = document.querySelector('#addOrderForm'); 
-    if (!orderForm) return;
-
-    const storageKey = 'addOrderFormData';
-
-    // 1. Load and Restore
-    const savedData = JSON.parse(sessionStorage.getItem(storageKey));
-    if (savedData) {
-        Object.keys(savedData).forEach(name => {
-            const fields = orderForm.querySelectorAll(`[name="${name}"]`);
-            
-            fields.forEach(field => {
-                if (field.type === 'radio') {
-                    // Check the radio only if its value matches what we saved
-                    field.checked = (field.value === savedData[name]);
-                } else if (field.type === 'checkbox') {
-                    field.checked = savedData[name];
-                } else {
-                    field.value = savedData[name];
-                }
-            });
-        });
-    }
-
-    // 2. Save on Input
-    orderForm.addEventListener('input', (e) => {
-        const formData = JSON.parse(sessionStorage.getItem(storageKey)) || {};
-        const field = e.target;
-        
-        if (field.name) {
-            // For radios, only save the value if it's the one currently checked
-            if (field.type === 'radio') {
-                if (field.checked) formData[field.name] = field.value;
-            } else if (field.type === 'checkbox') {
-                formData[field.name] = field.checked;
-            } else {
-                formData[field.name] = field.value;
-            }
-            sessionStorage.setItem(storageKey, JSON.stringify(formData));
-        }
-    });
-
-    orderForm.addEventListener('submit', () => {
-        sessionStorage.removeItem(storageKey);
-    });
-});
-
 document.addEventListener('DOMContentLoaded', function() {
-    // --- 1. BRIDGE: SYNC LOCALSTORAGE TO DJANGO HIDDEN INPUT ---
+    // --- 1. BRIDGE: SYNC LOCALSTORAGE ---
     const savedItems = localStorage.getItem('pendingOrderItems');
     const orderInput = document.getElementById('orderDataInput');
-    
     if (savedItems && orderInput) {
         orderInput.value = savedItems;
-        console.log("Form initialized with items from LocalStorage");
+        if (typeof renderOrderTable === 'function') renderOrderTable();
     }
 
-    // --- 2. MODAL CONTROLS: ADD CUSTOMER ---
-    const customerModal = document.getElementById('addCustomerModal');
-    const openBtn = document.querySelector('.open-add-customer-modal'); // Using class from your PDF
-    const closeBtn = document.getElementById('closeAddCustomerModal');
+    // --- 2. CUSTOMER TOGGLE (Matches id="new" and id="existing") ---
+    const custNew = document.getElementById('new');
+    const custExist = document.getElementById('existing');
+    const forNewCust = document.querySelector('.for-new');
+    const forExistingCust = document.querySelector('.for-existing');
 
-    if (openBtn && customerModal) openBtn.onclick = () => customerModal.style.display = 'flex';
-    if (closeBtn && customerModal) closeBtn.onclick = () => customerModal.style.display = 'none';
-
-    // --- 3. TOGGLE LOGIC: NEW VS EXISTING COMPANY ---
-    const newRadio = document.getElementById('new-company');
-    const existingRadio = document.getElementById('existing-company');
-    const newFieldsGroup = document.getElementById('newCompanyFields');
-    const existingFieldsGroup = document.getElementById('existingCompanyFields');
-
-    function toggleCustomerCompany() {
-        // Using IDs exactly as they appear in your HTML
-        const nameInput = document.getElementById('modal-company-name');
-        const addrInput = document.getElementById('company-address');
-        const selectField = document.getElementById('company');
-
-        if (newRadio && newRadio.checked) {
-            if (newFieldsGroup) newFieldsGroup.style.display = 'block';
-            if (existingFieldsGroup) existingFieldsGroup.style.display = 'none';
-            if (nameInput) nameInput.required = true;
-            if (addrInput) addrInput.required = true;
-            if (selectField) selectField.required = false;
-        } else if (existingRadio) {
-            if (newFieldsGroup) newFieldsGroup.style.display = 'none';
-            if (existingFieldsGroup) existingFieldsGroup.style.display = 'block';
-            if (nameInput) nameInput.required = false;
-            if (addrInput) addrInput.required = false;
-            if (selectField) selectField.required = true;
+    function toggleCustomer() {
+        const companySelect = document.getElementById('company-name');
+        const customerSelect = document.querySelector('select[name="customer-id"]');
+        
+        if (custNew.checked) {
+            forNewCust.style.display = 'block';
+            forExistingCust.style.display = 'none';
+            if (companySelect) companySelect.required = false;
+            if (customerSelect) customerSelect.required = false;
+        } else {
+            forNewCust.style.display = 'none';
+            forExistingCust.style.display = 'block';
+            if (companySelect) companySelect.required = true;
+            if (customerSelect) customerSelect.required = true;
         }
     }
 
-    if (newRadio && existingRadio) {
-        newRadio.addEventListener('change', toggleCustomerCompany);
-        existingRadio.addEventListener('change', toggleCustomerCompany);
-        // Set initial state on load
-        toggleCustomerCompany();
+    // --- 3. SHIPPING TOGGLE (Matches id="new-shipping" and id="existing-shipping") ---
+    const shipNew = document.getElementById('new-shipping');
+    const shipExist = document.getElementById('existing-shipping');
+    const forNewShip = document.querySelector('.for-new-shipping');
+    const forExistingShip = document.querySelector('.for-existing-shipping');
+
+    function toggleShipping() {
+        const shipSelect = document.getElementById('shipping-address-select');
+        if (shipNew.checked) {
+            forNewShip.style.display = 'block';
+            forExistingShip.style.display = 'none';
+            if (shipSelect) shipSelect.required = false;
+        } else {
+            forNewShip.style.display = 'none';
+            forExistingShip.style.display = 'block';
+            if (shipSelect) shipSelect.required = true;
+        }
     }
+
+    // Attach Listeners
+    [custNew, custExist].forEach(r => r?.addEventListener('change', toggleCustomer));
+    [shipNew, shipExist].forEach(r => r?.addEventListener('change', toggleShipping));
+
+    // Run once on load
+    toggleCustomer();
+    toggleShipping();
 });
 
 function submitDjangoOrder() {
+    const orderForm = document.getElementById('addOrderForm');
     const orderInput = document.getElementById('orderDataInput');
+    
+    // Check if cart is empty
     if (!orderInput.value || JSON.parse(orderInput.value).length === 0) {
         alert("Your cart is empty! Please add items first.");
         return;
     }
-    document.getElementById('finalOrderForm').submit();
+
+    // Use your global validation logic (if available)
+    if (typeof validateField === 'function') {
+        const fields = orderForm.querySelectorAll('.input[required]');
+        let valid = true;
+        fields.forEach(f => { if (!validateField(f)) valid = false; });
+        if (!valid) return; 
+    }
+
+    orderForm.submit();
 }
 </script>
 {% endblock %}
