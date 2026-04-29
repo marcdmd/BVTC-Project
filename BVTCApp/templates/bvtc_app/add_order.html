@@ -552,11 +552,9 @@
                         <div class="error-wrap">
                             <select class="input" name="company" id="company">
                                 <option value="" hidden>Select a company</option selected>
-                                <!--
                                 {% for c in companies %}
                                 <option value="{{ c.company_name }}">{{ c.company_name }}</option>
                                 {% endfor %}
-                                -->
                             </select>
                         </div>
                     </div>
@@ -602,12 +600,15 @@
 
             <div class="horizontal-input-field">
                 <label>Transaction Platforms:</label>
-                <input type="checkbox" name="transaction-platform" value="email" id="transaction-platform">
-                <p class="small-r">Email</p>
-                <input type="checkbox" name="transaction-platform" value="messenger" id="transaction-platform">
-                <p class="small-r">Messenger</p>
-                <input type="checkbox" name="transaction-platform" value="viber" id="transaction-platform">
-                <p class="small-r">Viber</p>
+                
+                <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
+                <label class="small-r" for="email-transaction">Email</label>
+
+                <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction">
+                <label class="small-r" for="messenger-transaction">Messenger</label>
+
+                <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction">
+                <label class="small-r" for="viber-transaction">Viber</label>
             </div>
 
             <div class="divider"><hr></div>
