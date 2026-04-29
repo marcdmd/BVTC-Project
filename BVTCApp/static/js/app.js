@@ -5,6 +5,8 @@ const viewProductModal = document.getElementById('viewProductModal');
 const viewOrderModal = document.getElementById('viewOrderModal');
 const viewItemModal = document.getElementById('viewItemModal');
 
+const viewCustomerModal = document.getElementById('viewCustomerModal');
+
 const modalForms = document.querySelectorAll('.modal form'); // For validator
 
 const orderBody = document.getElementById('order-items-body');
@@ -511,6 +513,28 @@ document.addEventListener('click', function (e) {
         if (addCustomerModal) showModal(addCustomerModal);
     }
 
+    // View Customer Modal
+    const viewCustomer = e.target.closest('.open-view-customer-modal');
+    if (viewCustomer && viewCustomerModal) {
+        e.preventDefault();
+        const id = viewCustomer.dataset.id;
+
+        qs('#view_customer_id', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_id;
+        qs('view_company_name', viewCustomerModal).textContent = viewCustomer.dataset.view_company_name;
+        qs('view_company_address', viewCustomerModal).textContent = viewCustomer.dataset.view_company_address;
+        qs('view_company_tin_number', viewCustomerModal).textContent = viewCustomer.dataset.view_company_tin_number;
+        qs('#view_customer_name', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_name;
+        qs('#view_customer_email', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_email;
+        qs('#view_customer_phone_number', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_phone_number;
+        qs('#view_messenger', viewCustomerModal).textContent = viewCustomer.dataset.view_messenger;
+        qs('#view_viber', viewCustomerModal).textContent = viewCustomer.dataset.view_viber;
+        // qs('#view_email_transaction', viewCustomerModal).textContent = viewCustomer.dataset.view_email_transaction;
+        // qs('#view_messenger_transaction', viewCustomerModal).textContent = viewCustomer.dataset.view_messenger_transaction;
+        // qs('#view_viber_transaction', viewCustomerModal).textContent = viewCustomer.dataset.viber_transaction;
+
+        if (viewCustomerModal) showModal(viewCustomerModal);
+    }
+
     // Add Shipping Details
     const addShipping = e.target.closest('.open-add-shipping-modal');
     if (addShipping) {
@@ -704,7 +728,24 @@ function saveItemToOrder(editIndex = null) {
     // 1. Identify which modal to pull data from
     const modalId = (editIndex !== null) ? 'editSummaryItemModal' : 'viewItemModal';
     const activeModal = document.getElementById(modalId);
-    
+
+    // The Gatekeeper
+    // Select all inputs inside the active modal
+    const inputs = activeModal.querySelectorAll('input, select, textarea');
+    let isModalValid = true;
+
+    inputs.forEach(input => {
+        // This triggers your red borders and error messages automatically
+        if (!validateField(input)) {
+            isModalValid = false;
+        }
+    });
+
+    if (!isModalValid) {
+        console.warn("Save blocked: Quantity is below MOQ or other field error.");
+        return; // This stops the function here. No data is saved.
+    }
+
     if (!activeModal) {
         console.error("FAILED: Could not find modal:", modalId);
         console.groupEnd();
@@ -717,6 +758,8 @@ function saveItemToOrder(editIndex = null) {
 
     const productData = JSON.parse(activeModal.getAttribute('data-current-product') || '{}');
     
+    console.group("DEBUG: saveItemToOrder Execution");
+
     // 2. Data Extraction
     const newItem = {
         db_id: productData.db_id,

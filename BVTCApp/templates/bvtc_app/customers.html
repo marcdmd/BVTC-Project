@@ -53,15 +53,29 @@
             {% for c in all_customers %}
             <tr>
                 <td><input type="checkbox"></td>
-                <td>{{ forloop.counter }}</td>
-                <td class="bold">{{ c.customer_name }}</td>
-                <td>{{ c.company_id.company_name }}</td>
-                <td>{{ c.customer_email }}</td>
-                <td>{{ c.customer_phone_number }}</td>
-                <td>
+                <td class="small-">{{ c.customer_id }}</td>
+                <td><b>{{ c.customer_name }}</b></td>
+                <td class="small-">{{ c.company_id.company_name }}</td>
+                <td class="small-">{{ c.customer_email }}</td>
+                <td class="small-">{{ c.customer_phone_number }}</td>
+                <td class="small-">
                     <div class="cell-buttons">
-                        <button type="button" class="m-button-secondary small-m">View</button>
-                        <button type="button" class="m-button-primary small-m">Edit</button>
+                        <button type="button"
+                                class="m-button-secondary smaller-b open-view-customer-modal"
+                                data-view_customer_id="{{ c.customer_id }}"
+                                data-view_company_name="{{ c.company_id.company_name }}"
+                                data-view_company_address="{{ c.company_id.company_address }}"
+                                data-view_company_tin_number="{{ c.company_id.tin_number }}"
+                                data-view_customer_name="{{ c.customer_name }}"
+                                data-view_customer_email="{{ c.customer_email }}"
+                                data-view_customer_phone_number="{{ c.customer_phone_number }}"
+                                data-view_messenger="{{ c.messenger }}"
+                                data-view_viber="{{ c.viber }}"
+                                data-view_email_transaction="{{ c.email_transaction }}"
+                                data-view_messenger_transaction="{{ c.messenger_transaction }}"
+                                data-view_viber_transaction="{{ c.viber_transaction }}">
+                                View</button>
+                        <button type="button" class="m-button-primary smaller-b">Edit</button>
                     </div>
                 </td>
             </tr>
@@ -202,14 +216,14 @@
                 <div class="horizontal-input-field">
                     <label for="viber">Viber:</label>
                     <div class="error-wrap">
-                        <input class="input" type="url" name="viber" id="viber">
+                        <input class="input" type="text" name="viber" id="viber" pattern="^(09|\+639)\d{9}$" maxlength="13">
                         <span class="error-msg"></span>
                     </div>
                 </div>
             </div>
 
             <div class="horizontal-input-field">
-                <label for="transaction-platforms">Transaction Platforms:</label>
+                <label>Transaction Platforms:</label>
                 
                 <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
                 <label class="small-r" for="email-transaction">Email</label>
@@ -232,75 +246,83 @@
 
 <div class="modal-container" id="viewCustomerModal">
     <div class="modal view-customer">
-        <div class="vertical-section">
-            <h1>Client no.</h1>
-
-            <div class="divider"><p>Company Logo</p><hr></div>
-            <div>
-                <img class="img-container" style="max-width: 100px;" src="" alt="">
+        <div class="horizontal-section">
+            <div class="vertical-section" style="max-width: 100px;">
+                <p class="small-r">Client no. <span class="bold" ></span></p>
+    
+                <div class="divider"><p>Company Logo</p><hr></div>
+                <div>
+                    <img class="img-container" style="max-width: 100px;" src="" alt="">
+                </div>
             </div>
-        </div>
+    
+            <div class="vertical-section" gap: 16px;">
+                <div class="divider"><p>Customer Information</p><hr></div>
+                <div class="vertical-section">
+                    <p class="small-r">Customer Name: <b id="view_customer_name"></b></p>
+                    <p class="small-r">Company Name: <b id="view_company_name"></b></p>
+                    <p class="small-r">Company Address: <b id="view_company_address"></b></p>
+                    <p class="small-r">Company Tin Number: <b id="view_company_tin_number"></b></p>
+                </div>
+    
+                <div class="divider"><p>Contact Details</p><hr></div>
+                <div class="vertical-section">
+                    <p class="small-r">Email Address: <b id="view_customer_email"></b></p>
+                    <p class="small-r">Contact Number: <b id="view_customer_contact_number"></b></p>
+                    <p class="small-r">Messenger: <b id="view_customer_messenger"></b></p>
+                    <p class="small-r">Viber: <b id="view_customer_viber"></b></p>
+                </div>
+    
+                <div class="horizontal-section">
+                    <p class="small-r">Transaction Platforms:</p>
+                    <div class="horizontal-input-field">
+                        <div class="horizontal-section">
+                            <input type="checkbox" name="transaction-platform" value="email" id="email-transaction" disabled>
+                            <label class="small-r" for="email-transaction">Email</label>
+                        </div>
 
-        <div class="vertical-section" style="flex: 4; gap: 16px;">
-            <div class="divider"><p>Customer Information</p><hr></div>
-            <div class="vertical-section">
-                <p class="small-r">Customer Name: <b id="view_customer_name"></b></p>
-                <p class="small-r">Company Name: <b id="view_company_name"></b></p>
-                <p class="small-r">Company Address: <b id="view_company_address"></b></p>
-                <p class="small-r">Company Tin Number: <b id="view_company_tin_number"></b></p>
-                <p class="small-r">Personal Address: <b id="view_personal_address"></b></p>
-            </div>
+                        <div class="horizontal-section">
+                            <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction" disabled>
+                            <label class="small-r" for="messenger-transaction">Messenger</label>
+                        </div>
 
-            <div class="divider"><p>Contact Details</p><hr></div>
-            <div class="vertical-section">
-                <p class="small-r">Email Address: <b id="view_customer_email_address"></b></p>
-                <p class="small-r">Contact Number: <b id="view_customer_contact_number"></b></p>
-                <p class="small-r">Messenger: <b id="view_customer_messenger"></b></p>
-                <p class="small-r">Viber: <b id="view_customer_viber"></b></p>
-            </div>
-
-            <div class="horizontal-section">
-                <label for="transaction-platforms">Transaction Platforms:</label>
-
-                <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
-                <label class="small-r" for="email-transaction">Email</label>
-
-                <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction">
-                <label class="small-r" for="messenger-transaction">Messenger</label>
-
-                <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction">
-                <label class="small-r" for="viber-transaction">Viber</label>
-            </div>
-
-            <div class="divider"><p>Shipping Details</p><hr></div>
-            <div class="vertical-section">
-                <button type="button" class="m-button-secondary">Shipping Detail</button>
-                <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 21px;">add</i></button>
-            </div>
-
-            <div class="divider"><p>On-going Transactions</p><hr></div>
-            <div class="vertical-section">
-                <table class="small-database">
-                    <thead>
-                        <tr>
-                            <th>ORDERS</th>
-                            <th>BILLING STATEMENTS</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="buttons-section">
-                <button type="submit" class="button-tertiary">Delete</button>
-                <button type="submit" class="button-primary">Edit</button>
-                <button type="submit" class="button-secondary">Close</button>
+                        <div class="horizontal-section">
+                            <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction" disabled>
+                            <label class="small-r" for="viber-transaction">Viber</label>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="divider"><p>Shipping Details</p><hr></div>
+                <div class="horizontal-section">
+                    <button type="button" class="m-button-secondary">Shipping Detail</button>
+                    <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 21px;">add</i></button>
+                </div>
+    
+                <div class="divider"><p>On-going Transactions</p><hr></div>
+                <div class="vertical-section">
+                    <table class="small-database">
+                        <thead>
+                            <tr>
+                                <th>ORDERS</th>
+                                <th>BILLING STATEMENTS</th>
+                            </tr>
+                        </thead>
+    
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+    
+                <div class="buttons-section">
+                    <button type="button" class="m-button-tertiary small-m">Delete</button>
+                    <button type="button" class="m-button-primary small-m">Edit</button>
+                    <button type="button" class="m-button-secondary small-m close-modal">Close</button>
+                </div>
             </div>
         </div>
     </div>

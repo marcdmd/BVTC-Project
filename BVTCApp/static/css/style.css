@@ -704,6 +704,7 @@ main .filter {
 }
 .customer-form,
 .view-customer {
+    width: 600px;
     max-width: 600px;
 }
 .shipping-form {

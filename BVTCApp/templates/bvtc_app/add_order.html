@@ -297,12 +297,10 @@
 
                 <div class="horizontal-input-field">
                     <label for="courier"><span>*</span> Courier:</label>
-                    <select name="courier" id="courier" class="input" required>
-                        <option value="" hidden selected>Select a Courier</option>
-                        <option value="j&t">J&T</option>
-                        <option value="lalamove">Lalamove</option>
-                        <option value="lbc">LBC</option>
-                    </select>
+                    <div class="error-wrap">
+                        <input type="text" id="courier" name="courier" class="input" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -462,7 +460,7 @@
             <p class="required-message"><span>*</span> Required</p>
         </div>
 
-        <form action="" id="addCustomerForm">
+        <form action="{% url 'add_customer' %}" method="POST" enctype="multipart/form-data" id="addCustomerForm">
             {% csrf_token %}
             <div class="divider"><p>Basic Information</p><hr></div>
             <div class="horizontal-section">
@@ -503,35 +501,26 @@
                     <label for="existing-company">Existing</label>
                 </div>
                 
-                <div class="for-new-company details" style="width: 100%;">
+                <div class="for-new-company details" id="newCompanyFields" style="width: 100%;">
                     <div class="vertical-section">
                         <div class="horizontal-section">
                             <div class="file-upload" style="height: 100%;">
-                                <label>
+                                <label style="cursor: pointer;">
                                     <span><i class="material-symbols-outlined" style="font-size: 12px; color: #898989;">add</i></span>
                                     <span class="file-text" style="color: #898989;"> Add Company Logo</span>
-                                    <div class="error-wrap">
-                                        <input name="logo" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
-                                        <span class="error-msg"></span>
-                                    </div>
+                                    <input name="logo" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
                                 </label>
                             </div>
 
                             <div class="vertical-section">
                                 <div class="horizontal-input-field">
-                                    <label for="company-name"><span>*</span> Company Name:</label>
-                                    <div class="error-wrap">
-                                        <input type="text" class="input" id="company-name" name="company-name" maxlength="150" required>
-                                        <span class="error-msg"></span>
-                                    </div>
+                                    <label for="modal-company-name"><span>*</span> Company Name:</label>
+                                    <input type="text" class="input" id="modal-company-name" name="company-name" maxlength="150">
                                 </div>
 
                                 <div class="horizontal-input-field">
                                     <label for="company-address"><span>*</span> Company Address:</label>
-                                    <div class="error-wrap">
-                                        <input type="text" class="input" id="company-address" name="company-address" maxlength="150" required>
-                                        <span class="error-msg"></span>
-                                    </div>
+                                    <input type="text" class="input" id="company-address" name="company-address" maxlength="150">
                                 </div>
                             </div>
                         </div>
@@ -546,17 +535,15 @@
                     </div>
                 </div>
 
-                <div class="for-existing-company details" style="width: 100%;">
+                <div class="for-existing-company details" id="existingCompanyFields" style="width: 100%; display: none;">
                     <div class="horizontal-input-field">
-                        <label for="company"><span>*</span> Company Name:</label>
-                        <div class="error-wrap">
-                            <select class="input" name="company" id="company">
-                                <option value="" hidden>Select a company</option selected>
-                                {% for c in companies %}
-                                <option value="{{ c.company_name }}">{{ c.company_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                        <label for="modal-company"><span>*</span> Company Name:</label>
+                        <select class="input" name="modal-company" id="company">
+                            <option value="" hidden>Select a company</option>
+                            {% for comp in companies %}
+                                <option value="{{ comp.company_id }}">{{ comp.company_name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>  
             </div>
@@ -582,25 +569,25 @@
 
             <div class="horizontal-section">
                 <div class="horizontal-input-field">
-                    <label for="messenger"><span>*</span> Messenger:</label>
+                    <label for="modal-messenger"><span>*</span> Messenger:</label>
                     <div class="error-wrap">
-                        <input class="input" type="url" name="messenger" id="messenger" required>
+                        <input class="input" type="url" name="messenger" id="modal-messenger" required>
                         <span class="error-msg"></span>
                     </div>
                 </div>
 
                 <div class="horizontal-input-field">
-                    <label for="viber">Viber:</label>
+                    <label for="modal-viber">Viber:</label>
                     <div class="error-wrap">
-                        <input class="input" type="url" name="viber" id="viber">
+                        <input class="input" type="text" name="contact-number" id="contact-number" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
                         <span class="error-msg"></span>
                     </div>
                 </div>
             </div>
 
             <div class="horizontal-input-field">
-                <label>Transaction Platforms:</label>
-
+                <label for="transaction-platforms">Transaction Platforms:</label>
+                
                 <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
                 <label class="small-r" for="email-transaction">Email</label>
 
@@ -613,7 +600,7 @@
 
             <div class="divider"><hr></div>
             <div class="buttons-section">
-                <button type="button" class="close-modal close-btn m-button-secondary small-m">Cancel</button>
+                <button type="button" class="close-modal m-button-secondary small-m" id="closeAddCustomerModal">Cancel</button>
                 <button type="submit" class="m-button-primary small-m">Add Customer</button>
             </div>
         </form>
@@ -779,13 +766,55 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    // This runs the moment the checkout page opens
+    // --- 1. BRIDGE: SYNC LOCALSTORAGE TO DJANGO HIDDEN INPUT ---
     const savedItems = localStorage.getItem('pendingOrderItems');
     const orderInput = document.getElementById('orderDataInput');
     
     if (savedItems && orderInput) {
         orderInput.value = savedItems;
         console.log("Form initialized with items from LocalStorage");
+    }
+
+    // --- 2. MODAL CONTROLS: ADD CUSTOMER ---
+    const customerModal = document.getElementById('addCustomerModal');
+    const openBtn = document.querySelector('.open-add-customer-modal'); // Using class from your PDF
+    const closeBtn = document.getElementById('closeAddCustomerModal');
+
+    if (openBtn && customerModal) openBtn.onclick = () => customerModal.style.display = 'flex';
+    if (closeBtn && customerModal) closeBtn.onclick = () => customerModal.style.display = 'none';
+
+    // --- 3. TOGGLE LOGIC: NEW VS EXISTING COMPANY ---
+    const newRadio = document.getElementById('new-company');
+    const existingRadio = document.getElementById('existing-company');
+    const newFieldsGroup = document.getElementById('newCompanyFields');
+    const existingFieldsGroup = document.getElementById('existingCompanyFields');
+
+    function toggleCustomerCompany() {
+        // Using IDs exactly as they appear in your HTML
+        const nameInput = document.getElementById('modal-company-name');
+        const addrInput = document.getElementById('company-address');
+        const selectField = document.getElementById('company');
+
+        if (newRadio && newRadio.checked) {
+            if (newFieldsGroup) newFieldsGroup.style.display = 'block';
+            if (existingFieldsGroup) existingFieldsGroup.style.display = 'none';
+            if (nameInput) nameInput.required = true;
+            if (addrInput) addrInput.required = true;
+            if (selectField) selectField.required = false;
+        } else if (existingRadio) {
+            if (newFieldsGroup) newFieldsGroup.style.display = 'none';
+            if (existingFieldsGroup) existingFieldsGroup.style.display = 'block';
+            if (nameInput) nameInput.required = false;
+            if (addrInput) addrInput.required = false;
+            if (selectField) selectField.required = true;
+        }
+    }
+
+    if (newRadio && existingRadio) {
+        newRadio.addEventListener('change', toggleCustomerCompany);
+        existingRadio.addEventListener('change', toggleCustomerCompany);
+        // Set initial state on load
+        toggleCustomerCompany();
     }
 });
 
