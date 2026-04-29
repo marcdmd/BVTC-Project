@@ -122,8 +122,62 @@ def add_order(request):
     customers = CustomerAccount.objects.all()
     return render(request, 'bvtc_app/add_order.html', {'companies': companies, 'all_customers': customers})
 
+# --- UC-19: ADD CUSTOMER LOGIC ---
+def add_customer(request):
+    if request.method == 'POST':
+        try:
+            # 1. Basic Info
+            first_name = request.POST.get('first-name', '').strip()
+            last_name = request.POST.get('last-name', '').strip()
+            customer_name = f"{first_name} {last_name}"
+            
+            # 2. Contact Details
+            email = request.POST.get('email-address', '')
+            contact_number = request.POST.get('contact-number', '')
+            messenger = request.POST.get('messenger', '')
+            viber = request.POST.get('viber', '')
+
+            # 3. Company Logic (New vs Existing)
+            company_details_type = request.POST.get('company-details')
+            
+            if company_details_type == 'new-company':
+                company = Company.objects.create(
+                    company_name=request.POST.get('company-name'),
+                    company_address=request.POST.get('company-address'),
+                    tin_number=request.POST.get('tin-number'),
+                    company_logo=request.FILES.get('logo') 
+                )
+            else:
+                company_id = request.POST.get('company')
+                company = Company.objects.get(company_id=company_id)
+
+            # 4. Save Customer
+            CustomerAccount.objects.create(
+                company_id=company,
+                customer_name=customer_name,
+                customer_email=email,
+                customer_phone_number=contact_number,
+                messenger=messenger,
+                viber=viber
+            )
+
+            messages.success(request, f"Customer {customer_name} added successfully!")
+            return redirect(request.META.get('HTTP_REFERER', 'customers'))
+
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect(request.META.get('HTTP_REFERER', 'customers'))
+
+    return redirect('customers')
+
+# --- UC-20: ADD SHIPPING PLACEHOLDER ---
+def add_shipping(request):
+    if request.method == 'POST':
+        # Logic will be implemented here next
+        return redirect(request.META.get('HTTP_REFERER', 'customers'))
+    return redirect('customers')
+
 def load_customers(request):
-    print("You called?")
     company_id = request.GET.get('company-id')
     if company_id:
         customers = CustomerAccount.objects.filter(company_id_id=company_id).order_by('customer_name')
@@ -152,9 +206,13 @@ def billings(request):
     return render(request, 'bvtc_app/billings.html')
 
 def customers(request):
-    companies = Company.objects.all()
-    customers = CustomerAccount.objects.all()
-    return render(request, 'bvtc_app/customers.html', {'companies': companies, 'all_customers': customers})
+    # Updated to fetch the correct context for your template
+    all_companies = Company.objects.all()
+    all_customers = CustomerAccount.objects.all()
+    return render(request, 'bvtc_app/customers.html', {
+        'companies': all_companies, 
+        'all_customers': all_customers
+    })
 
 def profile(request):
     return render(request, 'bvtc_app/profile.html')

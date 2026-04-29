@@ -30,18 +30,17 @@
             <form action="" class="search-area">
                 <input type="search" class="search-bar" placeholder="Search">
             </form>
-            <button type="submit" class="button-primary small-m open-add-customer-modal"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add New Customer</button>
+            <button type="button" class="button-primary small-m open-add-customer-modal" id="openAddCustomerModal">
+                <i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add New Customer
+            </button>
         </div>
     </div>
 
     <table class="database">
         <thead>
             <tr>
-                <th>
-                    <input type="checkbox" id="select-all">
-                </th>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>NO.</th>
-                <th>ORDER ID</th>
                 <th>CUSTOMER NAME</th>
                 <th>COMPANY NAME</th>
                 <th>EMAIL ADDRESS</th>
@@ -51,8 +50,26 @@
         </thead>
 
         <tbody>
-            <!-- {% for c in customers %} -->
-            <!-- {% endfor %} -->
+            {% for c in all_customers %}
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>{{ forloop.counter }}</td>
+                <td class="bold">{{ c.customer_name }}</td>
+                <td>{{ c.company_id.company_name }}</td>
+                <td>{{ c.customer_email }}</td>
+                <td>{{ c.customer_phone_number }}</td>
+                <td>
+                    <div class="cell-buttons">
+                        <button type="button" class="m-button-secondary small-m">View</button>
+                        <button type="button" class="m-button-primary small-m">Edit</button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 20px;">No customers found.</td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>
@@ -66,7 +83,7 @@
             <p class="required-message"><span>*</span> Required</p>
         </div>
 
-        <form action="" id="addCustomerForm">
+        <form action="{% url 'add_customer' %}" method="POST" enctype="multipart/form-data" id="addCustomerForm">
             {% csrf_token %}
             <div class="divider"><p>Basic Information</p><hr></div>
             <div class="horizontal-section">
@@ -107,35 +124,26 @@
                     <label for="existing-company">Existing</label>
                 </div>
                 
-                <div class="for-new-company details" style="width: 100%;">
+                <div class="for-new-company details" id="newCompanyFields" style="width: 100%;">
                     <div class="vertical-section">
                         <div class="horizontal-section">
                             <div class="file-upload" style="height: 100%;">
-                                <label>
+                                <label style="cursor: pointer;">
                                     <span><i class="material-symbols-outlined" style="font-size: 12px; color: #898989;">add</i></span>
                                     <span class="file-text" style="color: #898989;"> Add Company Logo</span>
-                                    <div class="error-wrap">
-                                        <input name="logo" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
-                                        <span class="error-msg"></span>
-                                    </div>
+                                    <input name="logo" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
                                 </label>
                             </div>
 
                             <div class="vertical-section">
                                 <div class="horizontal-input-field">
                                     <label for="company-name"><span>*</span> Company Name:</label>
-                                    <div class="error-wrap">
-                                        <input type="text" class="input" id="company-name" name="company-name" maxlength="150" required>
-                                        <span class="error-msg"></span>
-                                    </div>
+                                    <input type="text" class="input" id="company-name" name="company-name" maxlength="150">
                                 </div>
 
                                 <div class="horizontal-input-field">
                                     <label for="company-address"><span>*</span> Company Address:</label>
-                                    <div class="error-wrap">
-                                        <input type="text" class="input" id="company-address" name="company-address" maxlength="150" required>
-                                        <span class="error-msg"></span>
-                                    </div>
+                                    <input type="text" class="input" id="company-address" name="company-address" maxlength="150">
                                 </div>
                             </div>
                         </div>
@@ -150,19 +158,15 @@
                     </div>
                 </div>
 
-                <div class="for-existing-company details" style="width: 100%;">
+                <div class="for-existing-company details" id="existingCompanyFields" style="width: 100%; display: none;">
                     <div class="horizontal-input-field">
                         <label for="company"><span>*</span> Company Name:</label>
-                        <div class="error-wrap">
-                            <select class="input" name="company" id="company">
-                                <option value="" hidden>Select a company</option selected>
-                                <!--
-                                {% for c in companies %}
-                                <option value="{{ c.company_name }}">{{ c.company_name }}</option>
-                                {% endfor %}
-                                -->
-                            </select>
-                        </div>
+                        <select class="input" name="company" id="company">
+                            <option value="" hidden>Select a company</option>
+                            {% for comp in companies %}
+                                <option value="{{ comp.company_id }}">{{ comp.company_name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>  
             </div>
@@ -219,7 +223,7 @@
 
             <div class="divider"><hr></div>
             <div class="buttons-section">
-                <button type="button" class="close-modal close-btn m-button-secondary small-m">Cancel</button>
+                <button type="button" class="close-modal m-button-secondary small-m" id="closeAddCustomerModal">Cancel</button>
                 <button type="submit" class="m-button-primary small-m">Add Customer</button>
             </div>
         </form>
@@ -246,7 +250,7 @@
                 <p class="small-r">Company Tin Number: <b id="view_company_tin_number"></b></p>
                 <p class="small-r">Personal Address: <b id="view_personal_address"></b></p>
             </div>
-            
+
             <div class="divider"><p>Contact Details</p><hr></div>
             <div class="vertical-section">
                 <p class="small-r">Email Address: <b id="view_customer_email_address"></b></p>
@@ -257,7 +261,7 @@
 
             <div class="horizontal-section">
                 <label for="transaction-platforms">Transaction Platforms:</label>
-                
+
                 <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
                 <label class="small-r" for="email-transaction">Email</label>
 
@@ -301,4 +305,43 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('addCustomerModal');
+    const openBtn = document.getElementById('openAddCustomerModal');
+    const closeBtn = document.getElementById('closeAddCustomerModal');
+    
+    const newRadio = document.getElementById('new-company');
+    const existingRadio = document.getElementById('existing-company');
+    const newFields = document.getElementById('newCompanyFields');
+    const existingFields = document.getElementById('existingCompanyFields');
+
+    // Modal Toggle Logic
+    openBtn.onclick = () => modal.style.display = 'flex';
+    closeBtn.onclick = () => modal.style.display = 'none';
+
+    // Company Toggle Logic
+    function toggleCompany() {
+        if (newRadio.checked) {
+            newFields.style.display = 'block';
+            existingFields.style.display = 'none';
+            document.getElementById('company-name').required = true;
+            document.getElementById('company-address').required = true;
+            document.getElementById('company').required = false;
+        } else {
+            newFields.style.display = 'none';
+            existingFields.style.display = 'block';
+            document.getElementById('company-name').required = false;
+            document.getElementById('company-address').required = false;
+            document.getElementById('company').required = true;
+        }
+    }
+
+    newRadio.addEventListener('change', toggleCompany);
+    existingRadio.addEventListener('change', toggleCompany);
+});
+</script>
 {% endblock %}

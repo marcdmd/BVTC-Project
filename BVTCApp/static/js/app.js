@@ -719,6 +719,7 @@ function saveItemToOrder(editIndex = null) {
     
     // 2. Data Extraction
     const newItem = {
+        db_id: productData.db_id,
         code: activeModal.querySelector(`#${prefix}_item_code`)?.textContent?.trim() || 'N/A',
         name: productData.name || activeModal.querySelector(`#${prefix}_item_name`)?.textContent?.trim(),
         category: productData.category || activeModal.querySelector(`#${prefix}_category`)?.textContent?.trim(),

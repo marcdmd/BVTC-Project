@@ -8,7 +8,7 @@ urlpatterns = [
     path('catalog/delete/<int:pk>/', views.delete_product, name='delete_product'),
 
     path('orders/', views.orders, name='orders'),
-    path('orders/add_order', views.add_order, name='add_order'),
+    path('orders/add_order/', views.add_order, name='add_order'),
     path('orders/load_customers/', views.load_customers, name='load_customers'),
     path('orders/load_shipping/', views.load_shipping, name='load_shipping'),
     path('orders/add_order/add_item', views.add_item, name='add_item'),
@@ -20,8 +20,8 @@ urlpatterns = [
     path('billings/', views.billings, name='billings'),
 
     path('customers/', views.customers, name='customers'),
-    # path('customers/add_customer/', views.add_customer, name='add_customer'),
-    # path('customers/add_shipping/', views.add_shipping, name='add_shipping'),
+    path('customers/add_customer/', views.add_customer, name='add_customer'),
+    path('customers/add_shipping/', views.add_shipping, name='add_shipping'),
 
     path('profile/', views.profile, name='profile')
 ]
