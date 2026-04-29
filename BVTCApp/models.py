@@ -2,25 +2,17 @@ from django.db import models
 from django.utils import timezone
 
 class UserAccount(models.Model):
-    USER_TITLES = [
-        ('Account Manager', 'Account Manager'),
-        ('Production', 'Production'),
-        ('Sales Officer', 'Sales Officer'),
-        ('Marketing Officer', 'Marketing Officer'),
-        ('Graphic Designer', 'Graphic Designer'),
-    ]
-    
     USER_ROLES = [
         ('Admin', 'Admin'),
         ('Account Manager', 'Account Manager'),
         ('Officer', 'Officer'),
-        ('Other', 'Other'),
+        ('Production', 'Production'),
+        ('Graphic Designer', 'Graphic Designer'),
     ]
     
     user_id = models.AutoField(primary_key=True)
     user_name = models.CharField(max_length=50)
     password = models.CharField(max_length=255) # need to add hashing for passwords
-    user_title = models.CharField(max_length=50, choices=USER_TITLES)
     user_role = models.CharField(max_length=100, choices=USER_ROLES, default='Other')
 
     def __str__(self):
@@ -144,6 +136,7 @@ class Order(models.Model):
 
     ORDER_STATUS = [
 		('Under Feasibility', 'Under Feasibility'),
+        ('Feasibility Report Sent', 'Feasibility Report Sent'), ###
         ('Under Quotation', 'Under Quotation'),
         ('In Production', 'In Production'),
         ('Sampled', 'Sampled'),

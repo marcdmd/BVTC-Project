@@ -1,9 +1,18 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q
+<<<<<<< Updated upstream
 from django.db import IntegrityError 
 from django.contrib import messages  
 from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails
 from .models import Province, City, Barangay
+=======
+from django.db import IntegrityError # For TC 5: Duplicate code checking
+from django.contrib import messages  # For alerts
+from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails, OrderItem
+from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+>>>>>>> Stashed changes
 
 def catalog(request):
     if request.method == 'POST':
@@ -83,6 +92,64 @@ def orders(request):
 
 def add_order(request):
     return render(request, 'bvtc_app/add_order.html', {'companies': Company.objects.all(), 'all_customers': CustomerAccount.objects.all(), 'provinces': Province.objects.all().order_by('name')})
+
+ROLE_STATUS_OPTIONS = { ### shows the status options the role is allowed to select
+    'Admin': [
+        'Under Feasibility', 'Feasibility Report Sent', 'Under Quotation', 'In Production',
+        'Sampled', 'Packaged', 'In Transit', 'Under Validation',
+        'Validated', 'Sent to Customer', 'Signed', 'Issued',
+    ],
+    'Account Manager': [
+        'Under Feasibility', 'Feasibility Report Sent', 'Under Quotation', 'In Production',
+        'Sampled', 'Packaged', 'In Transit', 'Under Validation',
+        'Validated', 'Sent to Customer', 'Signed', 'Issued',
+    ],
+    'Officer': [
+        'Under Feasibility', 'Feasibility Report Sent',
+    ],
+    'Production': [
+        'In Production', 'Sampled', 'Packaged', 'In Transit'
+    ],
+}
+
+def get_allowed_statuses(user): ### function to filter order status based on user
+    """
+    Returns the list of statuses a user is allowed to see/set.
+    Accepts a UserAccount instance or None.
+    Returns all statuses if no user (temporary until login is done).
+    """
+    if user is None:
+        return [choice[0] for choice in Order.ORDER_STATUS]
+    return ROLE_STATUS_OPTIONS.get(user.user_role, [choice[0] for choice in Order.ORDER_STATUS])
+
+# --- UC: UPDATE ORDER STATUS ---
+@require_POST
+def update_order_status(request, pk):
+    try:
+        order = Order.objects.get(order_id=pk)
+    except Order.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Order not found.'}, status=404)
+
+    new_status = request.POST.get('status', '').strip()
+
+    # Validate: must be a valid choice
+    valid_statuses = [choice[0] for choice in Order.ORDER_STATUS]
+    if new_status not in valid_statuses:
+        return JsonResponse({'success': False, 'error': 'Invalid status.'}, status=400)
+
+    # Role check (placeholder until login — uses first user for now)
+    # REPLACE `UserAccount.objects.first()` with `request.user` once login is done
+    from .models import UserAccount
+    current_user = UserAccount.objects.first()
+    allowed = get_allowed_statuses(current_user)
+
+    if new_status not in allowed:
+        return JsonResponse({'success': False, 'error': 'You are not allowed to set this status.'}, status=403)
+
+    order.order_status = new_status
+    order.save()
+
+    return JsonResponse({'success': True, 'new_status': new_status})
 
 # --- UC-19: ADD CUSTOMER LOGIC ---
 def add_customer(request):
