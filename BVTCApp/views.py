@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q
-from django.db import IntegrityError # For TC 5: Duplicate code checking
-from django.contrib import messages  # For alerts
+from django.db import IntegrityError 
+from django.contrib import messages  
 from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails
 
 def catalog(request):
     if request.method == 'POST':
         try:
-            # Attempt to create the product (NO DEFAULTS for Price/MOQ)
             new_product = Product.objects.create(
                 product_code=request.POST.get('product-id'),
                 product_name=request.POST.get('product-name'),
@@ -17,73 +16,49 @@ def catalog(request):
                 MOQ=request.POST.get('moq')                        
             )
 
-            # create ProductColor objects for each color input
             color_list = request.POST.getlist('colors[]')
             for color_val in color_list:
                 if color_val.strip():
-                    ProductColor.objects.create(
-                        product_id=new_product, 
-                        product_color=color_val
-                    )
+                    ProductColor.objects.create(product_id=new_product, product_color=color_val)
 
-            # Append Images
             image_files = request.FILES.getlist('photos[]')
             if image_files:
                 for img in image_files:
                     ProductImage.objects.create(product_id=new_product, product_image=img)
 
-            # Success message
             messages.success(request, "Product added successfully!")
             return redirect('catalog')
 
         except IntegrityError:
-            # TC 5: Catches duplicate product code error
             messages.error(request, "Product Code already exists.")
             return redirect('catalog')
 
-    # --- GET REQUEST: FETCHING, SEARCHING, AND FILTERING ---
     products = Product.objects.all()
-
     search_query = request.GET.get('search', '').strip()
     if search_query:
-        products = products.filter(
-            Q(product_name__icontains=search_query) | 
-            Q(product_code__icontains=search_query)
-        )
+        products = products.filter(Q(product_name__icontains=search_query) | Q(product_code__icontains=search_query))
 
     category_filter = request.GET.get('filter', 'all')
     if category_filter != 'all':
         category_dict = dict(Product.CATEGORY_CHOICES)
         mapped_category = category_dict.get(category_filter)
-        
         if mapped_category:
             products = products.filter(category=mapped_category)
 
-    context = {
-        'products': products,
-        'category_choices': Product.CATEGORY_CHOICES,
-    }
-
-    return render(request, 'bvtc_app/catalog.html', context)
+    return render(request, 'bvtc_app/catalog.html', {'products': products, 'category_choices': Product.CATEGORY_CHOICES})
 
 def edit_product(request, pk):
-    # Fetch the specific product we want to edit
     product = Product.objects.get(product_id=pk)
-
     if request.method == 'POST':
         product.product_name = request.POST.get('product-name', product.product_name)
         product.category = request.POST.get('category', product.category)
         product.description = request.POST.get('product-description', product.description)
-        
         product.starting_price = request.POST.get('starting-price') or product.starting_price
         product.MOQ = request.POST.get('moq') or product.MOQ
-        
         product.save()
 
         ProductColor.objects.filter(product_id=product).delete()
-        
-        color_list = request.POST.getlist('colors[]')
-        for color_val in color_list:
+        for color_val in request.POST.getlist('colors[]'):
             if color_val.strip():
                 ProductColor.objects.create(product_id=product, product_color=color_val)
 
@@ -92,71 +67,84 @@ def edit_product(request, pk):
             for img in image_files:
                 ProductImage.objects.create(product_id=product, product_image=img)
 
-        # edit success message popup
         messages.success(request, "Product updated successfully!")
-
     return redirect('catalog')
 
 def delete_product(request, pk):
     product = Product.objects.get(product_id=pk)
-    
-    # save product name for deletion message
     deleted_name = product.product_name 
-    
     product.delete()
-
-    #delete success message
     messages.success(request, f"'{deleted_name}' was deleted successfully!")
-    
     return redirect('catalog')
 
 def orders(request):
-    orders = Order.objects.all()
-    return render(request, 'bvtc_app/orders.html', {'orders': orders})
+    return render(request, 'bvtc_app/orders.html', {'orders': Order.objects.all()})
 
 def add_order(request):
-    companies = Company.objects.all()
-    customers = CustomerAccount.objects.all()
-    return render(request, 'bvtc_app/add_order.html', {'companies': companies, 'all_customers': customers})
+    return render(request, 'bvtc_app/add_order.html', {'companies': Company.objects.all(), 'all_customers': CustomerAccount.objects.all()})
 
 # --- UC-19: ADD CUSTOMER LOGIC ---
 def add_customer(request):
     if request.method == 'POST':
         try:
-            # 1. Basic Info
+            # 1. Capture Basic Info
             first_name = request.POST.get('first-name', '').strip()
             last_name = request.POST.get('last-name', '').strip()
             customer_name = f"{first_name} {last_name}"
             
-            # 2. Contact Details
+            # 2. Capture Contact Details
             email = request.POST.get('email-address', '')
             contact_number = request.POST.get('contact-number', '')
             messenger = request.POST.get('messenger', '')
             viber = request.POST.get('viber', '')
+            personal_address = request.POST.get('home-address', '')
 
-            # 3. Company Logic (New vs Existing)
+            # 3. Company Logic (Preventing TIN Unique Constraint Error)
             company_details_type = request.POST.get('company-details')
             
             if company_details_type == 'new-company':
-                company = Company.objects.create(
-                    company_name=request.POST.get('company-name'),
-                    company_address=request.POST.get('company-address'),
+                company, created = Company.objects.get_or_create(
                     tin_number=request.POST.get('tin-number'),
-                    company_logo=request.FILES.get('logo') 
+                    defaults={
+                        'company_name': request.POST.get('company-name'),
+                        'company_address': request.POST.get('company-address'),
+                        'company_logo': request.FILES.get('logo') 
+                    }
                 )
+                if not created:
+                    company.company_name = request.POST.get('company-name')
+                    company.company_address = request.POST.get('company-address')
+                    company.save()
             else:
                 company_id = request.POST.get('company')
                 company = Company.objects.get(company_id=company_id)
 
-            # 4. Save Customer
-            CustomerAccount.objects.create(
+            # 4. Save Customer Account (Matched to Model fields)
+            platforms = request.POST.getlist('transaction-platform')
+            new_customer = CustomerAccount.objects.create(
                 company_id=company,
                 customer_name=customer_name,
                 customer_email=email,
                 customer_phone_number=contact_number,
                 messenger=messenger,
-                viber=viber
+                viber=viber,
+                email_transaction='email' in platforms,
+                messenger_transaction='messenger' in platforms,
+                viber_transaction='viber' in platforms
             )
+
+            if personal_address:
+                ShippingDetails.objects.create(
+                    customer_id=new_customer,
+                    contact_person_name=customer_name,
+                    contact_person_email=email,
+                    contact_person_number=contact_number,
+                    address_line_1=personal_address,
+                    address_province="N/A", 
+                    address_city="N/A",
+                    address_barangay="N/A",
+                    address_postal_code=0 
+                )
 
             messages.success(request, f"Customer {customer_name} added successfully!")
             return redirect(request.META.get('HTTP_REFERER', 'customers'))
@@ -167,34 +155,39 @@ def add_customer(request):
 
     return redirect('customers')
 
-# --- UC-20: ADD SHIPPING PLACEHOLDER ---
-def add_shipping(request):
-    if request.method == 'POST':
-        # Logic will be implemented here next
-        return redirect(request.META.get('HTTP_REFERER', 'customers'))
+def delete_customer(request, pk):
+    try:
+        customer = CustomerAccount.objects.get(customer_id=pk)
+        name = customer.customer_name
+        customer.delete()
+        messages.success(request, f"Customer '{name}' was deleted successfully.")
+    except CustomerAccount.DoesNotExist:
+        messages.error(request, "Customer not found.")
     return redirect('customers')
+
+def customers(request):
+    # Back to basics: Just get the data and render it.
+    return render(request, 'bvtc_app/customers.html', {
+        'companies': Company.objects.all(), 
+        'all_customers': CustomerAccount.objects.all()
+    })
+
+def add_shipping(request):
+    # Logic for UC-20 goes here
+    return redirect(request.META.get('HTTP_REFERER', 'customers'))
 
 def load_customers(request):
     company_id = request.GET.get('company-id')
-    if company_id:
-        customers = CustomerAccount.objects.filter(company_id_id=company_id).order_by('customer_name')
-    else:
-        customers = CustomerAccount.objects.none()
-    
+    customers = CustomerAccount.objects.filter(company_id_id=company_id).order_by('customer_name') if company_id else CustomerAccount.objects.none()
     return render(request, 'bvtc_app/partials/customer_options.html', {'customers': customers})
 
 def load_shipping(request):
     customer_id = request.GET.get('customer-id') 
-    if customer_id:
-        addresses = ShippingDetails.objects.filter(customer_id_id=customer_id)
-    else:
-        addresses = ShippingDetails.objects.none()
-
+    addresses = ShippingDetails.objects.filter(customer_id_id=customer_id) if customer_id else ShippingDetails.objects.none()
     return render(request, 'bvtc_app/partials/shipping_options.html', {'addresses': addresses})
 
 def add_item(request):
-    products = Product.objects.all()
-    return render(request, 'bvtc_app/add_item.html', {'products': products})
+    return render(request, 'bvtc_app/add_item.html', {'products': Product.objects.all()})
 
 def quotations(request):
     return render(request, 'bvtc_app/quotations.html')
@@ -203,11 +196,26 @@ def billings(request):
     return render(request, 'bvtc_app/billings.html')
 
 def customers(request):
-    # Updated to fetch the correct context for your template
-    all_companies = Company.objects.all()
     all_customers = CustomerAccount.objects.all()
+
+    # Search
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        all_customers = all_customers.filter(
+            Q(customer_name__icontains=search_query) | 
+            Q(customer_email__icontains=search_query) | 
+            Q(company_id__company_name__icontains=search_query)
+        )
+
+    # Sort
+    sort_by = request.GET.get('sort-by')
+    if sort_by == 'client-name':
+        all_customers = all_customers.order_by('customer_name')
+    elif sort_by == 'company-name':
+        all_customers = all_customers.order_by('company_id__company_name')
+
     return render(request, 'bvtc_app/customers.html', {
-        'companies': all_companies, 
+        'companies': Company.objects.all(), 
         'all_customers': all_customers
     })
 

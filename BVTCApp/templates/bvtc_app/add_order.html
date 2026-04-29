@@ -260,7 +260,7 @@
                     <div class="horizontal-input-field" style="align-self: flex-start;">
                         <label for="delivery-date"><span>*</span> Delivery Date:</label>
                         <div class="error-wrap">
-                            <input type="date" name="dalivery-date" id="delivery-date" class="input" required>
+                            <input type="date" name="delivery-date" id="delivery-date" class="input" required>
                             <span class="error-msg"></span>
                         </div>
                     </div>  
@@ -462,7 +462,7 @@
             <p class="required-message"><span>*</span> Required</p>
         </div>
 
-        <form action="" id="addCustomerForm">
+        <form action="{% url 'add_customer' %}" method="POST" id="addCustomerForm" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="divider"><p>Basic Information</p><hr></div>
             <div class="horizontal-section">
@@ -600,7 +600,7 @@
 
             <div class="horizontal-input-field">
                 <label>Transaction Platforms:</label>
-                
+
                 <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
                 <label class="small-r" for="email-transaction">Email</label>
 
