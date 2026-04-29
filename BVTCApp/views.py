@@ -233,3 +233,35 @@ def load_barangays(request):
     city_id = request.GET.get('city-municipality')
     barangays = Barangay.objects.filter(city_id=city_id).order_by('name')
     return render(request, 'bvtc_app/partials/geo_options.html', {'items': barangays, 'label': 'Barangay'}) 
+
+def save_shipping_details(request):
+    if request.method == "POST":
+        # 1. Get the Customer (Crucial because of your ForeignKey)
+        # Assuming you have a hidden input or selected customer ID in the form
+        customer_id = request.POST.get('customer_id') 
+        customer = CustomerAccount.objects.get(customer_id=customer_id)
+
+        # 2. Get the Names from the Geography IDs
+
+        province_obj = Province.objects.get(id=request.POST.get('province'))
+        city_obj = City.objects.get(id=request.POST.get('city-municipality'))
+        barangay_obj = Barangay.objects.get(id=request.POST.get('barangay'))
+
+        # 3. Create the ShippingDetails instance
+        shipping = ShippingDetails.objects.create(
+            customer_id=customer,
+            contact_person_name=request.POST.get('contact-person-name'),
+            contact_person_email=request.POST.get('contact-person-email'),
+            contact_person_number=request.POST.get('contact-person-number'),
+            address_line_1=request.POST.get('address-line-1'),
+            address_line_2=request.POST.get('address-line-2'),
+            address_province=province_obj.name, # Storing the string name
+            address_city=city_obj.name,         # Storing the string name
+            address_barangay=barangay_obj.name,   # Storing the string name
+            address_postal_code=request.POST.get('postal-code')
+        )
+
+
+        return render(request, 'bvtc_app/partials/shipping_info_display.html', {
+            'shipping': shipping
+        })

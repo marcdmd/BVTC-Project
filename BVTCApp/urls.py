@@ -29,4 +29,5 @@ urlpatterns = [
     # HTMX Geography Loads
     path('ajax/load-cities/', views.load_cities, name='load_cities'),
     path('ajax/load-barangays/', views.load_barangays, name='load_barangays'),
+    path('save-shipping-details/', views.save_shipping_details, name='save_shipping_details'),
 ]
