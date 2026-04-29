@@ -206,12 +206,15 @@
 
             <div class="horizontal-input-field">
                 <label for="transaction-platforms">Transaction Platforms:</label>
-                <input type="checkbox" name="transaction-platform" value="email" id="transaction-platform">
-                <p class="small-r">Email</p>
-                <input type="checkbox" name="transaction-platform" value="messenger" id="transaction-platform">
-                <p class="small-r">Messenger</p>
-                <input type="checkbox" name="transaction-platform" value="viber" id="transaction-platform">
-                <p class="small-r">Viber</p>
+                
+                <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
+                <label class="small-r" for="email-transaction">Email</label>
+
+                <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction">
+                <label class="small-r" for="messenger-transaction">Messenger</label>
+
+                <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction">
+                <label class="small-r" for="viber-transaction">Viber</label>
             </div>
 
             <div class="divider"><hr></div>
@@ -220,6 +223,82 @@
                 <button type="submit" class="m-button-primary small-m">Add Customer</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="modal-container" id="viewCustomerModal">
+    <div class="modal view-customer">
+        <div class="vertical-section">
+            <h1>Client no.</h1>
+
+            <div class="divider"><p>Company Logo</p><hr></div>
+            <div>
+                <img class="img-container" style="max-width: 100px;" src="" alt="">
+            </div>
+        </div>
+
+        <div class="vertical-section" style="flex: 4; gap: 16px;">
+            <div class="divider"><p>Customer Information</p><hr></div>
+            <div class="vertical-section">
+                <p class="small-r">Customer Name: <b id="view_customer_name"></b></p>
+                <p class="small-r">Company Name: <b id="view_company_name"></b></p>
+                <p class="small-r">Company Address: <b id="view_company_address"></b></p>
+                <p class="small-r">Company Tin Number: <b id="view_company_tin_number"></b></p>
+                <p class="small-r">Personal Address: <b id="view_personal_address"></b></p>
+            </div>
+            
+            <div class="divider"><p>Contact Details</p><hr></div>
+            <div class="vertical-section">
+                <p class="small-r">Email Address: <b id="view_customer_email_address"></b></p>
+                <p class="small-r">Contact Number: <b id="view_customer_contact_number"></b></p>
+                <p class="small-r">Messenger: <b id="view_customer_messenger"></b></p>
+                <p class="small-r">Viber: <b id="view_customer_viber"></b></p>
+            </div>
+
+            <div class="horizontal-section">
+                <label for="transaction-platforms">Transaction Platforms:</label>
+                
+                <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
+                <label class="small-r" for="email-transaction">Email</label>
+
+                <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction">
+                <label class="small-r" for="messenger-transaction">Messenger</label>
+
+                <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction">
+                <label class="small-r" for="viber-transaction">Viber</label>
+            </div>
+
+            <div class="divider"><p>Shipping Details</p><hr></div>
+            <div class="vertical-section">
+                <button type="button" class="m-button-secondary">Shipping Detail</button>
+                <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 21px;">add</i></button>
+            </div>
+
+            <div class="divider"><p>On-going Transactions</p><hr></div>
+            <div class="vertical-section">
+                <table class="small-database">
+                    <thead>
+                        <tr>
+                            <th>ORDERS</th>
+                            <th>BILLING STATEMENTS</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="buttons-section">
+                <button type="submit" class="button-tertiary">Delete</button>
+                <button type="submit" class="button-primary">Edit</button>
+                <button type="submit" class="button-secondary">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

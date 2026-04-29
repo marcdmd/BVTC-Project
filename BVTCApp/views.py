@@ -149,7 +149,9 @@ def billings(request):
     return render(request, 'bvtc_app/billings.html')
 
 def customers(request):
-    return render(request, 'bvtc_app/customers.html')
+    companies = Company.objects.all()
+    customers = CustomerAccount.objects.all()
+    return render(request, 'bvtc_app/customers.html', {'companies': companies, 'all_customers': customers})
 
 def profile(request):
     return render(request, 'bvtc_app/profile.html')

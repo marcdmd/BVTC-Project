@@ -702,7 +702,8 @@ main .filter {
 .order-view {
     flex: 0 0 1080px;
 }
-.customer-form {
+.customer-form,
+.view-customer {
     max-width: 600px;
 }
 .shipping-form {
