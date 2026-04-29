@@ -1,0 +1,381 @@
+{% extends 'bvtc_app/base.html' %}
+{% load static %}
+
+{% block title %}Edit Order{% endblock %}
+
+{% block nav %}
+<h1 class="bold">Orders</h1>
+<i class="material-symbols-outlined" style="font-size: 21px;">chevron_forward</i>
+<h1 class="bold">Add New Order</h1>
+{% endblock %}
+
+{% block orders_button %}
+<button type="submit" style="background: #E9E6E3;">
+    <i class="material-symbols-rounded" style="font-size: 24px;">assignment</i>
+    <p class="button-text small-b">Orders</p>
+</button>
+{% endblock %}
+
+{% block main %}
+<div class="modal">
+    <form action="" method="POST">
+        {% csrf_token %}
+        <h1>Add New Order</h1>
+        <div style="display: flex; flex-direction: row;">
+            <p class="required-message"><span>*</span> Required</p>
+        </div>
+        <div class="horizontal-section">
+            <div class="vertical-section">
+                <div class="divider">
+                    <p>Customer Information</p>
+                    <hr>
+                </div>
+                
+                <div class="vertical-section" style="height: max-content; max-height: max-content;">
+                    <div class="horizontal-input-field" style="flex: 1;">
+                        <label><span>*</span> Customer Information:</label>
+    
+                        <input type="radio" value="new" name="customer-info" id="new" checked>
+                        <label for="new">New</label>
+                        
+                        <input type="radio" value="existing" name="customer-info" id="existing">
+                        <label for="existing">Existing</label>
+                    </div>
+                    
+                    <div class="for-new details" style="width: 100%;">
+                        <button type="button" class="button-primary small-m" style="width: 100%; display: block;">
+                            <i class="material-symbols-outlined" style="font-size: 15px;">add</i>
+                            Add New Customer
+                        </button>
+                    </div>
+
+                    <div class="for-existing details" style="width: 100%;"> 
+                        <div class="vertical-section">
+                            <div class="horizontal-input-field">
+                                <label for="company-name"><span>*</span> Company Name:</label>
+                                <select class="input" 
+                                        name="company-id" 
+                                        id="company-name"
+                                        hx-get="{% url 'load_customers' %}" 
+                                        hx-target="#customer-name" 
+                                        hx-trigger="change">
+                                    <option value="" disabled selected>Select Company</option>
+                                    {% for company in companies %}
+                                        <option value="{{ company.company_id }}">{{ company.company_name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+
+                            <div class="horizontal-input-field" id="customer-name">
+                                <label for="customer-name"><span>*</span> Customer Name:</label>
+                                <select class="input" >
+                                    <option value="" disabled selected>Select a Company First</option>
+                                </select>
+                                <!-- This was populated by the first HTMX call -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vertical-section">
+                <div class="divider">
+                    <p>Payment Details</p>
+                    <hr>
+                </div>
+                
+                <div class="horizontal-input-field">
+                    <label for="payment-mode"><span>*</span> Mode of Payment:</label>
+                    <div class="horizontal-input-field radio-choices">
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" value="metrobank" name="payment-mode" id="metrobank" checked>
+                            <label for="metrobank">Metrobank Fund Transfer</label>
+                        </div>
+
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" value="bpi" name="payment-mode" id="bpi">
+                            <label for="bpi">BPI Bank Transfer</label>
+                        </div>
+
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" value="gcash" name="payment-mode" id="gcash">
+                            <label for="gcash">Gcash Payment</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="payment-terms"><span>*</span> Payment Terms:</label>
+
+                    <input type="radio" value="partial" name="payment-terms" id="partial" checked>
+                    <label for="partial">Partial</label>
+
+                    <input type="radio" value="full" name="payment-terms" id="full">
+                    <label for="full">Full</label>
+                </div>
+
+                <div class="horizontal-input-field" style="align-self: flex-start;">
+                    <label for="budget"><span>*</span> Budget:</label>
+                    <input class="input" type="number" min="1" placeholder="1" name="budget" id="budget" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="vertical-section">
+            <div class="divider">
+                <p>Order Details</p>
+                <hr>
+            </div>
+
+            <table class="small-database">
+                <thead>
+                    <tr>
+                        <th>PRODUCT</th>
+                        <th>COLOR</th>
+                        <th>CUSTOMIZATION</th>
+                        <th>QUANTITY</th>
+                        <th>PRICE</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+
+                <tbody id="order-items-body">
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <div class="cell-buttons">
+                                <button type="button" class="m-button-primary smaller-b">Edit</button>
+                                <a href="" class="m-button-tertiary smaller-b">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>TOTAL:</td>
+                        <td></td>
+                        <td><b>Php 0.00</b></td>
+                        <td></td>
+                    </tr>                    
+                </tbody>
+            </table>
+
+            <a href="{% url 'add_item' %}" class="button-primary small-m" style="flex: 1 0 0; align-self: stretch;"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Items</a>
+        </div>
+
+        <div class="horizontal-section">
+            <div class="vertical-section">
+                <div class="divider">
+                    <p>For Customizations</p>
+                    <hr>
+                </div>
+                
+                <div class="horizontal-input-field" style="max-height: 34px;">
+                    <label for="mockups">Mockup (Optional):</label>
+                    <div class="file-upload" style="width: 100%;">
+                        <label for="mockups">
+                            <span style="color: #898989;">Upload Image/s</span>
+                            <input id="mockups" name="mockups[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;" multiple>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="horizontal-input-field" style="max-height: 34px;">
+                    <label for="logo-link">Link to Logo (Optional):</label>
+                    <input type="text" id="logo-link" name="logo-link" class="input">
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="instructions">Packing Instructions (Optional):</label>
+                    <textarea type="text" class="input" name="instructions" id="instructions"></textarea>
+                </div>
+            </div>
+
+            <div class="vertical-section">
+                <div class="divider">
+                    <p>Production Details</p>
+                    <hr>
+                </div>
+
+                <div class="horizontal-section" style="align-self: flex-start;">
+                    <div class="horizontal-input-field" style="align-self: flex-start;">
+                        <label for="production=start"><span>*</span> Start of Production:</label>
+                        <input type="date" name="production-start" id="production-start" class="input">
+                    </div>
+
+                    <div class="horizontal-input-field" style="align-self: flex-start;">
+                        <label for="dalivery-date"><span>*</span> Delivery Date:</label>
+                        <input type="date" name="dalivery-date" id="dalivery-date" class="input">
+                    </div>  
+                </div>              
+
+                <div class="divider">
+                    <p>Shipping Details</p>
+                    <hr>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label><span>*</span> Shipping Details:</label>
+
+                    <input type="radio" value="new-shipping" name="shipping-details" id="new-shipping" checked>
+                    <label for="new-shipping">New</label>
+
+                    <input type="radio" value="existing-shipping" name="shipping-details" id="existing-shipping">
+                    <label for="existing-shipping">Existing</label>
+                </div>
+
+                <div class="for-new-shipping details" style="width: 100%;">
+                    <button type="button" class="button-primary small-m" style="width: 100%; display: block;">
+                        <i class="material-symbols-outlined" style="font-size: 15px;">add</i>
+                        Add New Set
+                    </button>
+                </div>
+
+                <div class="for-existing-shipping details" style="width: 100%;">
+                    <select class="input" name="shipping" id="shipping-address-select">
+                        <option value="" disabled selected>Select a Customer First</option>
+                        <!-- JS will handle injection of existing options -->
+                    </select>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="courier"><span>*</span> Courier:</label>
+                    <select name="courier" id="courier" class="input" required>
+                        <option value="" disabled selected>Select a Courier</option>
+                        <option value="j&t">J&T</option>
+                        <option value="lalamove">Lalamove</option>
+                        <option value="lbc">LBC</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="vertical-section">
+            <div class="divider">
+                <p>Other Details</p>
+                <hr>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="transaction-platform"><span>*</span> Transaction Platform:</label>
+
+                    <div class="horizontal-input-field radio-choices">
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="transaction-platform" id="email" checked>
+                            <label for="email">Email</label>
+                        </div>
+
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="transaction-platform" id="messenger">
+                            <label for="messenger">Messenger</label>
+                        </div>
+
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="transaction-platform" id="viber">
+                            <label for="viber">Viber</label> 
+                        </div>
+                    </div>               
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="account-manager"><span>*</span> Account Manager:</label>
+                    
+                    <div class="horizontal-input-field radio-choices">
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="account-manager" id="manager-1" checked>
+                            <label for="manager-1">Manager 1</label>
+                        </div>
+
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="account-manager" id="manager-2">
+                            <label for="manager-2">Manager 2</label>
+                        </div>
+                        
+                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
+                            <input type="radio" name="account-manager" id="top-manager">
+                            <label for="top-manager">Top Manager</label> 
+                        </div>                    
+                    </div>             
+                </div>
+            </div>
+        </div>
+
+        <div class="divider">
+            <hr>
+        </div>
+
+        <div class="buttons-section">
+            <a href="{% url 'orders' %}" class="m-button-secondary small-m">Cancel</a>
+            <button type="submit" class="m-button-primary small-m">Add Order</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const tableBody = document.getElementById('order-items-body');
+    if (!tableBody) return;
+
+    // FIX: Changed 'pendingOrder' to 'pendingOrderItems'
+    const savedData = localStorage.getItem('pendingOrderItems'); 
+    if (!savedData) {
+        console.log("No items found in localStorage under 'pendingOrderItems'");
+        return;
+    }
+
+    const items = JSON.parse(savedData);
+    let totalQty = 0;
+    let totalPrice = 0;
+
+    tableBody.innerHTML = ''; // Clear placeholder rows
+
+    items.forEach((item, index) => {
+        const qty = parseInt(item.qty) || 0;
+        const price = parseFloat(item.price) || 0;
+        totalQty += qty;
+        totalPrice += (qty * price);
+
+        const row = `
+            <tr>
+                <td>${item.code}</td>
+                <td>${item.color}</td>
+                <td>${item.custom}</td>
+                <td>${qty}</td>
+                <td>Php ${price.toFixed(2)}</td>
+                <td>
+                    <div class="cell-buttons">
+                        <button type="button" class="m-button-tertiary smaller-b" onclick="removeItem(${index})">Delete</button>
+                    </div>
+                </td>
+            </tr>`;
+        tableBody.insertAdjacentHTML('beforeend', row);
+    });
+
+    // Append the Total Row
+    tableBody.insertAdjacentHTML('beforeend', `
+        <tr style="font-weight: bold; background: #fdfdfd;">
+            <td colspan="2"></td>
+            <td><b>TOTAL:</b></td>
+            <td><b>${totalQty}</b></td>
+            <td><b>Php ${totalPrice.toLocaleString(undefined, {minimumFractionDigits: 2})}</b></td>
+            <td></td>
+        </tr>
+    `);
+});
+
+// FIX: Updated key here as well
+window.removeItem = (index) => {
+    let items = JSON.parse(localStorage.getItem('pendingOrderItems') || '[]');
+    items.splice(index, 1);
+    localStorage.setItem('pendingOrderItems', JSON.stringify(items));
+    location.reload();
+};
+</script>
+{% endblock %}

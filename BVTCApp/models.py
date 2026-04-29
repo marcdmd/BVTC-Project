@@ -49,6 +49,9 @@ class CustomerAccount(models.Model):
     messenger = models.CharField(max_length=100, blank=True, null=True)
     viber = models.CharField(max_length=15, blank=True, null=True)
     objects = models.Manager()
+    email_transaction = models.BooleanField(default=False)
+    messenger_transaction = models.BooleanField(default=False)
+    viber_transaction = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.customer_id} - {self.customer_name}, {self.company_id}'
@@ -78,16 +81,25 @@ class ShippingDetails(models.Model): # option to insert details if contact perso
 
 class Product(models.Model):
     CATEGORY_CHOICES = [
-        ('Company Profile', 'Company Profile'),
-        ('Individual Items', 'Individual Items'),
-        ('Gift Set', 'Gift Set'),
+        ('Apparel', 'Apparel'),
+        ('Awards & Recognition', 'Awards & Recognition'),
         ('Bag', 'Bag'),
+        ('Coffee & Wine Item', 'Coffee & Wine Item'),
+        ('Drinkware', 'Drinkware'),
+        ('Eco Item', 'Eco Item'),
+        ('Gadgets & Electronics', 'Gadgets & Electronics'),
+        ('Individual Item', 'Individual Item'),
+        ('Leather Item', 'Leather Item'),
+        ('Office Item', 'Office Item'),
+        ('Packaging Item', 'Packaging Item'),
+        ('Wellness & Travel', 'Wellness & Travel'),
+        ('Others', 'Others')
     ]
     
     product_id = models.AutoField(primary_key=True)
     product_code = models.CharField(max_length=20, unique=True, blank=True)
     product_name = models.CharField(max_length=150)
-    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='others')
     description = models.TextField()
     starting_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     MOQ = models.PositiveIntegerField()
@@ -174,6 +186,7 @@ class Order(models.Model):
 
     freight_term = models.BooleanField(default=False)
     delivery_fee = models.BooleanField(default=False)
+    courier = models.CharField(max_length=50, default='N/A')
 
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     issue_date = models.DateField(default=timezone.now)

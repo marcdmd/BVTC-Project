@@ -1,47 +1,294 @@
+import json
+
 from django.shortcuts import render, redirect
-from .models import Product, ProductImage, ProductColor, Order
+from django.db.models import Q
+from django.db import IntegrityError # For TC 5: Duplicate code checking
+from django.contrib import messages  # For alerts
+from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails, OrderItem
+from django.utils import timezone
 
 def catalog(request):
     if request.method == 'POST':
-        # create product object
-        new_product = Product.objects.create(
-            product_code=request.POST.get('product-id'),
-            product_name=request.POST.get('product-name'),
-            category=request.POST.get('category'),
-            description=request.POST.get('product-description'),
-            starting_price=request.POST.get('starting-price') or 0.00,  #default to 0.00 if no input
-            MOQ=request.POST.get('moq') or 1 #default to 1 if no input
+        try:
+            # Attempt to create the product (NO DEFAULTS for Price/MOQ)
+            new_product = Product.objects.create(
+                product_code=request.POST.get('product-id'),
+                product_name=request.POST.get('product-name'),
+                category=request.POST.get('category'),
+                description=request.POST.get('product-description'),
+                starting_price=request.POST.get('starting-price'), 
+                MOQ=request.POST.get('moq')                        
+            )
+
+            # create ProductColor objects for each color input
+            color_list = request.POST.getlist('colors[]')
+            for color_val in color_list:
+                if color_val.strip():
+                    ProductColor.objects.create(
+                        product_id=new_product, 
+                        product_color=color_val
+                    )
+
+            # Append Images
+            image_files = request.FILES.getlist('photos[]')
+            if image_files:
+                for img in image_files:
+                    ProductImage.objects.create(product_id=new_product, product_image=img)
+
+            # Success message
+            messages.success(request, "Product added successfully!")
+            return redirect('catalog')
+
+        except IntegrityError:
+            # TC 5: Catches duplicate product code error
+            messages.error(request, "Product Code already exists.")
+            return redirect('catalog')
+
+    # --- GET REQUEST: FETCHING, SEARCHING, AND FILTERING ---
+    products = Product.objects.all()
+
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        products = products.filter(
+            Q(product_name__icontains=search_query) | 
+            Q(product_code__icontains=search_query)
         )
 
-        # create ProductColor objects for each color input
+    category_filter = request.GET.get('filter', 'all')
+    if category_filter != 'all':
+        category_dict = dict(Product.CATEGORY_CHOICES)
+        mapped_category = category_dict.get(category_filter)
+        
+        if mapped_category:
+            products = products.filter(category=mapped_category)
+
+    context = {
+        'products': products,
+        'category_choices': Product.CATEGORY_CHOICES,
+    }
+
+    return render(request, 'bvtc_app/catalog.html', context)
+
+def edit_product(request, pk):
+    # Fetch the specific product we want to edit
+    product = Product.objects.get(product_id=pk)
+
+    if request.method == 'POST':
+        product.product_name = request.POST.get('product-name', product.product_name)
+        product.category = request.POST.get('category', product.category)
+        product.description = request.POST.get('product-description', product.description)
+        
+        product.starting_price = request.POST.get('starting-price') or product.starting_price
+        product.MOQ = request.POST.get('moq') or product.MOQ
+        
+        product.save()
+
+        ProductColor.objects.filter(product_id=product).delete()
+        
         color_list = request.POST.getlist('colors[]')
         for color_val in color_list:
             if color_val.strip():
-                ProductColor.objects.create(
-                    product_id=new_product, 
-                    product_color=color_val
-                )
+                ProductColor.objects.create(product_id=product, product_color=color_val)
 
-        # create ProductImage objects for each
         image_files = request.FILES.getlist('photos[]')
-        for img in image_files:
-            ProductImage.objects.create(
-                product_id=new_product, 
-                product_image=img
-            )
+        if image_files:
+            for img in image_files:
+                ProductImage.objects.create(product_id=product, product_image=img)
 
-        return redirect('catalog')
+        # edit success message popup
+        messages.success(request, "Product updated successfully!")
 
-    # fetch all products including admin-inputs
-    products = Product.objects.all()
-    return render(request, 'bvtc_app/catalog.html', {'products': products})
+    return redirect('catalog')
+
+def delete_product(request, pk):
+    product = Product.objects.get(product_id=pk)
+    
+    # save product name for deletion message
+    deleted_name = product.product_name 
+    
+    product.delete()
+
+    #delete success message
+    messages.success(request, f"'{deleted_name}' was deleted successfully!")
+    
+    return redirect('catalog')
 
 def orders(request):
     orders = Order.objects.all()
     return render(request, 'bvtc_app/orders.html', {'orders': orders})
 
 def add_order(request):
-    return render(request, 'bvtc_app/add_order.html')
+    if request.method == 'POST':
+        print("--- POST received ---")
+        print("POST data:", request.POST)
+        try:
+            # get variables
+            customer_id = request.POST.get('customer-id')  # value from the select
+            customer = CustomerAccount.objects.get(customer_id=customer_id)
+
+            shipping_id = request.POST.get('shipping')
+            shipping = ShippingDetails.objects.get(shipping_id=shipping_id)
+
+            order_data_raw = request.POST.get('order_data', '[]')
+
+            print("customer_id wow:", customer_id)          # Checkpoint 2: is the customer ID coming through?
+            print("shipping_id zing:", shipping_id)          # Checkpoint 3: is the shipping ID coming through?
+            print("order_data_raw hoo:", order_data_raw)
+
+            # TEMPORARY, CHANGE ONCE LOGIN IS IMPLEMENTED ------------------------------------------------------------------------------------------------------------------
+            from .models import UserAccount
+            user = UserAccount.objects.first()  # swap out once auth is added
+
+            # map form values to model field choices
+            payment_mode_map = {
+                'metrobank': 'Metrobank Fund Transfer',
+                'bpi': 'BPI Bank Transfer',
+                'gcash': 'GCash Payment',
+            }
+            payment_terms_map = {
+                'partial': 'Partial',
+                'full': 'Full',
+            }
+            platform_map = {
+                'email': 'Email',
+                'messenger': 'Messenger',
+                'viber': 'Viber',
+            }
+
+            # create order instance
+            print("Attempting to create order...")
+            new_order = Order.objects.create(
+                customer_id=customer,
+                user_id=user,
+                shipping_id=shipping,
+                mode_of_payment=payment_mode_map.get(request.POST.get('payment-mode'), 'Metrobank Fund Transfer'),
+                payment_terms=payment_terms_map.get(request.POST.get('payment-terms'), 'Partial'),
+                budget=request.POST.get('budget') or 0,
+                start_of_production=request.POST.get('production-start') or timezone.now().date(),
+                delivery_date=request.POST.get('delivery-date') or None,
+                transaction_platform=platform_map.get(request.POST.get('transaction-platform'), 'Email'),
+                link_to_logo=request.POST.get('logo-link') or None,
+                packing_instructions=request.POST.get('instructions') or None,
+                courier=request.POST.get('courier', 'N/A'),
+            )
+            print("Order created with ID:", new_order.order_id)
+
+            # create order item rows ---
+            order_items = json.loads(order_data_raw)
+
+            total = 0
+            for item in order_items:
+                product = Product.objects.get(product_id=item['db_id'])
+                qty   = int(item.get('qty', 1))
+                price = float(item.get('price', 0))
+
+                OrderItem.objects.create(
+                    order_id=new_order,
+                    product_id=product,
+                    color=item.get('color', ''),
+                    customization=item.get('custom', ''),
+                    quantity=qty,
+                    price=price,
+                )
+                total += qty * price
+
+            # computed total save to order
+            new_order.initial_total_price = total
+            new_order.total_amount = total
+            new_order.save()
+
+            messages.success(request, f"Order #{new_order.order_id} created successfully!")
+            return redirect('orders')
+
+        except CustomerAccount.DoesNotExist:
+            messages.error(request, "Selected customer not found.")
+        except ShippingDetails.DoesNotExist:
+            messages.error(request, "Selected shipping address not found.")
+        except json.JSONDecodeError:
+            messages.error(request, "Cart data was corrupted. Please re-add your items.")
+        except Exception as e:
+            print("ERROR:", type(e).__name__, "-", e)
+            messages.error(request, f"Something went wrong: {e}")
+
+        return redirect('add_order')
+
+    # --- GET: just render the form ---
+    companies = Company.objects.all()
+    customers = CustomerAccount.objects.all()
+    return render(request, 'bvtc_app/add_order.html', {'companies': companies, 'all_customers': customers})
+
+# --- UC-19: ADD CUSTOMER LOGIC ---
+def add_customer(request):
+    if request.method == 'POST':
+        try:
+            # 1. Basic Info
+            first_name = request.POST.get('first-name', '').strip()
+            last_name = request.POST.get('last-name', '').strip()
+            customer_name = f"{first_name} {last_name}"
+            
+            # 2. Contact Details
+            email = request.POST.get('email-address', '')
+            contact_number = request.POST.get('contact-number', '')
+            messenger = request.POST.get('messenger', '')
+            viber = request.POST.get('viber', '')
+
+            # 3. Company Logic (New vs Existing)
+            company_details_type = request.POST.get('company-details')
+            
+            if company_details_type == 'new-company':
+                company = Company.objects.create(
+                    company_name=request.POST.get('company-name'),
+                    company_address=request.POST.get('company-address'),
+                    tin_number=request.POST.get('tin-number'),
+                    company_logo=request.FILES.get('logo') 
+                )
+            else:
+                company_id = request.POST.get('company')
+                company = Company.objects.get(company_id=company_id)
+
+            # 4. Save Customer
+            CustomerAccount.objects.create(
+                company_id=company,
+                customer_name=customer_name,
+                customer_email=email,
+                customer_phone_number=contact_number,
+                messenger=messenger,
+                viber=viber
+            )
+
+            messages.success(request, f"Customer {customer_name} added successfully!")
+            return redirect(request.META.get('HTTP_REFERER', 'customers'))
+
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect(request.META.get('HTTP_REFERER', 'customers'))
+
+    return redirect('customers')
+
+# --- UC-20: ADD SHIPPING PLACEHOLDER ---
+def add_shipping(request):
+    if request.method == 'POST':
+        # Logic will be implemented here next
+        return redirect(request.META.get('HTTP_REFERER', 'customers'))
+    return redirect('customers')
+
+def load_customers(request):
+    company_id = request.GET.get('company-id')
+    if company_id:
+        customers = CustomerAccount.objects.filter(company_id_id=company_id).order_by('customer_name')
+    else:
+        customers = CustomerAccount.objects.none()
+    
+    return render(request, 'bvtc_app/partials/customer_options.html', {'customers': customers})
+
+def load_shipping(request):
+    customer_id = request.GET.get('customer-id') 
+    if customer_id:
+        addresses = ShippingDetails.objects.filter(customer_id_id=customer_id)
+    else:
+        addresses = ShippingDetails.objects.none()
+
+    return render(request, 'bvtc_app/partials/shipping_options.html', {'addresses': addresses})
 
 def add_item(request):
     products = Product.objects.all()
@@ -49,3 +296,18 @@ def add_item(request):
 
 def quotations(request):
     return render(request, 'bvtc_app/quotations.html')
+
+def billings(request):
+    return render(request, 'bvtc_app/billings.html')
+
+def customers(request):
+    # Updated to fetch the correct context for your template
+    all_companies = Company.objects.all()
+    all_customers = CustomerAccount.objects.all()
+    return render(request, 'bvtc_app/customers.html', {
+        'companies': all_companies, 
+        'all_customers': all_customers
+    })
+
+def profile(request):
+    return render(request, 'bvtc_app/profile.html')

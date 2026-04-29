@@ -129,6 +129,8 @@ main .filter {
     align-items: center;
     flex: 1 0 0;
 }
+
+/* Product Catalog */
 .catalog {
     display: flex;
     justify-content: center;
@@ -139,20 +141,19 @@ main .filter {
 }
 .product-card {
     display: flex;
-    padding: 12px;
+    /* padding: 12px; */
     max-width: 250px;
     align-self: stretch;
     flex-direction: column;
     align-items: flex-start;
     border-radius: 3px;
-    gap: 12px;
-    color: var(--alternative-black);
+    /* gap: 12px; */
     background: var(--pure-white);
     box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.10);
+    cursor: pointer;
 }
 .product-card:hover {
-    padding-bottom: 9px;
-    border-bottom: 3px solid var(--orient-blue);
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.25);
 }
 .thumbnail {
     max-width: 100%;
@@ -180,6 +181,7 @@ main .filter {
     justify-content: flex-start;
     align-items: center;
     gap: 6px;
+    margin: 0;
     align-self: flex-start;
     border-radius: 3px;
     background: var(--warm-light-gray);
@@ -195,6 +197,7 @@ main .filter {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+    padding: 12px;
     align-self: stretch;
 }
 .product-details h2 {
@@ -213,6 +216,8 @@ main .filter {
     gap: 5px;
     align-self: stretch;
 }
+
+/* Dashboard */
 .dashboard {
     display: flex;
     padding: 15px;
@@ -278,6 +283,44 @@ main .filter {
     box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.10);
 }
 
+/* Order */
+.status-pill,
+.status-btn {
+    display: inline-flex;
+    padding: 6px 9px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    width: max-content;
+    border-radius: 25px;
+}
+.status-btn:hover {
+    opacity: 0.9;
+    cursor: pointer;
+}
+.status-dropdown {
+    position: relative;
+}
+.status-dropdown-content {
+    position: absolute;
+    display: none;
+    padding: 9px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 9px;
+    border-radius: 3px;
+    background: #FFF;
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.10);
+}
+.status-dropdown-content a {
+    white-space: nowrap;;
+}
+.status-dropdown:hover .status-dropdown-content {
+    display: flex;
+}
+
 /* Table */
 .database {
     align-self: stretch;
@@ -292,7 +335,7 @@ main .filter {
     font-weight: 700;
     padding: 6px 12px;
 }
-.database td {
+.database tbody td {
     padding: 15px 9px;
     justify-content: center;
     align-items: center;
@@ -324,10 +367,10 @@ main .filter {
     text-align: center;
     font-size: 12px;
     font-weight: 700;
-    padding: 6px 12px;
+    padding: 3px 9px;
 }
 .small-database td {
-    padding: 9px 6px;
+    padding: 6px 9px;
     justify-content: center;
     align-items: center;
     font-size: 12px;
@@ -350,31 +393,38 @@ main .filter {
 
 /* Modals */
 .modal-container {
-    background-color: rgba(0, 0, 0, 0.50);
-    display: none;
-    align-items: center;
-    justify-content: center;
     position: fixed;
-    z-index: 1000;
-    inset: 0;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none; 
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    /* This allows clicks to be captured by the backdrop */
+    pointer-events: auto; 
 }
 .modal-container.show {
     display: flex;
     pointer-events: auto;
     opacity: 1;
+    animation: dissolve 0.2s ease-in-out;
 }
 .modal {
     display: flex;
     background-color: var(--pure-white);
     border-radius: 3px;
-    border-top: 6px solid var(--astronaut-blue);
+    border-top: 3px solid var(--astronaut-blue);
     box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.09);
     padding: 24px;
     max-width: 100%;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    pointer-events: auto;
+    z-index: 10000;
 }
 .modal form {
     display: flex;
@@ -386,11 +436,16 @@ main .filter {
     align-self: stretch;
     font-size: 21px;
     font-weight: 700;
+    white-space: nowrap;
     color: var(--zodiac-blue);
 }
 .modal h2 {
     font-size: 10px;
     font-weight: 400;
+}
+.modal .required-message {
+    font-size: 10px;
+    font-weight: 500;
 }
 .modal .divider {
     display: flex;
@@ -412,10 +467,11 @@ main .filter {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: left;
+    align-items: flex-start;
     gap: 12px;
     align-self: stretch;
     flex: 1 0 0;
+    min-width: 0;
 }
 .horizontal-section {
     display: flex;
@@ -425,6 +481,24 @@ main .filter {
     gap: 12px;
     align-self: stretch;
     flex: 1 0 0;
+    min-width: 0;
+}
+
+/* Modal Inputs */
+.error-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+}
+.error-wrap .input {
+    width: 100%;
+    box-sizing: border-box;
+}
+.error-msg {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--vintage-maroon);
 }
 .modal .info {
     display: flex;
@@ -438,21 +512,66 @@ main .filter {
 }
 .vertical-input-field {
     display: flex;
-    flex: 1 0 0;
+    width: 100%;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: left;
+    align-items: stretch;
     gap: 6px;
     align-self: stretch;
 }
 .horizontal-input-field {
     display: flex;
-    flex: 1 0 0;
+    flex: 1;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
     gap: 6px;
     align-self: stretch;
+}
+.color-container {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-content: flex-start;
+    align-items: flex-start;
+    gap: 6px;
+    align-self: stretch;
+    width: 100%;
+    flex-wrap: wrap;
+}
+.color-input-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: flex-start;
+    max-height: 120px;
+    overflow-y: auto;
+    padding: 4px;
+}
+.color-input-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex: 0 1;
+    width: auto;
+}
+.color-input-row .input {
+    width: 100px;
+    flex: none;
+}
+.add-color-btn, .remove-color-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    border: 0;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 3px;
+    background: var(--warm-light-gray);
+    color: var(--gray);
 }
 .modal .content {
     font-size: 14px;
@@ -462,40 +581,115 @@ main .filter {
     color: var(--alternative-black);
     font-size: 14px;
     font-weight: 500;
+    white-space: nowrap;
 }
 .modal .input {
     display: flex;
-    flex: 1 0 0;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
     padding: 9px;
     align-items: center;
     gap: 12px;
-    align-self: stretch;
     border-radius: 3px;
     background: var(--warm-light-gray);
     border: none;
     font-weight: 700;
 }
+.modal .input:disabled {
+    background: var(--off-white);
+}
+.modal .input.error-border {
+    border: 2px solid var(--vintage-maroon) !important;
+    background: fff5f5;
+}
+.modal textarea.input {
+    display: block;
+    width: 100%;
+    min-height: 50px;
+    align-self: stretch;
+    resize: vertical;
+    box-sizing: border-box;
+}
 .modal .file-upload {
     display: flex;
-    max-height: 21px;
-    padding: 10px;
+    height: 34px;
+    max-width: 100%;
+    padding: 0 9px;
     justify-content: center;
     align-items: center;
-    overflow-y: hidden;
+    overflow: hidden;
     gap: 10px;
     align-self: stretch;
     border-radius: 3px;
     color: var(--gray);
     background: var(--warm-light-gray);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    min-width: 0;
 }
-.modal .buttons-section {
+.modal .file-upload label {
     display: flex;
-    flex-direction: row;
-    justify-content: right;
-    align-items: flex-end;
-    gap: 9px;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+    min-width: 0;
+}
+.modal .file-text {
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    min-width: 0;
+}
+
+/* For Notification Modals */
+.notif-modal {
+    display: flex;
+    width: 300px;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 3px;
+    background: var(--pure-white);
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.10);
+}
+.notif-modal .header-warning,
+.notif-modal .header-success {
+    display: flex;
+    padding: 15px;
+    align-items: center;
+    gap: 10px;
     align-self: stretch;
+    border-radius: 3px 3px 0 0;
+    color: var(--pure-white);
+}
+.notif-modal .header-success {
+    background: var(--Astronaut-Blue, #013C58);
+}
+.notif-modal .header-warning {
+    background: var(--Vintage-Maroon, #621D1D);
+}
+.notif-modal h1 {
+    flex: 1 0 0;
+}
+.notif-modal .body {
+    display: flex;
+    padding: 15px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    align-self: stretch;
+    border-radius: 0 0 3px 3px;
+}
+.notif-modal p {
+    align-self: stretch;
+    color: #000;
+    text-align: center;
 }
 
 /* For Modal Responsiveness */
@@ -505,18 +699,33 @@ main .filter {
 .product-view {
     flex: 0 0 800px;
 }
+.order-view {
+    flex: 0 0 1080px;
+}
+.customer-form,
+.view-customer {
+    max-width: 600px;
+}
+.shipping-form {
+    width: 500px;
+    max-width: 500px;
+}
 
 /* Carousel from w3schools*/
 /* Slideshow container */
 .slideshow-container {
     position: relative;
+    width: 100%;
+    /* max-width: 350px; */
+    margin: 0 auto;
 }
 .slideshow-container .img-container {
-    max-width: 100%;
+    width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: 3px;
     background: var(--warm-light-gray);
+    display: block;
 }
 /* Hide the images by default */
 .mySlides {
@@ -547,6 +756,16 @@ main .filter {
     background-color: var(--alternative-black);
 }
 /* The dots/bullets/indicators */
+.dot-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 0;
+    align-self: stretch;
+    margin: 0 auto;
+}
 .dot {
     cursor: pointer;
     height: 9px;
@@ -556,9 +775,31 @@ main .filter {
     border-radius: 50%;
     display: inline-block;
     transition: background-color 0.1s ease;
+    flex-shrink: 0;
 }
 .active, .dot:hover {
     background-color: var(--alternative-black);
+}
+
+/* Alerts */
+.alert-box {
+    padding: 12px 20px; 
+    border-radius: 6px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+    margin-bottom: 20px;
+    transition: opacity 0.5s ease;
+}
+.alert-error {
+    background-color: #fdeaea; 
+    color: #d92d20; 
+    border: 1px solid #fecaca;
+}
+.alert-success {
+    background-color: #eefdf3; 
+    color: #027a48; 
+    border: 1px solid #a6f4c5;
 }
 
 /* Inputs */
@@ -566,17 +807,28 @@ main .filter {
     display: none;
 }
 .filter-input:checked + .filter-label {
-    background: var(--warm-light-gray);
+    background: var(--cool-light-gray);
 }
-.filter-label {
+.filter-input:checked + .color-filter-label {
+    background: var(--cool-light-gray);
+    padding: 5px 8px;
+    border: 1px solid var(--gray);
+}
+.filter-label,
+.color-filter-label {
     display: inline-flex;
     padding: 6px 9px;
     justify-content: center;
     align-items: center;
     gap: 10px;
     border-radius: 3px;
+    cursor: pointer;
 }
-.filter-label:hover {
+.color-filter-label {
+    background: var(--warm-light-gray);
+}
+.filter-label:hover,
+.color-filter-label:hover {
     background: var(--warm-light-gray);
 }
 .search-bar {
@@ -612,6 +864,12 @@ main .filter {
 .vertical-section:has(#existing-shipping:checked) .for-existing-shipping {
     display: flex;
 }
+.vertical-section:has(#new-company:checked) .for-new-company {
+    display: flex;
+}
+.vertical-section:has(#existing-company:checked) .for-existing-company {
+    display: flex;
+}
 
 /* Icons */
 .material-symbols-outlined {
@@ -642,6 +900,7 @@ aside button {
     background: none;
     border: 0;
     border-radius: 3px;
+    cursor: pointer;
 }
 aside button:hover {
     background: var(--warm-light-gray);
@@ -669,37 +928,51 @@ aside.expand .arrow {
 nav.expand {
     width: calc(100vw - 150px);
 }
+.buttons-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: flex-end;
+    gap: 9px;
+    align-self: stretch;
+}
+.close-btn {
+    margin: 0;
+    cursor: pointer;
+}
 .button-primary {
     display: inline-flex;
-    padding: 9px 12px;
+    padding: 9px 18px;
     justify-content: center;
     align-items: center;
     gap: 3px;
     border: 0;
     border-radius: 3px;
     background: var(--astronaut-blue);
-    color: var(--off-white); 
+    color: var(--off-white);
+    cursor: pointer; 
 }
 .button-primary:hover {
     background: var(--zodiac-blue);
 }
 .button-secondary {
     display: inline-flex;
-    padding: 9px 12px;
+    padding: 9px 18px;
     justify-content: center;
     align-items: center;
     gap: 3px;
     border: 0;
     border-radius: 3px;
     color: var(--alternative-black);
-    background: var(--light-gray); 
+    background: var(--light-gray);
+    cursor: pointer; 
 }
 .button-secondary:hover{
     background: var(--gray);
 }
 .button-tertiary {
     display: flex;
-    padding: 9px 12px;
+    padding: 9px 18px;
     justify-content: center;
     align-items: center;
     gap: 3px;
@@ -707,13 +980,14 @@ nav.expand {
     border-radius: 3px;
     color: var(--off-white);
     background: var(--vintage-maroon);
+    cursor: pointer;
 }
 .button-tertiary:hover {
     background: var(--dark-maroon);
 }
 .m-button-primary {
     display: flex;
-    padding: 6px 9px;
+    padding: 6px 12px;
     justify-content: center;
     align-items: center;
     gap: 9px;
@@ -721,13 +995,14 @@ nav.expand {
     border-radius: 3px;
     color: var(--off-white);
     background: var(--orient-blue);
+    cursor: pointer;
 }
 .m-button-primary:hover {
     background: var(--astronaut-blue);
 }
 .m-button-secondary {
     display: flex;
-    padding: 6px 9px;
+    padding: 6px 12px;
     justify-content: center;
     align-items: center;
     gap: 9px;
@@ -735,6 +1010,7 @@ nav.expand {
     border-radius: 3px;
     color: var(--alternative-black);
     background: var(--light-gray);
+    cursor: pointer;
 }
 .m-button-primary a {
     color: var(--alternative-black);
@@ -744,7 +1020,7 @@ nav.expand {
 }
 .m-button-tertiary {
     display: flex;
-    padding: 6px 9px;
+    padding: 6px 12px;
     justify-content: center;
     align-items: center;
     gap: 9px;
@@ -752,6 +1028,7 @@ nav.expand {
     border-radius: 3px;
     color: var(--off-white);
     background: var(--vintage-maroon);
+    cursor: pointer;
 }
 .m-button-tertiary:hover {
     background: var(--dark-maroon);
@@ -951,4 +1228,10 @@ nav.expand {
         font-size: 7px;
         font-weight: 700;
     }
+}
+
+/* Animation */
+@keyframes dissolve {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

@@ -12,7 +12,9 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <link rel="stylesheet" href="{% static '/css/style.css' %}">
     <script type="text/javascript" src="{% static '/js/app.js' %}" defer></script>
+    <script type="text/javascript" src="{% static 'js/htmx.min.js' %}"></script>
 </head>
+
 
 <body>
     <main>
@@ -79,7 +81,7 @@
         {% endblock %}
         
         {% block billings_button %}
-        <form action="" style="display: flex; align-self: stretch;">
+        <form action="{% url 'billings' %}" style="display: flex; align-self: stretch;">
             <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
                 <i class="material-symbols-outlined" style="font-size: 24px;">receipt</i>
                 <p class="button-text small-b">Billings</p>
@@ -88,7 +90,7 @@
         {% endblock %}
 
         {% block customers_button %}
-        <form action="" style="display: flex; align-self: stretch;">
+        <form action="{% url 'customers' %}" style="display: flex; align-self: stretch;">
             <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
                 <i class="material-symbols-outlined" style="font-size: 24px;">group</i>
                 <p class="button-text small-b">Customers</p>
@@ -97,7 +99,7 @@
         {% endblock %}
 
         {% block profile_button %}
-        <form action="" style="display: flex; align-self: stretch;">
+        <form action="{% url 'profile' %}" style="display: flex; align-self: stretch;">
             <button type="submit" style="display: flex; align-self: stretch; flex: 1 0 0;">
                 <i class="material-symbols-outlined" style="font-size: 24px;">account_box</i>
                 <p class="button-text small-b">Profile</p>
@@ -111,6 +113,9 @@
             </button>
         </div>
     </aside>
+
+    {% block scripts %}
+    {% endblock %}
 </body>
 
 {% block modals %}

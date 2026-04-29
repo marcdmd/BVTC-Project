@@ -101,77 +101,68 @@
                 <td class="small-b">{{ o.customer_id.customer_name }}</td>
                 <td class="small-b">{{ o.customer_id.company_id.company_name }}</td>
                 <td class="small-r">{{ o.delivery_date }}</td>
-                <td class="small-b">{{ o.order_status }}</td>
+                <td style="vertical-align: middle;">
+                    {% if o.order_status == 'Under Feasibility' %}
+                    <span class="status-pill" style="color: #FAF9F6; border: 2px solid #0B1E33;">
+                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                        <p class="smaller-r" >{{ o.order_status }}</p>
+                    </span>
+                    {% elif o.order_status == 'Under Quotation' %}
+                    <span class="status-pill" style="color: #013C58; border: 1px solid #013C58;">
+                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                        <p class="smaller-b" >{{ o.order_status }}</p>
+                    </span>                    
+                    {% elif o.order_status == 'In Production' %}
+                    <span class="status-pill" style="color: #00537A; border: 1px solid #00537A;">
+                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                        <p class="smaller-b" >{{ o.order_status }}</p>
+                    </span>  
+                    {% elif o.order_status == 'Sampled' %}
+                    <span class="status-pill" style="color: #F5A201; border: 1px solid #F5A201;">
+                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                        <p class="smaller-b" >{{ o.order_status }}</p>
+                    </span>                    
+                    {% elif o.order_status == 'Packaged' %}
+                    <span class="status-pill" style="color: #EDC001; border: 1px solid #EDC001;">
+                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                        <p class="smaller-b" >{{ o.order_status }}</p>
+                    </span>
+                    {% elif o.order_status == 'In Transit' %}
+                    <span class="status-pill" style="color: #00C27D; border: 1px solid #00C27D;">
+                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                        <p class="smaller-b" >{{ o.order_status }}</p>
+                    </span>
+                    {% endif %}
+                </td>
                 <td class="small-b">{{ o.user_id.user_name }}</td>
                 <td>
                     <div class="cell-buttons">
-                        <button type="button" data-modal="order-modal-{{ o.order_id }}" class="m-button-primary smaller-b">View</button>
-                        <a href="" class="m-button-secondary smaller-b">Edit</a>
+                        <button type="button"
+                                class="m-button-primary smaller-b open-view-order-modal"
+                                data-order_id = "{{ o.order_id }}"
+                                data-customer_id = "{{  o.customer_id }}"
+                                data-customer_name = "{{ o.customer_id.customer_name }}"
+                                data-company_name = "{{ o.customer_id.company_id.company_name }}"
+                                data-company_address = "{{ o.customer_id.company_id.company_address }}"
+                                data-items='[{% for oi in o.orderitem_set.all %}{"code":"{{ oi.product_id.product_code }}","color":"{{ oi.color }}","custom":"{{ oi.customization }}","qty":"{{ oi.quantity }}","price":"{{ oi.price }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                data-budget = "{{ o.budget }}"
+                                data-order_status = "{{ o.order_status }}"
+                                data-delivery_address = "{{ o.shipping_id.address_line_1 }}, {{ o.shipping_id.address_line_2 }}, {{ o.shipping_id.barangay }}, {{ o.shipping_id.address_province }} {{ o.shipping_id.address_postal_code }}"
+                                data-contact = "{{ o.shipping_id.contact_person_name }}"
+                                data-contact_number = "{{ o.shipping_id.contact_person_number }}"
+                                data-contact_email = "{{ o.shipping_id.contact_person_email }}"
+                                data-mode_of_payment = "{{ o.mode_of_payment }}"
+                                data-payment_terms = "{{ o.payment_terms }}"
+                                data-packing_instructions = "{{ o.packing_instructions }}"
+                                data-start_of_production = "{{ o.start_of_production }}"
+                                data-delivery_date = "{{ o.delivery_date }}"
+                                data-lead_time = "{{ o.lead_time }}"
+                                data-transaction_platform = "{{ o.transaction_platform }}"
+                                data-account_manager = "{{ o.user_id.user_name }}">
+                                View</button>
+                        <button type="button" class="m-button-secondary smaller-b">Edit</button>
                     </div>
                 </td>
-            
-                <div class="modal-container" id="order-modal-{{ o.order_id }}">
-                    <div class="modal product-view">
-                        <div class="horizontal-section">
-                            <div class="vertical-section" style="flex: 1 0 0;">
-                                <div class="slideshow-container" id="slideshow-{{ o.order_id }}">
-                                    {% for img in o.productimage_set.all %}
-                                    <div class="mySlides fade">
-                                        <img class="img-container" src="{{ o.product_image.url }}" alt="{{ o.product_name }}">
-                                    </div>
-                                    {% empty %}
-                                        <p class="small-r">No Mockups</p>
-                                    {% endfor %}
-                                    <a class="prev" onclick="plusSlides(-1, '{{ p.product_id }}')">&#10094;</a>
-                                    <a class="next" onclick="plusSlides(1, '{{ p.product_id }}')">&#10095;</a>
-                                </div>
-                                <div style="text-align:center">
-                                    {% for _ in p.productimage_set.all %}
-                                    <span class="dot" onclick="currentSlide('{{ forloop.counter }}', '{{ p.product_id }}')"></span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            
-                            <div class="vertical-section" style="flex: 3 0 0;">
-                                <div class="divider"><p>Client Information</p><hr></div>
-                                <p class="small-r">Client Name: <b>{{ o.customer_id.customer_name }}</b></p>
-                                <p class="small-r">Company Name: <b>{{ o.customer_id.company_id.company_name }}</b></p>
-                                <p class="small-r">Company Address: <b>{{ o.customer_id.company_id.company_address }}</b></p>
-
-                                <div class="divider"><p>Order Details</p><hr></div>
-                                <div class="horizontal-input-field">
-                                    <div class="horizontal-input-field">
-                                        <p class="small-r">Budget: <b>{{ o.budget }}</b></p>
-                                    </div>
-
-                                    <div class="horizontal-input-field">
-                                        <a href="" class="m-button-primary small-m" style="white-space: nowrap;">View Feasibility Report</a>
-                                        <a href="" class="m-button-primary small-m" style="white-space: nowrap;">View Samples</a>
-                                    </div>
-                                </div>
-
-                                <div class="vertical-section">
-                                    {% for oi in o.orderitems_set.all %}
-                                        <p class="small-r"><b>{{ oi.order_id }}-{{ oi.product_id }}</b>: {{ oi.customization }}, {{ oi.quantity }}, {{ oi.price }}</p>
-                                    {% endfor %}
-                                </div>
-
-                                <div class="divider"><p>Shipping Details</p><hr></div>
-                                <p class="small-r">Delivery Address: <b>{{ o.shipping_id.address_city }}</b></p>
-                                <p class="small-r">Budget: <b>{{ o.budget }}</b></p>
-                                <p class="small-r">Budget: <b>{{ o.budget }}</b></p>
-                                <p class="small-r">Budget: <b>{{ o.budget }}</b></p>
-                                
-                                <div class="divider"><hr></div>
-                                <div class="buttons-section">
-                                    <a href="" class="button-tertiary small-m">Cancel</a>
-                                    <a href="" class="button-primary small-m">Edit</a>
-                                    <button type="button" class="close-modal button-secondary small-m">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </tr>
             {% endfor %}
         </tbody>
@@ -180,4 +171,164 @@
 {% endblock %}
 
 {% block modals %}
+<div class="modal-container" id="viewOrderModal">
+    <div class="modal order-view">
+        <div class="horizontal-section">
+            <div class="vertical-section">
+                <div class="horizontal-section" style="flex: 0; align-items: center; justify-content: flex-start;">
+                    <p class="small-r">Order no. <b id="order_order_id"></b></p>
+                    <div class="status-dropdown">
+                        <button class="status-btn">
+                            <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                            <p class="smaller-b" id="order_order_status"></p>
+                        </button>
+
+                        <div class="status-dropdown-content">
+                            <a href="#" class="status-btn" style="color: #FAF9F6; background: #0B1E33; flex: 0; align-items: center; justify-content: flex-start;">
+                                <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                                <p class="smaller-b">Under Feasibility</p>
+                            </a>
+                            
+                            <a href="#" class="status-btn" style="color: #FAF9F6; background: #013C58; flex: 0; align-items: center; justify-content: flex-start;">
+                                <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                                <p class="smaller-b">Under Quotation</p>
+                            </a>
+                            
+                            <a href="#" class="status-btn" style="color: #FAF9F6; background: #00537A; flex: 0; align-items: center; justify-content: flex-start;">
+                                <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                                <p class="smaller-b">In Production</p>
+                            </a>
+                            
+                            <a href="#" class="status-btn" style="color: #101212; background: #F5A201; flex: 0; align-items: center; justify-content: flex-start;">
+                                <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                                <p class="smaller-b">Sampled</p>
+                            </a>
+                            
+                            <a href="#" class="status-btn" style="color: #101212; background: #EDC001; flex: 0; align-items: center; justify-content: flex-start;">
+                                <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                                <p class="smaller-b">Packaged</p>
+                            </a>
+                            
+                            <a href="#" class="status-btn" style="color: #101212; background: #00C27D; flex: 0; align-items: center; justify-content: flex-start;">
+                                <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                                <p class="smaller-b">In Transit</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slideshow-container" id="slideshow-view">
+                    <!-- JS handles injection of slides -->
+                    <a class="prev" onclick="plusSlides(-1, 'view')">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1, 'view')">&#10095;</a>
+                </div>
+
+                <div class="dot-container" style="text-align: center">
+                    <!-- JS handles injection of dots -->
+                </div>
+            </div>
+            
+            <div class="vertical-section" style="flex: 1.5 0 0;">
+                <div class="divider"><p>Client Information</p><hr></div>
+                <div class="horizontal-section" style="flex-wrap: wrap; justify-content: flex-start; gap: 6px; flex: 0;">
+                    <p class="small-r">Client Name: <b id="order_customer_name"></b></p>•
+                    <p class="small-r">Company Name: <b id="order_company_name"></b></p>•
+                    <p class="small-r">Company Address: <b id="order_company_address"></b></p>
+                </div>
+
+                <div class="divider"><p>Order Details</p><hr></div>
+                <div class="horizontal-input-field" style="justify-content: space-between;">
+                    <div class="horizontal-input-field">
+                        <p class="small-r">Budget: <b id="order_budget"></b></p>
+                    </div>
+
+                    <div class="buttons-section">
+                        <button type="button" class="m-button-primary smaller-r" style="white-space: nowrap;">View Feasibility Report</button>
+                        <button type="button" class="m-button-primary smaller-r" style="white-space: nowrap;">View Samples</button>
+                    </div>
+                </div>
+
+                <div class="vertical-section" style="gap: 0;">
+                    <div class="vertical-section" style="flex: none; height: max-content; max-height: 120px; overflow-y: auto; display: block;">
+                        <table class="small-database" style="width: 100%; border-collapse: collapse;">
+                            <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                                <tr>
+                                    <th>PRODUCT CODE</th>
+                                    <th>COLOR</th>
+                                    <th>CUSTOMIZATION</th>
+                                    <th>QUANTITY</th>
+                                    <th>PRICE</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="order-items-body">
+                                <!-- JS will handle injection of order items -->
+                            </tbody>                            
+                        </table>
+                    </div>
+
+                    <table class="small-database">
+                        <tbody>
+                            <tr style="border-bottom: 0; border-top: 1px solid #E9E6E3;">
+                            <td style="width: 30%;"></td>
+                            <td style="width: 15%;"></td>
+                            <td style="width: 25%; font-weight: bold;">TOTAL:</td>
+                            <td style="width: 15%;"><b id="order_total_qty"></b></td>
+                            <td style="width: 15%;"><b>₱</b> <b id="order_total_price"></b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="divider"><p>Shipping Details</p><hr></div>
+                <div class="horizontal-section" style="flex-wrap: wrap; justify-content: flex-start; gap: 6px; flex: 0;">
+                    <p class="small-r">Delivery Address: <b id="order_delivery_address"></b></p>•
+                    <p class="small-r">Contact Person: <b id="order_contact"></b></p>•
+                    <p class="small-r">Contact Number: <b id="order_contact_number"></b></p>•
+                    <p class="small-r">Contact Email: <b id="order_contact_email"></b></p>•
+                    <p class="small-r">Courier: <b id=""></b></p>
+                </div>
+
+                <div class="divider"><p>Payment Details</p><hr></div>
+                    <div class="horizontal-section" style="flex-wrap: wrap; justify-content: flex-start; gap: 6px; flex: 0;">
+                        <p class="small-r">Mode of Payment: <b id="order_mode_of_payment"></b></p>•
+                        <p class="small-r">Payment Terms: <b id="order_payment_terms"></b></p>
+                    </div>
+                
+                <div class="divider"><p>Packing Instructions</p><hr></div>
+                    <div class="horizontal-section" style="flex-wrap: wrap; justify-content: flex-start; gap: 6px; flex: 0;">
+                        <div class="product-highlight" style="align-self: stretch; flex: 1 0 0;">
+                            <p class="small-r"><b id="order_packing_instructions"></b></p>
+                        </div>
+                    </div>
+                
+                <div class="divider"><p>Production Details</p><hr></div>
+                    <div class="horizontal-section" style="flex-wrap: wrap; justify-content: flex-start; gap: 6px; flex: 0;">
+                        <p class="small-r">Start of Production: <b id="order_start_of_production"></b></p>•
+                        <p class="small-r">Delivery Date: <b id="order_delivery_date"></b></p>•
+                        <p class="small-r">Lead Time: <b id="order_lead_time"></b></p>
+                    </div>
+                
+                <div class="divider"><hr></div>
+                <div class="buttons-section" style="align-items: center;">
+                    <div class="horizontal-input-field">
+                        <p class="small-r" style="color: #898989; white-space: nowrap;">Platform: <b id="order_transaction_platform"></b></p>•
+                        <p class="small-r" style="color: #898989; white-space: nowrap;">Account Manager: <b id="order_account_manager"></b></p>
+                    </div>
+
+                    <button type="button" href="" class="button-tertiary small-m">Cancel</button>
+                    <button type="button" href="" class="button-primary small-m">Edit</button>
+                    <button type="button" class="close-modal button-secondary small-m">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Reset Order Items
+    localStorage.removeItem('pendingOrderItems');
+</script>
 {% endblock %}

@@ -1,0 +1,347 @@
+{% extends 'bvtc_app/base.html' %}
+{% load static %}
+
+{% block title %}Customers{% endblock %}
+
+{% block nav %}
+<h1 class="bold">Customer Accounts</h1>
+{% endblock %}
+
+{% block customers_button %}
+<button type="submit" style="background: #E9E6E3;">
+    <i class="material-symbols-rounded" style="font-size: 24px;">group</i>
+    <p class="button-text small-b">Customers</p>
+</button>
+{% endblock %}
+
+{% block main %}
+<div class="tracker">
+    <div class="horizontal-section">
+        <form action="" class="filter">
+            <p class="small-r filter-name" style="padding: 6px 15px 6px 15px;">Sort by:</p>
+            <input class="filter-input" type="radio" name="sort-by" value="client-name" id="client-name" checked>
+            <label class="filter-label small-b" for="client-name">Client Name</label>
+
+            <input class="filter-input" type="radio" name="sort-by" value="company-name" id="company-name">
+            <label class="filter-label small-b" for="company-name">Company Name</label>
+        </form>
+
+        <div class="actions">
+            <form action="" class="search-area">
+                <input type="search" class="search-bar" placeholder="Search">
+            </form>
+            <button type="button" class="button-primary small-m open-add-customer-modal" id="openAddCustomerModal">
+                <i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add New Customer
+            </button>
+        </div>
+    </div>
+
+    <table class="database">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>NO.</th>
+                <th>CUSTOMER NAME</th>
+                <th>COMPANY NAME</th>
+                <th>EMAIL ADDRESS</th>
+                <th>CONTACT NUMBER</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for c in all_customers %}
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>{{ forloop.counter }}</td>
+                <td class="bold">{{ c.customer_name }}</td>
+                <td>{{ c.company_id.company_name }}</td>
+                <td>{{ c.customer_email }}</td>
+                <td>{{ c.customer_phone_number }}</td>
+                <td>
+                    <div class="cell-buttons">
+                        <button type="button" class="m-button-secondary small-m">View</button>
+                        <button type="button" class="m-button-primary small-m">Edit</button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 20px;">No customers found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal-container" id="addCustomerModal">
+    <div class="modal customer-form">
+        <h1>Add New Customer</h1>
+        <div style="display: flex; flex-direction: row;">
+            <p class="required-message"><span>*</span> Required</p>
+        </div>
+
+        <form action="{% url 'add_customer' %}" method="POST" enctype="multipart/form-data" id="addCustomerForm">
+            {% csrf_token %}
+            <div class="divider"><p>Basic Information</p><hr></div>
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="first-name"><span>*</span> First Name:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" id="first-name" name="first-name" maxlength="150" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="last-name"><span>*</span> Last Name:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" id="last-name" name="last-name" maxlength="150" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-input-field">
+                <label for="home-address"><span>*</span> Home Address:</label>
+                <div class="error-wrap">
+                    <input class="input" type="text" id="home-address" name="home-address" maxlength="320" required>
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+
+            <div class="divider"><p>Company Information</p><hr></div>
+            <div class="vertical-section" style="height: max-content; max-height: max-content;">
+                <div class="horizontal-input-field" style="flex: 1;">
+                    <label><span>*</span> Company Details:</label>
+
+                    <input type="radio" value="new-company" name="company-details" id="new-company" checked>
+                    <label for="new-company">New</label>
+                    
+                    <input type="radio" value="existing-company" name="company-details" id="existing-company">
+                    <label for="existing-company">Existing</label>
+                </div>
+                
+                <div class="for-new-company details" id="newCompanyFields" style="width: 100%;">
+                    <div class="vertical-section">
+                        <div class="horizontal-section">
+                            <div class="file-upload" style="height: 100%;">
+                                <label style="cursor: pointer;">
+                                    <span><i class="material-symbols-outlined" style="font-size: 12px; color: #898989;">add</i></span>
+                                    <span class="file-text" style="color: #898989;"> Add Company Logo</span>
+                                    <input name="logo" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                </label>
+                            </div>
+
+                            <div class="vertical-section">
+                                <div class="horizontal-input-field">
+                                    <label for="company-name"><span>*</span> Company Name:</label>
+                                    <input type="text" class="input" id="company-name" name="company-name" maxlength="150">
+                                </div>
+
+                                <div class="horizontal-input-field">
+                                    <label for="company-address"><span>*</span> Company Address:</label>
+                                    <input type="text" class="input" id="company-address" name="company-address" maxlength="150">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="horizontal-input-field">
+                            <label for="tin-number">Tin Number:</label>
+                            <div class="error-wrap">
+                                <input type="number" class="input" id="tin-number" name="tin-number">
+                                <span class="error-msg"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="for-existing-company details" id="existingCompanyFields" style="width: 100%; display: none;">
+                    <div class="horizontal-input-field">
+                        <label for="company"><span>*</span> Company Name:</label>
+                        <select class="input" name="company" id="company">
+                            <option value="" hidden>Select a company</option>
+                            {% for comp in companies %}
+                                <option value="{{ comp.company_id }}">{{ comp.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>  
+            </div>
+
+            <div class="divider"><p>Contact Details</p><hr></div>
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="email-address"><span>*</span> Email Address:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="email" name="email-address" id="email-address" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="contact-number"><span>*</span> Contact Number:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" name="contact-number" id="contact-number" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="messenger"><span>*</span> Messenger:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="url" name="messenger" id="messenger" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="viber">Viber:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="url" name="viber" id="viber">
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-input-field">
+                <label for="transaction-platforms">Transaction Platforms:</label>
+                
+                <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
+                <label class="small-r" for="email-transaction">Email</label>
+
+                <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction">
+                <label class="small-r" for="messenger-transaction">Messenger</label>
+
+                <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction">
+                <label class="small-r" for="viber-transaction">Viber</label>
+            </div>
+
+            <div class="divider"><hr></div>
+            <div class="buttons-section">
+                <button type="button" class="close-modal m-button-secondary small-m" id="closeAddCustomerModal">Cancel</button>
+                <button type="submit" class="m-button-primary small-m">Add Customer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-container" id="viewCustomerModal">
+    <div class="modal view-customer">
+        <div class="vertical-section">
+            <h1>Client no.</h1>
+
+            <div class="divider"><p>Company Logo</p><hr></div>
+            <div>
+                <img class="img-container" style="max-width: 100px;" src="" alt="">
+            </div>
+        </div>
+
+        <div class="vertical-section" style="flex: 4; gap: 16px;">
+            <div class="divider"><p>Customer Information</p><hr></div>
+            <div class="vertical-section">
+                <p class="small-r">Customer Name: <b id="view_customer_name"></b></p>
+                <p class="small-r">Company Name: <b id="view_company_name"></b></p>
+                <p class="small-r">Company Address: <b id="view_company_address"></b></p>
+                <p class="small-r">Company Tin Number: <b id="view_company_tin_number"></b></p>
+                <p class="small-r">Personal Address: <b id="view_personal_address"></b></p>
+            </div>
+
+            <div class="divider"><p>Contact Details</p><hr></div>
+            <div class="vertical-section">
+                <p class="small-r">Email Address: <b id="view_customer_email_address"></b></p>
+                <p class="small-r">Contact Number: <b id="view_customer_contact_number"></b></p>
+                <p class="small-r">Messenger: <b id="view_customer_messenger"></b></p>
+                <p class="small-r">Viber: <b id="view_customer_viber"></b></p>
+            </div>
+
+            <div class="horizontal-section">
+                <label for="transaction-platforms">Transaction Platforms:</label>
+
+                <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
+                <label class="small-r" for="email-transaction">Email</label>
+
+                <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction">
+                <label class="small-r" for="messenger-transaction">Messenger</label>
+
+                <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction">
+                <label class="small-r" for="viber-transaction">Viber</label>
+            </div>
+
+            <div class="divider"><p>Shipping Details</p><hr></div>
+            <div class="vertical-section">
+                <button type="button" class="m-button-secondary">Shipping Detail</button>
+                <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 21px;">add</i></button>
+            </div>
+
+            <div class="divider"><p>On-going Transactions</p><hr></div>
+            <div class="vertical-section">
+                <table class="small-database">
+                    <thead>
+                        <tr>
+                            <th>ORDERS</th>
+                            <th>BILLING STATEMENTS</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="buttons-section">
+                <button type="submit" class="button-tertiary">Delete</button>
+                <button type="submit" class="button-primary">Edit</button>
+                <button type="submit" class="button-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('addCustomerModal');
+    const openBtn = document.getElementById('openAddCustomerModal');
+    const closeBtn = document.getElementById('closeAddCustomerModal');
+    
+    const newRadio = document.getElementById('new-company');
+    const existingRadio = document.getElementById('existing-company');
+    const newFields = document.getElementById('newCompanyFields');
+    const existingFields = document.getElementById('existingCompanyFields');
+
+    // Modal Toggle Logic
+    openBtn.onclick = () => modal.style.display = 'flex';
+    closeBtn.onclick = () => modal.style.display = 'none';
+
+    // Company Toggle Logic
+    function toggleCompany() {
+        if (newRadio.checked) {
+            newFields.style.display = 'block';
+            existingFields.style.display = 'none';
+            document.getElementById('company-name').required = true;
+            document.getElementById('company-address').required = true;
+            document.getElementById('company').required = false;
+        } else {
+            newFields.style.display = 'none';
+            existingFields.style.display = 'block';
+            document.getElementById('company-name').required = false;
+            document.getElementById('company-address').required = false;
+            document.getElementById('company').required = true;
+        }
+    }
+
+    newRadio.addEventListener('change', toggleCompany);
+    existingRadio.addEventListener('change', toggleCompany);
+});
+</script>
+{% endblock %}
