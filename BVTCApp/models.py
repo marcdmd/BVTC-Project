@@ -183,6 +183,10 @@ class Order(models.Model):
 
     freight_term = models.BooleanField(default=False)
     delivery_fee = models.BooleanField(default=False)
+    email_transaction = models.BooleanField(default=False)
+    messenger_transaction = models.BooleanField(default=False)
+    viber_transaction = models.BooleanField(default=False)
+    courier = models.CharField(max_length=50)
 
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     issue_date = models.DateField(default=timezone.now)
