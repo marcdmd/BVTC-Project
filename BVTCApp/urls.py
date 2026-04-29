@@ -22,6 +22,12 @@ urlpatterns = [
     path('customers/', views.customers, name='customers'),
     path('customers/add_customer/', views.add_customer, name='add_customer'),
     path('customers/add_shipping/', views.add_shipping, name='add_shipping'),
+    path('delete-customer/<int:pk>/', views.delete_customer, name='delete_customer'),
 
-    path('profile/', views.profile, name='profile')
+    path('profile/', views.profile, name='profile'),
+
+    # HTMX Geography Loads
+    path('ajax/load-cities/', views.load_cities, name='load_cities'),
+    path('ajax/load-barangays/', views.load_barangays, name='load_barangays'),
+    path('save-shipping-details/', views.save_shipping_details, name='save_shipping_details'),
 ]
