@@ -49,6 +49,9 @@ class CustomerAccount(models.Model):
     messenger = models.CharField(max_length=100, blank=True, null=True)
     viber = models.CharField(max_length=15, blank=True, null=True)
     objects = models.Manager()
+    email_transaction = models.BooleanField(default=False)
+    messenger_transaction = models.BooleanField(default=False)
+    viber_transaction = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.customer_id} - {self.customer_name}, {self.company_id}'
@@ -183,6 +186,7 @@ class Order(models.Model):
 
     freight_term = models.BooleanField(default=False)
     delivery_fee = models.BooleanField(default=False)
+    courier = models.CharField(max_length=50, default='N/A')
 
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     issue_date = models.DateField(default=timezone.now)
