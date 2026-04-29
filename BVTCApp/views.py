@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.db import IntegrityError 
 from django.contrib import messages  
 from .models import Product, ProductImage, ProductColor, Order, Company, CustomerAccount, ShippingDetails
+from .models import Province, City, Barangay
 
 def catalog(request):
     if request.method == 'POST':
@@ -81,7 +82,7 @@ def orders(request):
     return render(request, 'bvtc_app/orders.html', {'orders': Order.objects.all()})
 
 def add_order(request):
-    return render(request, 'bvtc_app/add_order.html', {'companies': Company.objects.all(), 'all_customers': CustomerAccount.objects.all()})
+    return render(request, 'bvtc_app/add_order.html', {'companies': Company.objects.all(), 'all_customers': CustomerAccount.objects.all(), 'provinces': Province.objects.all().order_by('name')})
 
 # --- UC-19: ADD CUSTOMER LOGIC ---
 def add_customer(request):
@@ -216,8 +217,19 @@ def customers(request):
 
     return render(request, 'bvtc_app/customers.html', {
         'companies': Company.objects.all(), 
-        'all_customers': all_customers
+        'all_customers': all_customers,
+        'provinces': Province.objects.all().order_by('name')
     })
 
 def profile(request):
     return render(request, 'bvtc_app/profile.html')
+
+def load_cities(request):
+    province_id = request.GET.get('province')
+    cities = City.objects.filter(province_id=province_id).order_by('name')
+    return render(request, 'bvtc_app/partials/geo_options.html', {'items': cities, 'label': 'City/Municipality'}) 
+
+def load_barangays(request):
+    city_id = request.GET.get('city-municipality')
+    barangays = Barangay.objects.filter(city_id=city_id).order_by('name')
+    return render(request, 'bvtc_app/partials/geo_options.html', {'items': barangays, 'label': 'Barangay'}) 

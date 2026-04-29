@@ -257,3 +257,16 @@ class Image(models.Model): #Composite Key
     image_type = models.CharField(max_length=20, choices=IMAGE_TYPES)
     image_status = models.CharField(max_length=15, choices=IMAGE_STATUS, default='Pending')
 
+class Province(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    def __str__(self): return self.name
+
+class City(models.Model):
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, related_name='cities')
+    name = models.CharField(max_length=100)
+    def __str__(self): return self.name
+
+class Barangay(models.Model):
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='barangays')
+    name = models.CharField(max_length=100)
+    def __str__(self): return self.name

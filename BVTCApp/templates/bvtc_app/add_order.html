@@ -462,7 +462,7 @@
             <p class="required-message"><span>*</span> Required</p>
         </div>
 
-        <form action="{% url 'add_customer' %}" method="POST" id="addCustomerForm" enctype="multipart/form-data">
+        <form action="" id="addCustomerForm">
             {% csrf_token %}
             <div class="divider"><p>Basic Information</p><hr></div>
             <div class="horizontal-section">
@@ -680,18 +680,27 @@
                 <div class="vertical-input-field">
                     <label for="province"><span>*</span> Province:</label>
                     <div class="error-wrap">
-                        <select class="input" name="province" id="province" required>
-                            <option value="" hidden>Select a province</option>
+                        <select class="input" name="province" id="province" required
+                                hx-get="{% url 'load_cities' %}" 
+                                hx-target="#city-municipality" 
+                                hx-trigger="change">
+                            <option value="" hidden selected>Select a province</option>
+                            {% for province in provinces %}
+                                <option value="{{ province.id }}">{{ province.name }}</option>
+                            {% endfor %}
                         </select>
                         <span class="error-msg"></span>
                     </div>
                 </div>
-    
+
                 <div class="vertical-input-field">
                     <label for="city-municipality"><span>*</span> City/Municipality:</label>
                     <div class="error-wrap">
-                        <select class="input" name="city-municipality" id="city-municipality" required>
-                            <option value="" hidden>Select a province first</option>
+                        <select class="input" name="city-municipality" id="city-municipality" required
+                                hx-get="{% url 'load_barangays' %}" 
+                                hx-target="#barangay" 
+                                hx-trigger="change">
+                            <option value="" hidden selected>Select a province first</option>
                         </select>
                         <span class="error-msg"></span>
                     </div>
@@ -703,12 +712,12 @@
                     <label for="barangay"><span>*</span> Barangay:</label>
                     <div class="error-wrap">
                         <select class="input" name="barangay" id="barangay" required>
-                            <option value="" hidden>Select a province first</option>
+                            <option value="" hidden selected>Select a city first</option>
                         </select>
                         <span class="error-msg"></span>
                     </div>
                 </div>
-    
+
                 <div class="vertical-input-field">
                     <label for="postal-code">Postal Code:</label>
                     <div class="error-wrap">
@@ -716,9 +725,7 @@
                         <span class="error-msg"></span>
                     </div>
                 </div>
-            </div>
-
-            <div class="divider"><hr></div>
+            </div> <div class="divider"><hr></div>
             <div class="buttons-section">
                 <button type="button" class="close-modal close-btn m-button-secondary small-m">Cancel</button>
                 <button type="submit" class="m-button-primary small-m">Add</button>
