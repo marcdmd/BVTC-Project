@@ -747,6 +747,11 @@ function saveItemToOrder(editIndex = null) {
     // 4. Save to LocalStorage
     localStorage.setItem('pendingOrderItems', JSON.stringify(currentOrder));
 
+    const orderInput = document.getElementById('orderDataInput');
+    if (orderInput) {
+        orderInput.value = JSON.stringify(currentOrder);
+    }
+
     // 5. Refresh the Table
     if (typeof renderOrderTable === 'function') renderOrderTable();
 
@@ -1005,6 +1010,12 @@ function deleteOrderItem(index) {
     if (confirm("Are you sure you want to remove this item?")) {
         currentOrder.splice(index, 1); // Remove the specific item
         localStorage.setItem('pendingOrderItems', JSON.stringify(currentOrder));
+
+        const orderInput = document.getElementById('orderDataInput');
+        if (orderInput) {
+            orderInput.value = JSON.stringify(currentOrder);
+        }
+
         renderOrderTable(); // Refresh the table
     }
 }

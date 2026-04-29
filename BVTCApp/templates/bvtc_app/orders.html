@@ -325,3 +325,10 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    // Reset Order Items
+    localStorage.removeItem('pendingOrderItems');
+</script>
+{% endblock %}

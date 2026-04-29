@@ -10,10 +10,10 @@
 {% endblock %}
 
 {% block catalog_button %}
-<button type="submit">
+<!-- <button type="submit">
     <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">browse</i>
     <p style="color: #898989;" class="button-text small-b">Catalog</p>
-</button>
+</button> -->
 {% endblock %}
 
 {% block orders_button %}
@@ -24,36 +24,36 @@
 {% endblock %}
 
 {% block quotations_button %}
-<button type="submit">
+<!-- <button type="submit">
     <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">request_quote</i>
     <p style="color: #898989;" class="button-text small-b">Quotations</p>
-</button>
+</button> -->
 {% endblock %}
 
 {% block billings_button %}
-<button type="submit">
+<!-- <button type="submit">
     <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">receipt</i>
     <p style="color: #898989;" class="button-text small-b">Billings</p>
-</button>
+</button> -->
 {% endblock %}
 
 {% block customers_button %}
-<button type="submit">
+<!-- <button type="submit">
     <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">group</i>
     <p style="color: #898989;" class="button-text small-b">Customers</p>
-</button>
+</button> -->
 {% endblock %}
 
 {% block profile_button %}
-<button type="submit">
+<!-- <button type="submit">
     <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">account_box</i>
     <p style="color: #898989;" class="button-text small-b">Profile</p>
-</button>
+</button> -->
 {% endblock %}
 
 {% block main %}
-<div class="modal" id="addOrderForm">
-    <form action="" method="POST">
+<div class="modal">
+    <form action="" method="POST" id="addOrderForm">
         {% csrf_token %}
         <h1>Add New Order</h1>
         <div style="display: flex; flex-direction: row;">
@@ -102,11 +102,11 @@
                             </div>
 
                             <div class="horizontal-input-field" id="customer-name">
-                                <label for="customer-name"><span>*</span> Customer Name:</label>
-                                <select class="input" >
+                                <label><span>*</span> Customer Name:</label>
+                                <select class="input"  name="customer-name">
                                     <option value="" disabled selected>Select a Company First</option>
+                                    <!-- This will be populated by the first HTMX call -->
                                 </select>
-                                <!-- This will be populated by the first HTMX call -->
                             </div>
                         </div>
                     </div>
@@ -120,7 +120,7 @@
                 </div>
                 
                 <div class="horizontal-input-field">
-                    <label for="payment-mode"><span>*</span> Mode of Payment:</label>
+                    <label><span>*</span> Mode of Payment:</label>
                     <div class="horizontal-input-field radio-choices">
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
                             <input type="radio" value="metrobank" name="payment-mode" id="metrobank" checked>
@@ -140,7 +140,7 @@
                 </div>
 
                 <div class="horizontal-input-field">
-                    <label for="payment-terms"><span>*</span> Payment Terms:</label>
+                    <label><span>*</span> Payment Terms:</label>
 
                     <input type="radio" value="partial" name="payment-terms" id="partial" checked>
                     <label for="partial">Partial</label>
@@ -164,6 +164,8 @@
                 <p>Order Details</p>
                 <hr>
             </div>
+
+            <input type="hidden" name="order_data" id="orderDataInput">
 
             <table class="small-database">
                 <thead>
@@ -313,42 +315,42 @@
 
             <div class="horizontal-section">
                 <div class="horizontal-input-field">
-                    <label for="transaction-platform"><span>*</span> Transaction Platform:</label>
+                    <label><span>*</span> Transaction Platform:</label>
 
                     <div class="horizontal-input-field radio-choices">
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" id="email" checked>
+                            <input type="radio" name="transaction-platform" value="email" id="email" checked>
                             <label for="email">Email</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" id="messenger">
+                            <input type="radio" name="transaction-platform" value="radio" id="messenger">
                             <label for="messenger">Messenger</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" id="viber">
+                            <input type="radio" name="transaction-platform" value="viber" id="viber">
                             <label for="viber">Viber</label> 
                         </div>
                     </div>               
                 </div>
 
                 <div class="horizontal-input-field">
-                    <label for="account-manager"><span>*</span> Account Manager:</label>
+                    <label><span>*</span> Account Manager:</label>
                     
                     <div class="horizontal-input-field radio-choices">
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" id="manager-1" checked>
+                            <input type="radio" name="account-manager" value="manager-1" id="manager-1" checked>
                             <label for="manager-1">Manager 1</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" id="manager-2">
+                            <input type="radio" name="account-manager" value="manager-2" id="manager-2">
                             <label for="manager-2">Manager 2</label>
                         </div>
                         
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" id="top-manager">
+                            <input type="radio" name="account-manager" value="top-manager" id="top-manager">
                             <label for="top-manager">Top Manager</label> 
                         </div>                    
                     </div>             
@@ -599,7 +601,7 @@
             </div>
 
             <div class="horizontal-input-field">
-                <label for="transaction-platforms">Transaction Platforms:</label>
+                <label>Transaction Platforms:</label>
                 <input type="checkbox" name="transaction-platform" value="email" id="transaction-platform">
                 <p class="small-r">Email</p>
                 <input type="checkbox" name="transaction-platform" value="messenger" id="transaction-platform">
@@ -774,5 +776,25 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.removeItem(storageKey);
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // This runs the moment the checkout page opens
+    const savedItems = localStorage.getItem('pendingOrderItems');
+    const orderInput = document.getElementById('orderDataInput');
+    
+    if (savedItems && orderInput) {
+        orderInput.value = savedItems;
+        console.log("Form initialized with items from LocalStorage");
+    }
+});
+
+function submitDjangoOrder() {
+    const orderInput = document.getElementById('orderDataInput');
+    if (!orderInput.value || JSON.parse(orderInput.value).length === 0) {
+        alert("Your cart is empty! Please add items first.");
+        return;
+    }
+    document.getElementById('finalOrderForm').submit();
+}
 </script>
 {% endblock %}
