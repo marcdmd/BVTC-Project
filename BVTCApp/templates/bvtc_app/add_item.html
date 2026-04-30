@@ -11,6 +11,9 @@
 <h1 class="bold">Add Item</h1>
 {% endblock %}
 
+{% block catalog_button %}
+{% endblock %}
+
 {% block orders_button %}
 <button type="submit" style="background: #E9E6E3;">
     <i class="material-symbols-rounded" style="font-size: 24px;">assignment</i>
@@ -18,24 +21,38 @@
 </button>
 {% endblock %}
 
+{% block quotations_button %}
+{% endblock %}
+
+{% block billings_button %}
+{% endblock %}
+
+{% block customers_button %}
+{% endblock %}
+
+{% block profile_button %}
+{% endblock %}
+
 {% block main %}
 <div class="action-bar">
     <div class="horizontal-section" style="display: flex; align-items: center; flex: 1 0 0;">
         <h1 style="flex: 1;">Add Item to Order</h1>
         <div class="horizontal-section" style="flex: 1 0 0;">
-            <div class="vertical-section" style="gap: 3px; justify-content: right; align-items: flex-end;">
+            <div class="vertical-section" style="gap: 3px; justify-content: center; align-items: flex-end;">
                 <!-- Added ID: initial-items-label -->
                 <p class="small-r" id="initial-items-label" style="white-space: nowrap;">
                     Initial Items (0 Items): <b>₱ 0.00</b>
                 </p>
                 <!-- Added ID: discounted-total-label -->
-                <p class="smaller-r" id="discounted-total-label" style="color: #898989; white-space: nowrap;">
+                <!-- <p class="smaller-r" id="discounted-total-label" style="color: #898989; white-space: nowrap;">
                     Discounted Total <i>(less 0%)</i>: <b>₱ 0.00</b>
-                </p>
+                </p> -->
             </div>
             <div class="horizontal-input-field" style="width: max-content; max-width: max-content;">
                 <button type="button" class="button-secondary small-m open-quick-summary">View Cart</button>
-                <a href="{% url 'add_order' %}" class="button-primary small-m">Done</a>
+                <a href="#"
+                   onclick="window.history.back(); return false;"
+                   class="button-primary small-m">Done</a>
             </div>
         </div>
     </div>
@@ -237,7 +254,10 @@
 
         <div class="buttons-section">
             <button type="button" class="close-modal m-button-secondary small-m">Close</button>
-            <a href="{% url 'add_order' %}" class="m-button-primary small-m">Go to Order Form</a>
+            <a href="#"
+               onclick="window.history.back(); return false;"
+               class="m-button-primary small-m">Go to Order Form</a>
+
         </div>
     </div>
 </div>

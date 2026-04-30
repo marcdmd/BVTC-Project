@@ -19,32 +19,32 @@
     <h1>Order Status</h1>
     <div class="numbers">
         <div class="number-card">
-            <div class="number" style="color: #0B1E33;">00</div>
+            <div class="number" style="color: #0B1E33;">{{ count_feasibility|default:0 }}</div>
             <p>Under Feasibility</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #013C58;">00</div>
+            <div class="number" style="color: #013C58;">{{ count_quotation|default:0 }}</div>
             <p>Under Quotation</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #00537A;">00</div>
+            <div class="number" style="color: #00537A;">{{ count_production|default:0 }}</div>
             <p>In Production</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #F5A201;">00</div>
+            <div class="number" style="color: #F5A201;">{{ count_sampled|default:0 }}</div>
             <p>Sampled</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #EDC001;">00</div>
+            <div class="number" style="color: #EDC001;">{{ count_packaged|default:0 }}</div>
             <p>Packaged</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #00A887;">00</div>
+            <div class="number" style="color: #00A887;">{{ count_transit|default:0 }}</div>
             <p>In Transit</p>
         </div>
     </div>
@@ -52,7 +52,7 @@
 
 <div class="tracker">
     <div class="horizontal-section">
-        <form action="" class="filter">
+        <!-- <form action="" class="filter">
             <p class="small-r filter-name" style="padding: 6px 15px 6px 15px;">Sort by:</p>
             <input class="filter-input" type="radio" name="sort-by" value="client-name" id="client-name" checked>
             <label class="filter-label small-b" for="client-name">Client Name</label>
@@ -65,7 +65,7 @@
 
             <input class="filter-input" type="radio" name="sort-by" value="account-manager" id="account-manager">
             <label class="filter-label small-b" for="account-manager">Account Manager</label>
-        </form>
+        </form> -->
 
         <div class="actions">
             <form action="" class="search-area">
@@ -139,6 +139,7 @@
                     <div class="cell-buttons">
                         <button type="button"
                                 class="m-button-primary smaller-b open-view-order-modal"
+                                data-id = "{{ o.order_id }}"
                                 data-order_id = "{{ o.order_id }}"
                                 data-customer_id = "{{  o.customer_id }}"
                                 data-customer_name = "{{ o.customer_id.customer_name }}"
@@ -153,14 +154,16 @@
                                 data-contact_email = "{{ o.shipping_id.contact_person_email }}"
                                 data-mode_of_payment = "{{ o.mode_of_payment }}"
                                 data-payment_terms = "{{ o.payment_terms }}"
+                                data-link_to_logo = "{{ o.link_to_logo }}"
                                 data-packing_instructions = "{{ o.packing_instructions }}"
                                 data-start_of_production = "{{ o.start_of_production }}"
                                 data-delivery_date = "{{ o.delivery_date }}"
                                 data-lead_time = "{{ o.lead_time }}"
+                                data-courier = "{{ o.courier }}"
                                 data-transaction_platform = "{{ o.transaction_platform }}"
                                 data-account_manager = "{{ o.user_id.user_name }}">
                                 View</button>
-                        <button type="button" class="m-button-secondary smaller-b">Edit</button>
+                        <a href="{% url 'edit_order' o.order_id %}" class="m-button-secondary smaller-b">Edit</a>
                     </div>
                 </td>
             </tr>
@@ -178,38 +181,38 @@
                 <div class="horizontal-section" style="flex: 0; align-items: center; justify-content: flex-start;">
                     <p class="small-r">Order no. <b id="order_order_id"></b></p>
                     <div class="status-dropdown">
-                        <button class="status-btn">
+                        <button type="button" class="status-btn">
                             <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                             <p class="smaller-b" id="order_order_status"></p>
                         </button>
 
                         <div class="status-dropdown-content">
-                            <a href="#" class="status-btn" style="color: #FAF9F6; background: #0B1E33; flex: 0; align-items: center; justify-content: flex-start;">
+                            <a href="#" class="status-btn update-status-link" data-status="Under Feasibility" style="color: #FAF9F6; background: #0B1E33; flex: 0; align-items: center; justify-content: flex-start;">
                                 <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                                 <p class="smaller-b">Under Feasibility</p>
                             </a>
                             
-                            <a href="#" class="status-btn" style="color: #FAF9F6; background: #013C58; flex: 0; align-items: center; justify-content: flex-start;">
+                            <a href="#" class="status-btn update-status-link" data-status="Under Quotation" style="color: #FAF9F6; background: #013C58; flex: 0; align-items: center; justify-content: flex-start;">
                                 <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                                 <p class="smaller-b">Under Quotation</p>
                             </a>
                             
-                            <a href="#" class="status-btn" style="color: #FAF9F6; background: #00537A; flex: 0; align-items: center; justify-content: flex-start;">
+                            <a href="#" class="status-btn update-status-link" data-status="In Production" style="color: #FAF9F6; background: #00537A; flex: 0; align-items: center; justify-content: flex-start;">
                                 <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                                 <p class="smaller-b">In Production</p>
                             </a>
                             
-                            <a href="#" class="status-btn" style="color: #101212; background: #F5A201; flex: 0; align-items: center; justify-content: flex-start;">
+                            <a href="#" class="status-btn update-status-link" data-status="Sampled" style="color: #101212; background: #F5A201; flex: 0; align-items: center; justify-content: flex-start;">
                                 <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                                 <p class="smaller-b">Sampled</p>
                             </a>
                             
-                            <a href="#" class="status-btn" style="color: #101212; background: #EDC001; flex: 0; align-items: center; justify-content: flex-start;">
+                            <a href="#" class="status-btn update-status-link" data-status="Packaged" style="color: #101212; background: #EDC001; flex: 0; align-items: center; justify-content: flex-start;">
                                 <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                                 <p class="smaller-b">Packaged</p>
                             </a>
                             
-                            <a href="#" class="status-btn" style="color: #101212; background: #00C27D; flex: 0; align-items: center; justify-content: flex-start;">
+                            <a href="#" class="status-btn update-status-link" data-status="In Transit" style="color: #101212; background: #00C27D; flex: 0; align-items: center; justify-content: flex-start;">
                                 <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                                 <p class="smaller-b">In Transit</p>
                             </a>
@@ -243,6 +246,7 @@
                     </div>
 
                     <div class="buttons-section">
+                        <a href="" class="m-button-secondary smaller-r open-link-to-logo">View Logo</a>
                         <button type="button" class="m-button-primary smaller-r" style="white-space: nowrap;">View Feasibility Report</button>
                         <button type="button" class="m-button-primary smaller-r" style="white-space: nowrap;">View Samples</button>
                     </div>
@@ -258,6 +262,7 @@
                                     <th>CUSTOMIZATION</th>
                                     <th>QUANTITY</th>
                                     <th>PRICE</th>
+                                    <th>SUBTOTAL</th>
                                 </tr>
                             </thead>
 
@@ -269,12 +274,14 @@
 
                     <table class="small-database">
                         <tbody>
-                            <tr style="border-bottom: 0; border-top: 1px solid #E9E6E3;">
-                            <td style="width: 30%;"></td>
-                            <td style="width: 15%;"></td>
-                            <td style="width: 25%; font-weight: bold;">TOTAL:</td>
-                            <td style="width: 15%;"><b id="order_total_qty"></b></td>
-                            <td style="width: 15%;"><b>₱</b> <b id="order_total_price"></b></td>
+                            <tr>
+                                <td style="border-bottom: 0; border-top: 1px solid #E9E6E3;">
+                                <td style="width: 20%;"></td>
+                                <td style="width: 15%;"></td>
+                                <td style="width: 15%;"></td>
+                                <td style="width: 15%; font-weight: bold;">TOTAL:</td>
+                                <td style="width: 15%;"><b id="order_total_qty"></b></td>
+                                <td style="width: 20%;"><b>₱</b> <b id="order_total_price"></b></b></td>
                             </tr>
                         </tbody>
                     </table>
@@ -286,7 +293,7 @@
                     <p class="small-r">Contact Person: <b id="order_contact"></b></p>•
                     <p class="small-r">Contact Number: <b id="order_contact_number"></b></p>•
                     <p class="small-r">Contact Email: <b id="order_contact_email"></b></p>•
-                    <p class="small-r">Courier: <b id=""></b></p>
+                    <p class="small-r">Courier: <b id="order_courier"></b></p>
                 </div>
 
                 <div class="divider"><p>Payment Details</p><hr></div>
@@ -316,10 +323,48 @@
                         <p class="small-r" style="color: #898989; white-space: nowrap;">Account Manager: <b id="order_account_manager"></b></p>
                     </div>
 
-                    <button type="button" href="" class="button-tertiary small-m">Cancel</button>
-                    <button type="button" href="" class="button-primary small-m">Edit</button>
+                    <a href="" class="button-tertiary small-m cancel-order-modal-btn">Cancel Order</a>
+                    <a href="" class="button-primary small-m open-edit-order-modal">Edit</a>
                     <button type="button" class="close-modal button-secondary small-m">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="cancelOrderModal">
+    <div class="notif-modal">
+        <div class="header-warning">
+            <h1 class="bold">Cancel Order?</h1>
+            <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+        </div>
+
+        <div class="body">
+            <p class="regular">Are you sure you want to cancel <b>Order no.<span id="cancel_order_id_display"></span></b>? It will be permanently deleted from the system.</p>
+            <div class="buttons-section">
+                <a href="" class="m-button-tertiary small-m confirm_delete" style="flex: 1 0 0;">Yes</a>
+                <button type="button" class="m-button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="updateOrderStatusModal">
+    <div class="notif-modal">
+        <div class="header-success">
+            <h1 class="bold">Update Status?</h1>
+            <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+        </div>
+
+        <div class="body">
+            <!-- ADDED IDs HERE -->
+            <p class="regular">
+                Change status of <b>Order no.<span id="confirm_status_order_id"></span></b> 
+                to <b id="confirm_status_new_name"></b>?
+            </p>
+            <div class="buttons-section">
+                <button type="button" id="confirmStatusUpdateBtn" class="m-button-primary small-m" style="flex: 1 0 0;">Yes</button>
+                <button type="button" class="m-button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
             </div>
         </div>
     </div>

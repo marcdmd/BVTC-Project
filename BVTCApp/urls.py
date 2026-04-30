@@ -12,8 +12,10 @@ urlpatterns = [
     path('orders/load_customers/', views.load_customers, name='load_customers'),
     path('orders/load_shipping/', views.load_shipping, name='load_shipping'),
     path('orders/add_order/add_item', views.add_item, name='add_item'),
-    # path('orders/edit_order/<int:pk>', views.edit_order, name='edit_order'),
-    # path('order/update_order_status/', views.update_order_status, name='update_order_status'),
+    path('orders/edit_order/<int:pk>/', views.edit_order, name='edit_order'),
+    path('orders/cancel_order/<int:pk>/', views.cancel_order, name='cancel_order'),
+    path('orders/update_status/<int:pk>/', views.update_order_status, name='update_order_status'),
+
 
     path('quotations/', views.quotations, name='quotations'),
 

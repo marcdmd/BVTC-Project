@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render, redirect
 from django.db.models import Q
 from django.db import IntegrityError 
 from django.contrib import messages  
 from django.utils import timezone
-from .models import Product, ProductImage, ProductColor, Order, OrderItem, Company, CustomerAccount, ShippingDetails
+from .models import Product, ProductImage, ProductColor, Order, OrderItem, Company, CustomerAccount, ShippingDetails, UserAccount
 from .models import Province, City, Barangay
 import json
 
@@ -81,7 +82,20 @@ def delete_product(request, pk):
     return redirect('catalog')
 
 def orders(request):
-    return render(request, 'bvtc_app/orders.html', {'orders': Order.objects.all()})
+    all_orders = Order.objects.all()
+
+    # Calculate counts for the dashboard
+    context = {
+        'orders': all_orders,
+        'count_feasibility': all_orders.filter(order_status='Under Feasibility').count(),
+        'count_quotation':   all_orders.filter(order_status='Under Quotation').count(),
+        'count_production':  all_orders.filter(order_status='In Production').count(),
+        'count_sampled':     all_orders.filter(order_status='Sampled').count(),
+        'count_packaged':    all_orders.filter(order_status='Packaged').count(),
+        'count_transit':     all_orders.filter(order_status='In Transit').count(),
+    }
+    
+    return render(request, 'bvtc_app/orders.html', context)
 
 def add_order(request):
     if request.method == 'POST':
@@ -89,10 +103,13 @@ def add_order(request):
         print("POST data:", request.POST)
         try:
             # get variables
+            manager_id = request.POST.get('account-manager')
+            selected_manager = UserAccount.objects.get(user_id=manager_id)
+
             customer_id = request.POST.get('customer-id')  # value from the select
             customer = CustomerAccount.objects.get(customer_id=customer_id)
 
-            shipping_id = request.POST.get('shipping')
+            shipping_id = request.POST.get('shipping_id')
             shipping = ShippingDetails.objects.get(shipping_id=shipping_id)
 
             order_data_raw = request.POST.get('order_data', '[]')
@@ -101,8 +118,6 @@ def add_order(request):
             print("shipping_id zing:", shipping_id)          # Checkpoint 3: is the shipping ID coming through?
             print("order_data_raw hoo:", order_data_raw)
 
-            # TEMPORARY, CHANGE ONCE LOGIN IS IMPLEMENTED ------------------------------------------------------------------------------------------------------------------
-            from .models import UserAccount
             user = UserAccount.objects.first()  # swap out once auth is added
 
             # map form values to model field choices
@@ -125,7 +140,7 @@ def add_order(request):
             print("Attempting to create order...")
             new_order = Order.objects.create(
                 customer_id=customer,
-                user_id=user,
+                user_id=selected_manager,
                 shipping_id=shipping,
                 mode_of_payment=payment_mode_map.get(request.POST.get('payment-mode'), 'Metrobank Fund Transfer'),
                 payment_terms=payment_terms_map.get(request.POST.get('payment-terms'), 'Partial'),
@@ -179,9 +194,116 @@ def add_order(request):
         return redirect('orders')
 
     # --- GET: just render the form ---
-    companies = Company.objects.all()
-    customers = CustomerAccount.objects.all()
-    return render(request, 'bvtc_app/add_order.html', {'companies': Company.objects.all(), 'all_customers': CustomerAccount.objects.all(), 'provinces': Province.objects.all().order_by('name')})
+    context = {
+        'companies': Company.objects.all(),
+        'all_customers': CustomerAccount.objects.all(),
+        'managers': UserAccount.objects.all(), # NEW: Add this to the context
+        'provinces': Province.objects.all().order_by('name')
+    }
+    return render(request, 'bvtc_app/add_order.html', context)
+
+def edit_order(request, pk):
+    order = get_object_or_404(Order, order_id=pk)
+    customer_shipping_addresses = ShippingDetails.objects.filter(customer_id=order.customer_id)
+    
+    if request.method == 'POST':
+        try:
+            manager_id = request.POST.get('account-manager')
+            if manager_id:
+                # Fetch the instance and assign it to the order
+                order.user_id = UserAccount.objects.get(user_id=manager_id)            
+
+            # 1. Update Basic Order Fields
+            ship_id = request.POST.get('shipping-id')
+            if ship_id:
+                order.shipping_id = ShippingDetails.objects.get(shipping_id=ship_id)
+            order.customer_id_id = request.POST.get('customer-id')
+            order.budget = request.POST.get('budget') or 0
+            order.mode_of_payment = request.POST.get('payment-mode')
+            order.payment_terms = request.POST.get('payment-terms')
+            order.start_of_production = request.POST.get('production-start')
+            order.delivery_date = request.POST.get('delivery-date') or None
+            order.transaction_platform = request.POST.get('transaction-platform')
+            order.link_to_logo = request.POST.get('logo-link')
+            order.packing_instructions = request.POST.get('instructions')
+            order.courier = request.POST.get('courier')
+            
+            # 2. Re-sync Order Items
+            order_data_raw = request.POST.get('order_data', '[]')
+            new_items_list = json.loads(order_data_raw)
+
+            # Clear old items and replace (cleanest way to handle deletions/edits)
+            order.orderitem_set.all().delete()
+            
+            total = 0
+            for item in new_items_list:
+                # Use product_id based on your Product model
+                product = Product.objects.get(product_id=item['db_id'])
+                qty = int(item.get('qty', 1))
+                price = float(item.get('price', 0))
+
+                OrderItem.objects.create(
+                    order_id=order,
+                    product_id=product,
+                    color=item.get('color', ''),
+                    customization=item.get('custom', ''),
+                    quantity=qty,
+                    price=price
+                )
+                total += qty * price
+
+            order.initial_total_price = total
+            order.total_amount = total
+            order.save()
+
+            return redirect('orders')
+        except Exception as e:
+            print(f"Error updating order: {e}")
+
+    # GET: Prepare JSON for the frontend table
+    existing_items = []
+    for item in order.orderitem_set.all():
+        existing_items.append({
+            'db_id': item.product_id.product_id,
+            'code': item.product_id.product_code,
+            'name': item.product_id.product_name, # Matches your model
+            'color': item.color,
+            'custom': item.customization,
+            'price': float(item.price),
+            'qty': item.quantity,
+            'moq': item.product_id.MOQ # Matches your model
+        })
+
+    context = {
+        'order': order,
+        'managers': UserAccount.objects.all(),
+        'customer_shipping_addresses': customer_shipping_addresses, # Filtered list
+        'existing_items_json': existing_items,
+        'companies': Company.objects.all(),
+    }
+    return render(request, 'bvtc_app/edit_order.html', context)
+
+def cancel_order(request, pk):
+    order = get_object_or_404(Order, order_id=pk)
+    
+    try:
+        order.delete()
+        messages.success(request, f"Order no.{pk} has been successfully canceled.")
+        
+    except Exception as e:
+        messages.error(request, f"Error canceling order: {e}")
+
+    return redirect('orders')
+
+def update_order_status(request, pk):
+    order = get_object_or_404(Order, order_id=pk)
+    new_status = request.GET.get('status')
+    
+    if new_status:
+        order.order_status = new_status
+        order.save()
+        return HttpResponse(status=200)  # Tells JS: "I'm done, you can refresh now!"
+    return HttpResponse(status=400)
 
 # --- UC-19: ADD CUSTOMER LOGIC ---
 def add_customer(request):
@@ -287,7 +409,14 @@ def load_shipping(request):
     return render(request, 'bvtc_app/partials/shipping_options.html', {'addresses': addresses})
 
 def add_item(request):
-    return render(request, 'bvtc_app/add_item.html', {'products': Product.objects.all()})
+    edit_order_id = request.GET.get('edit_order_id')
+        
+    context = {
+        'products': Product.objects.all(),
+        'edit_order_id': edit_order_id
+    }
+    
+    return render(request, 'bvtc_app/add_item.html', context)
 
 def quotations(request):
     return render(request, 'bvtc_app/quotations.html')

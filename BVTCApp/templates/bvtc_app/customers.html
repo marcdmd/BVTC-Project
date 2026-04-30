@@ -53,16 +53,17 @@
             {% for c in all_customers %}
             <tr>
                 <td><input type="checkbox"></td>
-                <td class="small-">{{ c.customer_id }}</td>
+                <td class="small-r">{{ c.customer_id }}</td>
                 <td><b>{{ c.customer_name }}</b></td>
-                <td class="small-">{{ c.company_id.company_name }}</td>
-                <td class="small-">{{ c.customer_email }}</td>
-                <td class="small-">{{ c.customer_phone_number }}</td>
-                <td class="small-">
+                <td><p class="small-r">{{ c.company_id.company_name }}</p></td>
+                <td class="small-r">{{ c.customer_email }}</td>
+                <td><p class="even-smaller-r">{{ c.customer_phone_number }}</p></td>
+                <td>
                     <div class="cell-buttons">
                         <button type="button"
                                 class="m-button-secondary smaller-b open-view-customer-modal"
                                 data-view_customer_id="{{ c.customer_id }}"
+                                data-view_logo="{% if c.company_id.company_logo %}{{ c.company_id.company_logo.url }}{% endif %}"
                                 data-view_company_name="{{ c.company_id.company_name }}"
                                 data-view_company_address="{{ c.company_id.company_address }}"
                                 data-view_company_tin_number="{{ c.company_id.tin_number }}"
@@ -237,7 +238,7 @@
 
             <div class="divider"><hr></div>
             <div class="buttons-section">
-                <button type="button" class="close-modal m-button-secondary small-m" id="closeAddCustomerModal">Cancel</button>
+                <button type="button" class="close-modal m-button-quaternary small-m" id="closeAddCustomerModal">Cancel</button>
                 <button type="submit" class="m-button-primary small-m">Add Customer</button>
             </div>
         </form>
@@ -248,15 +249,15 @@
     <div class="modal view-customer">
         <div class="horizontal-section">
             <div class="vertical-section" style="max-width: 100px;">
-                <p class="small-r">Client no. <span class="bold" ></span></p>
+                <p class="small-r">Client no. <span class="bold" id="view_customer_id"></span></p>
     
                 <div class="divider"><p>Company Logo</p><hr></div>
                 <div>
-                    <img class="img-container" style="max-width: 100px;" src="" alt="">
+                    <img class="img-container" id="view_company_logo" style="max-width: 100px;" src="" alt="Company Logo">
                 </div>
             </div>
     
-            <div class="vertical-section" gap: 16px;">
+            <div class="vertical-section" style="gap: 16px;">
                 <div class="divider"><p>Customer Information</p><hr></div>
                 <div class="vertical-section">
                     <p class="small-r">Customer Name: <b id="view_customer_name"></b></p>

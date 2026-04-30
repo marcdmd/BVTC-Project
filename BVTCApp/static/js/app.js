@@ -41,43 +41,87 @@ document.addEventListener('click', function (e) {
         e.preventDefault();
         const id = viewOrder.dataset.id;
 
+        // For link to logo
+        const logoLink = viewOrder.dataset.link_to_logo;
+        const logoBtn = viewOrderModal.querySelector('.open-link-to-logo');
+
+        if (logoBtn) {
+            // 1. Check if the link exists and isn't just "None" from Django
+            if (logoLink && logoLink !== "None" && logoLink.trim() !== "") {
+                logoBtn.href = logoLink;
+                logoBtn.target = "_blank"; // Opens in a new tab
+                logoBtn.style.display = 'inline-flex'; // Show the button
+                console.log("--- TRACE: Logo Link assigned ---");
+            } else {
+                // 2. Hide the button if there is no link
+                logoBtn.style.display = 'none';
+                console.log("--- TRACE: No Logo Link found, hiding button ---");
+            }
+        }
+
         // For Image Set
         const slideContainer = qs('.slideshow-container', viewOrderModal);
         const dotContainer = qs('.dot-container', viewOrderModal);
-        const imageUrls = viewOrder.dataset.images ? viewOrder.dataset.images.split(',') : [];        
+        
+        // Clean empty values out of the array
+        const imageUrls = (viewOrder.dataset.images ? viewOrder.dataset.images.split(',') : []).filter(url => url.trim() !== '');        
 
         slideContainer.innerHTML = '';
         if (dotContainer) dotContainer.innerHTML = '';
 
-        imageUrls.forEach((url, index) => {
-            if (url.trim()) {
+        if (imageUrls.length > 0) {
+            // Show real images
+            imageUrls.forEach((url, index) => {
                 const slideDiv = document.createElement('div');
                 slideDiv.className = 'mySlides fade';
                 slideDiv.innerHTML = `<img src="${url}" class="img-container">`;
                 slideContainer.appendChild(slideDiv);
 
-                if(dotContainer) {
+                if (dotContainer) {
                     const dot = document.createElement('span');
                     dot.className = 'dot';
                     dot.onclick = () => currentSlide(index + 1, 'view');
                     dotContainer.appendChild(dot);
                 }
-            }
-        })
+            });
 
-        const prevBtn = document.createElement('a');
-        prevBtn.className = 'prev';
-        prevBtn.innerHTML = '&#10094;';
-        prevBtn.onclick = () => plusSlides(-1, 'view');
+            // Add Navigation Arrows
+            const prevBtn = document.createElement('a');
+            prevBtn.className = 'prev';
+            prevBtn.innerHTML = '❮';
+            prevBtn.onclick = () => plusSlides(-1, 'view');
 
-        const nextBtn = document.createElement('a');
-        nextBtn.className = 'next';
-        nextBtn.innerHTML = '&#10095;';
-        nextBtn.onclick = () => plusSlides(1, 'view');
+            const nextBtn = document.createElement('a');
+            nextBtn.className = 'next';
+            nextBtn.innerHTML = '❯';
+            nextBtn.onclick = () => plusSlides(1, 'view');
 
-        slideContainer.appendChild(prevBtn);
-        slideContainer.appendChild(nextBtn);
-        slideContainer.id = 'slideshow-view'
+            slideContainer.appendChild(prevBtn);
+            slideContainer.appendChild(nextBtn);
+        } else {
+            // SHOW PLACEHOLDER ICON
+            const placeholder = document.createElement('div');
+            // 'flex-grow: 1' and 'height: 100%' ensures it fills the container space
+            placeholder.style.cssText = `
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                min-height: 300px; 
+                height: 100%; 
+                width: 100%;
+                color: #CBCBCB;
+                padding-top: 40px; 
+            `;
+            
+            placeholder.innerHTML = `
+                <i class="material-symbols-rounded" style="font-size: 100px; margin-bottom: 10px;">photo</i>
+                <p class="small-r" style="margin: 0;">No images available</p>
+            `;
+            slideContainer.appendChild(placeholder);
+        }
+
+        slideContainer.id = 'slideshow-view';
 
         // Update Status Button
         const status = viewOrder.dataset.order_status;
@@ -115,20 +159,27 @@ document.addEventListener('click', function (e) {
         items.forEach(item => {
             const qty = parseInt(item.qty) || 0;
             const price = parseFloat(item.price) || 0;
+            const subtotal = qty * price;
             totalQty += qty;
-            totalPrice += (qty * price);
+            totalPrice += subtotal;
+
+            const formattedSubtotal = subtotal.toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            });
 
             const row = `
                 <tr>
-                    <td class="small-r" style="width: 30%;">${item.code}</td>
+                    <td class="small-r" style="width: 20%;">${item.code}</td>
                     <td class="small-r" style="width: 15%;">${item.color || '-'}</td>
-                    <td class="small-r" style="width: 25%;">${item.custom || '-'}</td>
-                    <td class="small-r" style="width: 15%;">${qty}</td>
+                    <td class="small-r" style="width: 15%;">${item.custom || '-'}</td>
                     <td class="small-r" style="width: 15%;">${price.toFixed(2)}</td>
+                    <td class="small-r" style="width: 15%;">${qty}</td>
+                    <td class="small-r" style="width: 20%;">${formattedSubtotal}</td>
                 </tr>`;
             tableBody.innerHTML += row;
         });
-
+        
         const qtyDisplay = qs('#order_total_qty', viewOrderModal);
         const priceDisplay = qs('#order_total_price', viewOrderModal);
 
@@ -152,7 +203,11 @@ document.addEventListener('click', function (e) {
             const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
 
             const leadTimeElement = qs('#order_lead_time', viewOrderModal);
-            leadTimeElement.textContent = diffInDays > 0 ? `${diffInDays} Days` : "0 Days";
+            if (diffInDays <= 0) {
+                leadTimeElement.textContent = "0";
+            } else {
+                leadTimeElement.textContent = `${diffInDays} ${diffInDays === 1 ? 'Day' : 'Days'}`;
+            }
         }
 
         qs('#order_order_id', viewOrderModal).textContent = viewOrder.dataset.order_id;
@@ -170,9 +225,18 @@ document.addEventListener('click', function (e) {
         qs('#order_packing_instructions', viewOrderModal).textContent = viewOrder.dataset.packing_instructions;
         qs('#order_start_of_production', viewOrderModal).textContent = viewOrder.dataset.start_of_production;
         qs('#order_delivery_date', viewOrderModal).textContent = viewOrder.dataset.delivery_date;
+        qs('#order_courier', viewOrderModal).textContent = viewOrder.dataset.courier;
         qs('#order_transaction_platform', viewOrderModal).textContent = viewOrder.dataset.transaction_platform;
         qs('#order_account_manager', viewOrderModal).textContent = viewOrder.dataset.account_manager;
         viewOrderModal.dataset.currentOrder = JSON.stringify(viewOrder.dataset);
+
+        const editButton = viewOrderModal.querySelector('.open-edit-order-modal');
+
+        // Use 'id' which you defined at the top of this function
+        if (editButton && id) {
+            editButton.href = `/orders/edit_order/${id}/`;
+            console.log(`--- TRACE: Edit button URL set to order ${id} ---`);
+        }
 
         showModal(viewOrderModal);
 
@@ -506,6 +570,45 @@ document.addEventListener('click', function (e) {
         showModal(cancelAddModal)
     }
 
+    // For Update Order Status
+    const statusLink = e.target.closest('.update-status-link');
+    
+    if (statusLink) {
+        e.preventDefault();
+        
+        // 1. Get Data from the main View Modal
+        const newStatus = statusLink.dataset.status;
+        const orderId = document.querySelector('#order_order_id').textContent;
+        const confirmModal = document.getElementById('updateOrderStatusModal');
+
+        if (!orderId) {
+            console.error("Order ID not found in modal.");
+            return;
+        }
+
+        // 2. Fill the Confirmation Modal with the correct text
+        document.getElementById('confirm_status_order_id').textContent = orderId;
+        document.getElementById('confirm_status_new_name').textContent = newStatus;
+
+        // 3. Set the 'Yes' button action
+        const yesBtn = document.getElementById('confirmStatusUpdateBtn');
+        yesBtn.onclick = function() {
+            // Send the request to your Django view
+            fetch(`/orders/update_status/${orderId}/?status=${encodeURIComponent(newStatus)}`)
+                .then(response => {
+                    if (response.ok) {
+                        // Success: Refresh the page to update Dashboard counts & Modal
+                        window.location.reload(); 
+                    } else {
+                        alert("Failed to update status. Please try again.");
+                    }
+                });
+        };
+
+        // 4. Show the confirmation modal
+        showModal(confirmModal);
+    }
+
     // Add Customer Modal
     const addCustomer = e.target.closest('.open-add-customer-modal');
     if (addCustomer) {
@@ -518,19 +621,24 @@ document.addEventListener('click', function (e) {
     if (viewCustomer && viewCustomerModal) {
         e.preventDefault();
         const id = viewCustomer.dataset.id;
+        const logoUrl = viewCustomer.dataset.view_logo;
+        const logoImg = qs('#view_company_logo', viewCustomerModal);
 
+        if (logoImg) {
+            logoImg.src = logoUrl ? logoUrl : '/static/images/no-logo-placeholder.png';
+        }
         qs('#view_customer_id', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_id;
-        qs('view_company_name', viewCustomerModal).textContent = viewCustomer.dataset.view_company_name;
-        qs('view_company_address', viewCustomerModal).textContent = viewCustomer.dataset.view_company_address;
-        qs('view_company_tin_number', viewCustomerModal).textContent = viewCustomer.dataset.view_company_tin_number;
+        qs('#view_company_name', viewCustomerModal).textContent = viewCustomer.dataset.view_company_name;
+        qs('#view_company_address', viewCustomerModal).textContent = viewCustomer.dataset.view_company_address;
+        qs('#view_company_tin_number', viewCustomerModal).textContent = viewCustomer.dataset.view_company_tin_number;
         qs('#view_customer_name', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_name;
         qs('#view_customer_email', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_email;
-        qs('#view_customer_phone_number', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_phone_number;
-        qs('#view_messenger', viewCustomerModal).textContent = viewCustomer.dataset.view_messenger;
-        qs('#view_viber', viewCustomerModal).textContent = viewCustomer.dataset.view_viber;
-        // qs('#view_email_transaction', viewCustomerModal).textContent = viewCustomer.dataset.view_email_transaction;
-        // qs('#view_messenger_transaction', viewCustomerModal).textContent = viewCustomer.dataset.view_messenger_transaction;
-        // qs('#view_viber_transaction', viewCustomerModal).textContent = viewCustomer.dataset.viber_transaction;
+        qs('#view_customer_messenger', viewCustomerModal).textContent = viewCustomer.dataset.view_messenger;
+        qs('#view_customer_viber', viewCustomerModal).textContent = viewCustomer.dataset.view_viber;
+        qs('#view_customer_contact_number', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_phone_number;
+        qs('#email-transaction', viewCustomerModal).checked = (viewCustomer.dataset.view_email_transaction === 'True');
+        qs('#messenger-transaction', viewCustomerModal).checked = (viewCustomer.dataset.view_messenger_transaction === 'True');
+        qs('#viber-transaction', viewCustomerModal).checked = (viewCustomer.dataset.view_viber_transaction === 'True');
 
         if (viewCustomerModal) showModal(viewCustomerModal);
     }
@@ -557,25 +665,31 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. Target the elements
     const productionStart = document.getElementById('production-start');
     const deliveryDate = document.getElementById('delivery-date');
+    
+    // Check if we are in "Edit" mode by looking at the header text
+    const pageHeader = document.querySelector('h1')?.textContent || "";
+    const isEditMode = pageHeader.toLowerCase().includes("edit order");
 
-    // 3. Set initial minimums and logic
     if (productionStart && deliveryDate) {
-        // Set both to minimum of today initially
-        productionStart.setAttribute('min', today);
-        deliveryDate.setAttribute('min', today);
+        const today = new Date().toLocaleDateString('en-CA'); 
 
-        // Update Delivery Date's minimum whenever Production Start changes
+        // ONLY apply the "today" constraint if NOT in edit mode
+        if (!isEditMode) {
+            productionStart.setAttribute('min', today);
+            deliveryDate.setAttribute('min', today);
+            console.log("Add Mode: Minimum date set to today.");
+        } else {
+            console.log("Edit Mode: Minimum date constraint removed.");
+        }
+
+        // Keep the logical link: Delivery must always be after Start
         productionStart.addEventListener('change', function() {
             const selectedStartDate = this.value;
             deliveryDate.setAttribute('min', selectedStartDate);
 
-            // If current delivery date is now earlier than production start, clear it
             if (deliveryDate.value && deliveryDate.value < selectedStartDate) {
                 deliveryDate.value = "";
-                // Trigger your validation function to show the error message
-                if (typeof validateField === "function") {
-                    validateField(deliveryDate);
-                }
+                if (typeof validateField === "function") validateField(deliveryDate);
             }
         });
     }
@@ -1138,20 +1252,50 @@ function resetItemModal() {
     });
 }
 
+// Helper for Update Order Status
+function executeStatusUpdate(id, status, modalToClose) {
+    console.log(`--- TRACE: Sending update for #${id} to ${status} ---`);
+
+    fetch(`/orders/update_status/${id}/?status=${encodeURIComponent(status)}`)
+        .then(response => {
+            if (response.ok) {
+                // A. Update the View Modal UI instantly
+                const statusDisplay = qs('#order_order_status', viewOrderModal);
+                statusDisplay.textContent = status;
+                updateStatusButtonStyle(statusDisplay.closest('.status-btn'), status);
+
+                // B. Close the confirmation modal
+                hideModal(modalToClose);
+
+                // C. Optional: Force a dashboard refresh or show a success toast
+                console.log("--- TRACE: Database update successful ---");
+            }
+        })
+        .catch(err => console.error("Update failed:", err));
+}
+
 // Validator
 function validateField(field) {
-    console.log('Validating:', field.name, 'Result:', field.checkValidity());
     const errorWrap = field.closest('.error-wrap');
     const errorMsg = errorWrap ? errorWrap.querySelector('.error-msg') : null;
+
+    // 1. CUSTOM CHECK: Force "Select" with value="" to be invalid
+    let isInvalidSelect = (field.tagName === 'SELECT' && field.value === "");
     
-    if (!field.checkValidity()) {
+    // 2. COMBINE: Check browser validity OR our custom select rule
+    if (!field.checkValidity() || isInvalidSelect) {
+        console.log('Validating:', field.name, 'Result: INVALID');
+        
         if (errorMsg) {
-            errorMsg.textContent = field.dataset.error || field.validationMessage;
+            // Use custom data-error or a fallback message
+            errorMsg.textContent = isInvalidSelect ? "Please select an option." : (field.dataset.error || field.validationMessage);
             errorMsg.style.display = 'block';
             field.classList.add('error-border');
         }
         return false;
     } else {
+        // 3. VALID CASE
+        console.log('Validating:', field.name, 'Result: VALID');
         if (errorMsg) {
             errorMsg.style.display = 'none';
             field.classList.remove('error-border');
@@ -1256,30 +1400,44 @@ document.querySelectorAll('.modal-container').forEach(modal => {
 // SPECIALS
 // Validator for All Modals
 modalForms.forEach(form => {
-    // Validate on input (Real-time)
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    function updateButtonState() {
+        if (!submitBtn) return;
+        // checkValidity() is a built-in browser method that checks all required/pattern rules
+        const isFormValid = form.checkValidity();
+        submitBtn.disabled = !isFormValid;
+        
+        // Optional: Add a class for styling the disabled state
+        submitBtn.style.opacity = isFormValid ? "1" : "0.5";
+        submitBtn.style.cursor = isFormValid ? "pointer" : "not-allowed";
+    }
+
+    // 1. Real-time validation
     form.addEventListener('input', function (e) {
         const field = e.target;
-
         if (field.hasAttribute('hx-get')) return; 
-
+        
         if (field.classList.contains('input') || field.type === 'file') {
             validateField(field);
+            updateButtonState(); // Toggle button on every keystroke
         }
     });
 
-    // Validate on submit (Final check)
+    // 2. Initial check on load (in case fields are empty/required)
+    updateButtonState();
+
+    // 3. Final check on submit (Keep your existing safety)
     form.addEventListener('submit', function (e) {
         const fields = form.querySelectorAll('.input, input[type="file"]');
         let isValid = true;
-
         fields.forEach(field => {
             if (!validateField(field)) isValid = false;
         });
 
-        // Stop submission if anything is invalid
         if (!isValid) {
             e.preventDefault();
-            console.log("Form validation failed.");
+            updateButtonState();
         }
     });
 });

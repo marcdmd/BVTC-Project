@@ -1,12 +1,15 @@
 {% extends 'bvtc_app/base.html' %}
 {% load static %}
 
-{% block title %}Edit Order{% endblock %}
+{% block title %}Edit Order no.{{ order.order_id }}{% endblock %}
 
 {% block nav %}
 <h1 class="bold">Orders</h1>
 <i class="material-symbols-outlined" style="font-size: 21px;">chevron_forward</i>
-<h1 class="bold">Add New Order</h1>
+<h1 class="bold">Edit Order no.{{ order.order_id }}</h1>
+{% endblock %}
+
+{% block catalog_button %}
 {% endblock %}
 
 {% block orders_button %}
@@ -16,14 +19,30 @@
 </button>
 {% endblock %}
 
+{% block quotations_button %}
+{% endblock %}
+
+{% block billings_button %}
+{% endblock %}
+
+{% block customers_button %}
+{% endblock %}
+
+{% block profile_button %}
+{% endblock %}
+
 {% block main %}
 <div class="modal">
-    <form action="" method="POST">
+    <!-- 1. DYNAMIC URL: Points to the specific order ID for the update view -->
+    <form action="{% url 'edit_order' order.order_id %}" method="POST" enctype="multipart/form-data" id="addOrderForm">
         {% csrf_token %}
-        <h1>Add New Order</h1>
+
+        <!-- 2. DYNAMIC TITLE: Shows the current Order ID -->
+        <h1>Edit Order no.{{ order.order_id }}</h1>
         <div style="display: flex; flex-direction: row;">
             <p class="required-message"><span>*</span> Required</p>
         </div>
+
         <div class="horizontal-section">
             <div class="vertical-section">
                 <div class="divider">
@@ -34,16 +53,16 @@
                 <div class="vertical-section" style="height: max-content; max-height: max-content;">
                     <div class="horizontal-input-field" style="flex: 1;">
                         <label><span>*</span> Customer Information:</label>
-    
-                        <input type="radio" value="new" name="customer-info" id="new" checked>
+                        <!-- 3. PRE-SELECTED RADIOS: 'Existing' is checked by default for edits -->
+                        <input type="radio" value="new" name="customer-info" id="new" disabled>
                         <label for="new">New</label>
                         
-                        <input type="radio" value="existing" name="customer-info" id="existing">
+                        <input type="radio" value="existing" name="customer-info" id="existing" checked disabled>
                         <label for="existing">Existing</label>
                     </div>
                     
                     <div class="for-new details" style="width: 100%;">
-                        <button type="button" class="button-primary small-m" style="width: 100%; display: block;">
+                        <button type="button" class="button-primary small-m open-add-customer-modal" style="width: 100%; display: block;">
                             <i class="material-symbols-outlined" style="font-size: 15px;">add</i>
                             Add New Customer
                         </button>
@@ -53,26 +72,27 @@
                         <div class="vertical-section">
                             <div class="horizontal-input-field">
                                 <label for="company-name"><span>*</span> Company Name:</label>
-                                <select class="input" 
-                                        name="company-id" 
-                                        id="company-name"
-                                        hx-get="{% url 'load_customers' %}" 
-                                        hx-target="#customer-name" 
-                                        hx-trigger="change">
-                                    <option value="" disabled selected>Select Company</option>
+                                <select class="input" disabled>
                                     {% for company in companies %}
-                                        <option value="{{ company.company_id }}">{{ company.company_name }}</option>
+                                        <!-- 4. FOREIGN KEY MATCHING: Compares current company to the Order's saved company -->
+                                        <option value="{{ company.company_id }}" 
+                                            {% if company.company_id == order.customer_id.company_id.company_id %}selected{% endif %}>
+                                            {{ company.company_name }}
+                                        </option>
                                     {% endfor %}
                                 </select>
-
+                                <input type="hidden" name="company-id" id="company-name" value="{{ company.company_id }}">
                             </div>
 
                             <div class="horizontal-input-field" id="customer-name">
-                                <label for="customer-name"><span>*</span> Customer Name:</label>
-                                <select class="input" >
-                                    <option value="" disabled selected>Select a Company First</option>
+                                <label><span>*</span> Customer Name:</label>
+                                <select class="input" disabled>
+                                    <!-- 5. PRE-FILL DROPDOWN: Shows the current customer assigned to this order -->
+                                    <option value="{{ order.customer_id.customer_id }}" selected>
+                                        {{ order.customer_id.customer_name }}
+                                    </option>
                                 </select>
-                                <!-- This was populated by the first HTMX call -->
+                                <input type="hidden" name="customer-id" value="{{ order.customer_id.customer_id }}">
                             </div>
                         </div>
                     </div>
@@ -86,38 +106,47 @@
                 </div>
                 
                 <div class="horizontal-input-field">
-                    <label for="payment-mode"><span>*</span> Mode of Payment:</label>
+                    <label><span>*</span> Mode of Payment:</label>
                     <div class="horizontal-input-field radio-choices">
+                        <!-- 6. RADIO LOGIC: Checks if the saved string matches the option value -->
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" value="metrobank" name="payment-mode" id="metrobank" checked>
+                            <input type="radio" value="Metrobank Fund Transfer" name="payment-mode" id="metrobank" 
+                                {% if order.mode_of_payment == 'Metrobank Fund Transfer' %}checked{% endif %}>
                             <label for="metrobank">Metrobank Fund Transfer</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" value="bpi" name="payment-mode" id="bpi">
+                            <input type="radio" value="BPI Bank Transfer" name="payment-mode" id="bpi"
+                                {% if order.mode_of_payment == 'BPI Bank Transfer' %}checked{% endif %}>
                             <label for="bpi">BPI Bank Transfer</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" value="gcash" name="payment-mode" id="gcash">
+                            <input type="radio" value="GCash Payment" name="payment-mode" id="gcash"
+                                {% if order.mode_of_payment == 'GCash Payment' %}checked{% endif %}>
                             <label for="gcash">Gcash Payment</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="horizontal-input-field">
-                    <label for="payment-terms"><span>*</span> Payment Terms:</label>
+                    <label><span>*</span> Payment Terms:</label>
 
-                    <input type="radio" value="partial" name="payment-terms" id="partial" checked>
+                    <input type="radio" value="Partial" name="payment-terms" id="partial"
+                        {% if order.payment_terms == 'Partial' %}checked{% endif %}>
                     <label for="partial">Partial</label>
 
-                    <input type="radio" value="full" name="payment-terms" id="full">
+                    <input type="radio" value="Full" name="payment-terms" id="full"
+                        {% if order.payment_terms == 'Full' %}checked{% endif %}>
                     <label for="full">Full</label>
                 </div>
 
                 <div class="horizontal-input-field" style="align-self: flex-start;">
                     <label for="budget"><span>*</span> Budget:</label>
-                    <input class="input" type="number" min="1" placeholder="1" name="budget" id="budget" required>
+                    <div class="error-wrap">
+                        <input class="input" type="number" min="1" placeholder="1" name="budget" id="budget" value="{{ order.budget }}" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,45 +157,31 @@
                 <hr>
             </div>
 
+            <input type="hidden" name="order_data" id="orderDataInput">
+
             <table class="small-database">
                 <thead>
                     <tr>
                         <th>PRODUCT</th>
                         <th>COLOR</th>
                         <th>CUSTOMIZATION</th>
+                        <th>UNIT PRICE</th>
                         <th>QUANTITY</th>
-                        <th>PRICE</th>
+                        <th>SUBTOTAL</th>
                         <th>ACTIONS</th>
                     </tr>
                 </thead>
 
                 <tbody id="order-items-body">
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <div class="cell-buttons">
-                                <button type="button" class="m-button-primary smaller-b">Edit</button>
-                                <a href="" class="m-button-tertiary smaller-b">Delete</a>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td>TOTAL:</td>
-                        <td></td>
-                        <td><b>Php 0.00</b></td>
-                        <td></td>
-                    </tr>                    
+                    <!-- 8. DYNAMIC TABLE: Left empty; populated by JS using the JSON at the bottom -->                 
                 </tbody>
             </table>
 
-            <a href="{% url 'add_item' %}" class="button-primary small-m" style="flex: 1 0 0; align-self: stretch;"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add Items</a>
+            <a href="{% url 'add_item' %}?edit_order_id={{ order.order_id }}"
+               class="button-primary small-m"
+               style="flex: 1 0 0; align-self: stretch;">
+                <i class="material-symbols-outlined">add</i>Add Items
+            </a>
         </div>
 
         <div class="horizontal-section">
@@ -180,7 +195,7 @@
                     <label for="mockups">Mockup (Optional):</label>
                     <div class="file-upload" style="width: 100%;">
                         <label for="mockups">
-                            <span style="color: #898989;">Upload Image/s</span>
+                            <span class="file-text" style="color: #898989;">Upload Image/s</span>
                             <input id="mockups" name="mockups[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;" multiple>
                         </label>
                     </div>
@@ -188,12 +203,20 @@
 
                 <div class="horizontal-input-field" style="max-height: 34px;">
                     <label for="logo-link">Link to Logo (Optional):</label>
-                    <input type="text" id="logo-link" name="logo-link" class="input">
+                    <div class="error-wrap">
+                        <!-- 9. DEFAULT FILTER: Uses |default:'' so it doesn't show "None" if empty -->
+                        <input type="url" id="logo-link" name="logo-link" class="input" value="{{ order.link_to_logo|default:'' }}">
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
 
                 <div class="vertical-input-field">
                     <label for="instructions">Packing Instructions (Optional):</label>
-                    <textarea type="text" class="input" name="instructions" id="instructions"></textarea>
+                    <div class="error-wrap">
+                        <!-- 10. TEXTAREA: Values go BETWEEN the tags, not in a value attribute -->
+                        <textarea class="input" name="instructions" id="instructions">{{ order.packing_instructions }}</textarea>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
 
@@ -203,15 +226,21 @@
                     <hr>
                 </div>
 
-                <div class="horizontal-section" style="align-self: flex-start;">
+                <div class="horizontal-input-field" style="align-self: flex-start;">
                     <div class="horizontal-input-field" style="align-self: flex-start;">
-                        <label for="production=start"><span>*</span> Start of Production:</label>
-                        <input type="date" name="production-start" id="production-start" class="input">
+                        <label for="production-start"><span>*</span> Start of Production:</label>
+                        <div class="error-wrap">
+                            <input type="date" name="production-start" id="production-start" class="input" value="{{ order.start_of_production|date:'Y-m-d' }}" data-no-min="true" required>
+                            <span class="error-msg"></span>
+                        </div>
                     </div>
 
                     <div class="horizontal-input-field" style="align-self: flex-start;">
-                        <label for="dalivery-date"><span>*</span> Delivery Date:</label>
-                        <input type="date" name="dalivery-date" id="dalivery-date" class="input">
+                        <label for="delivery-date"><span>*</span> Delivery Date:</label>
+                        <div class="error-wrap">
+                            <input type="date" name="delivery-date" id="delivery-date" class="input" value="{{ order.delivery_date|date:'Y-m-d' }}" required>
+                            <span class="error-msg"></span>
+                        </div>
                     </div>  
                 </div>              
 
@@ -223,35 +252,38 @@
                 <div class="horizontal-input-field">
                     <label><span>*</span> Shipping Details:</label>
 
-                    <input type="radio" value="new-shipping" name="shipping-details" id="new-shipping" checked>
+                    <input type="radio" value="new-shipping" name="shipping-details" id="new-shipping">
                     <label for="new-shipping">New</label>
 
-                    <input type="radio" value="existing-shipping" name="shipping-details" id="existing-shipping">
+                    <input type="radio" value="existing-shipping" name="shipping-details" id="existing-shipping" checked>
                     <label for="existing-shipping">Existing</label>
                 </div>
 
                 <div class="for-new-shipping details" style="width: 100%;">
-                    <button type="button" class="button-primary small-m" style="width: 100%; display: block;">
+                    <button type="button" class="button-primary small-m open-add-shipping-modal" style="width: 100%; display: block;">
                         <i class="material-symbols-outlined" style="font-size: 15px;">add</i>
-                        Add New Set
+                        Add New Shipping Details
                     </button>
                 </div>
 
                 <div class="for-existing-shipping details" style="width: 100%;">
-                    <select class="input" name="shipping" id="shipping-address-select">
-                        <option value="" disabled selected>Select a Customer First</option>
-                        <!-- JS will handle injection of existing options -->
+                    <select class="input" name="shipping-id" id="shipping-address-select" required>
+                        <option value="" disabled>Select an address</option>
+                        {% for ship in customer_shipping_addresses %}
+                            <option value="{{ ship.shipping_id }}" 
+                                {% if ship.shipping_id == order.shipping_id.shipping_id %}selected{% endif %}>
+                                {{ ship.contact_person_name }} - {{ ship.address_line_1 }}, {{ ship.address_city }}
+                            </option>
+                        {% endfor %}
                     </select>
                 </div>
 
                 <div class="horizontal-input-field">
                     <label for="courier"><span>*</span> Courier:</label>
-                    <select name="courier" id="courier" class="input" required>
-                        <option value="" disabled selected>Select a Courier</option>
-                        <option value="j&t">J&T</option>
-                        <option value="lalamove">Lalamove</option>
-                        <option value="lbc">LBC</option>
-                    </select>
+                    <div class="error-wrap">
+                        <input type="text" id="courier" name="courier" class="input" value="{{ order.courier }}" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -264,45 +296,44 @@
 
             <div class="horizontal-section">
                 <div class="horizontal-input-field">
-                    <label for="transaction-platform"><span>*</span> Transaction Platform:</label>
+                    <label><span>*</span> Transaction Platform:</label>
 
                     <div class="horizontal-input-field radio-choices">
+                        <!-- NOTE: We compare against the strings 'Email', 'Messenger', or 'Viber' -->
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" id="email" checked>
-                            <label for="email">Email</label>
+                            <input type="radio" name="transaction-platform" value="Email" id="email-option"
+                                {% if order.transaction_platform == 'Email' %}checked{% endif %}>
+                            <label for="email-option">Email</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" id="messenger">
-                            <label for="messenger">Messenger</label>
+                            <input type="radio" name="transaction-platform" value="Messenger" id="messenger-option" 
+                                {% if order.transaction_platform == 'Messenger' %}checked{% endif %}>
+                            <label for="messenger-option">Messenger</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" id="viber">
-                            <label for="viber">Viber</label> 
+                            <input type="radio" name="transaction-platform" value="Viber" id="viber-option" 
+                                {% if order.transaction_platform == 'Viber' %}checked{% endif %}>
+                            <label for="viber-option">Viber</label> 
                         </div>
                     </div>               
                 </div>
 
                 <div class="horizontal-input-field">
                     <label for="account-manager"><span>*</span> Account Manager:</label>
-                    
-                    <div class="horizontal-input-field radio-choices">
-                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" id="manager-1" checked>
-                            <label for="manager-1">Manager 1</label>
-                        </div>
-
-                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" id="manager-2">
-                            <label for="manager-2">Manager 2</label>
-                        </div>
-                        
-                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" id="top-manager">
-                            <label for="top-manager">Top Manager</label> 
-                        </div>                    
-                    </div>             
+                    <div class="error-wrap">
+                        <select class="input" name="account-manager" id="account-manager" required>
+                            <!-- Loop through all managers passed from the backend context -->
+                            {% for m in managers %}
+                                <option value="{{ m.user_id }}" 
+                                    {% if m.user_id == order.user_id.user_id %}selected{% endif %}>
+                                    {{ m.user_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <span class="error-msg"></span>
+                    </div>         
                 </div>
             </div>
         </div>
@@ -312,70 +343,469 @@
         </div>
 
         <div class="buttons-section">
-            <a href="{% url 'orders' %}" class="m-button-secondary small-m">Cancel</a>
-            <button type="submit" class="m-button-primary small-m">Add Order</button>
+            <button type="button" class="m-button-secondary small-m open-cancel-add-modal">Cancel</button>
+            <button type="button" onclick="submitDjangoOrder()" class="m-button-primary small-m">Update Order</button>
         </div>
     </form>
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const tableBody = document.getElementById('order-items-body');
-    if (!tableBody) return;
+{{ existing_items_json|json_script:"server-side-items" }}
 
-    // FIX: Changed 'pendingOrder' to 'pendingOrderItems'
-    const savedData = localStorage.getItem('pendingOrderItems'); 
-    if (!savedData) {
-        console.log("No items found in localStorage under 'pendingOrderItems'");
+{% endblock %}
+
+{% block modals %}
+<div class="modal-container" id="editSummaryItemModal">        
+    <div class="modal product-view" style="max-width: 500px;">
+        <form id="editItemForm">
+            {% csrf_token %}
+            <div class="vertical-section">
+                <div class="horizontal-input-field" style="flex: 0; justify-content: space-between; align-items: center;">
+                    <!-- Unique ID: edit_item_code -->
+                    <p class="product-id smaller-r" id="edit_item_code"></p>
+                    <i class="material-symbols-outlined close-modal close-btn">close</i>
+                </div>
+
+                <!-- Unique ID: edit_item_name, edit_category, etc. -->
+                <h1 id="edit_item_name">Product Name</h1>
+                <p class="small-r">Category: <b id="edit_category"></b></p>
+                <p class="small-r">MOQ: <b id="edit_moq"></b> <b>pcs.</b></p>
+                <p class="small-r">Price: <b>₱</b> <b id="edit_price"></b></p>
+
+                <div class="divider"><p>Color Variations</p><hr></div>
+                <div class="color-container" style="height: max-content;">
+                    <!-- JS handles injection of colors -->
+                </div>
+                
+                <div class="divider"><p>Customizations</p><hr></div>
+                <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
+                    <input class="filter-input radio-input" type="radio" name="customization" id="cut-&-sew-edit" value="Cut & Sew" checked>
+                    <label class="color-filter-label small-b" for="cut-&-sew-edit">Cut & Sew</label>
+
+                    <input class="filter-input radio-input" type="radio" name="customization" id="silkscreen-print-edit" value="Silkscreen Print">
+                    <label class="color-filter-label small-b" for="silkscreen-print-edit">Silkscreen Print</label>
+
+                    <input class="filter-input radio-input" type="radio" name="customization" id="digital-print-edit" value="Digital Print">
+                    <label class="color-filter-label small-b" for="digital-print-edit">Digital Print</label>
+
+                    <input class="filter-input radio-input" type="radio" name="customization" id="laser-engrave-edit" value="Laser Engrave">
+                    <label class="color-filter-label small-b" for="laser-engrave-edit">Laser Engrave</label>
+
+                    <input class="filter-input radio-input" type="radio" name="customization" id="leather-stamp-edit" value="Leather Stamp">
+                    <label class="color-filter-label small-b" for="leather-stamp-edit">Leather Stamp</label>
+
+                    <input class="filter-input radio-input" type="radio" name="customization" id="none-edit" value="N/A">
+                    <label class="color-filter-label small-b" for="none-edit">None</label>
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="edit_note">Note:</label>
+                    <textarea class="input" name="note" id="edit_note" placeholder="Add specific instructions..."></textarea>
+                </div>                
+
+                <div class="divider"><p>Quantity</p><hr></div>
+                <div class="horizontal-input-field">
+                    <div class="error-wrap">
+                        <input class="input" type="number" name="quantity" id="edit_quantity" required>
+                        <span class="error-msg"></span>
+                    </div>
+                    <label for="edit_quantity" style="flex: 2 0 0; color: #898989;">MOQ: <b id="edit_moq_2"></b> <b>pcs.</b></label>
+                </div>
+
+                <div class="divider"><hr></div>
+                <div class="buttons-section">
+                    <button type="button" id="saveItemBtn" onclick="saveItemToOrder()" class="m-button-primary small-m">Update Item</button>
+                    <button type="button" class="close-modal close-btn m-button-secondary small-m">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-container" id="cancelAddModal">
+    <div class="notif-modal">
+        <div class="header-warning">
+            <h1 class="bold">Cancel Editing Order?</h1>
+            <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+        </div>
+
+        <div class="body">
+            <p class="regular">Are you sure you want to cancel? Your progress will be lost</p>
+            <div class="buttons-section">
+                <a href="" class="m-button-tertiary small-m confirm_cancel" style="flex: 1 0 0;">Yes</a>
+                <button type="button" class="m-button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="addCustomerModal">
+    <div class="modal customer-form">
+        <h1>Add New Customer</h1>
+        <div style="display: flex; flex-direction: row;">
+            <p class="required-message"><span>*</span> Required</p>
+        </div>
+
+        <form action="{% url 'add_customer' %}" method="POST" enctype="multipart/form-data" id="addCustomerForm">
+            {% csrf_token %}
+            <div class="divider"><p>Basic Information</p><hr></div>
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="first-name"><span>*</span> First Name:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" id="first-name" name="first-name" maxlength="150" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="last-name"><span>*</span> Last Name:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" id="last-name" name="last-name" maxlength="150" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-input-field">
+                <label for="home-address"><span>*</span> Home Address:</label>
+                <div class="error-wrap">
+                    <input class="input" type="text" id="home-address" name="home-address" maxlength="320" required>
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+
+            <div class="divider"><p>Company Information</p><hr></div>
+            <div class="vertical-section" style="height: max-content; max-height: max-content;">
+                <div class="horizontal-input-field" style="flex: 1;">
+                    <label><span>*</span> Company Details:</label>
+
+                    <input type="radio" value="new-company" name="company-details" id="new-company" checked>
+                    <label for="new-company">New</label>
+                    
+                    <input type="radio" value="existing-company" name="company-details" id="existing-company">
+                    <label for="existing-company">Existing</label>
+                </div>
+                
+                <div class="for-new-company details" id="newCompanyFields" style="width: 100%;">
+                    <div class="vertical-section">
+                        <div class="horizontal-section">
+                            <div class="file-upload" style="height: 100%;">
+                                <label style="cursor: pointer;">
+                                    <span><i class="material-symbols-outlined" style="font-size: 12px; color: #898989;">add</i></span>
+                                    <span class="file-text" style="color: #898989;"> Add Company Logo</span>
+                                    <input name="logo" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                </label>
+                            </div>
+
+                            <div class="vertical-section">
+                                <div class="horizontal-input-field">
+                                    <label for="modal-company-name"><span>*</span> Company Name:</label>
+                                    <input type="text" class="input" id="modal-company-name" name="company-name" maxlength="150">
+                                </div>
+
+                                <div class="horizontal-input-field">
+                                    <label for="company-address"><span>*</span> Company Address:</label>
+                                    <input type="text" class="input" id="company-address" name="company-address" maxlength="150">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="horizontal-input-field">
+                            <label for="tin-number">Tin Number:</label>
+                            <div class="error-wrap">
+                                <input type="number" class="input" id="tin-number" name="tin-number">
+                                <span class="error-msg"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="for-existing-company details" id="existingCompanyFields" style="width: 100%; display: none;">
+                    <div class="horizontal-input-field">
+                        <label for="modal-company"><span>*</span> Company Name:</label>
+                        <select class="input" name="company" id="modal-company">
+                            <option value="" hidden>Select a company</option>
+                            {% for comp in companies %}
+                                <option value="{{ comp.company_id }}">{{ comp.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>  
+            </div>
+
+            <div class="divider"><p>Contact Details</p><hr></div>
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="email-address"><span>*</span> Email Address:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="email" name="email-address" id="email-address" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="contact-number"><span>*</span> Contact Number:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" name="contact-number" id="contact-number" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="modal-messenger"><span>*</span> Messenger:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="url" name="messenger" id="modal-messenger" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="modal-viber">Viber:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" name="viber" id="modal-viber" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-input-field">
+                <label>Transaction Platforms:</label>
+                
+                <input type="checkbox" name="transaction-platform" value="email" id="email-transaction">
+                <label class="small-r" for="email-transaction">Email</label>
+
+                <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction">
+                <label class="small-r" for="messenger-transaction">Messenger</label>
+
+                <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction">
+                <label class="small-r" for="viber-transaction">Viber</label>
+            </div>
+
+            <div class="divider"><hr></div>
+            <div class="buttons-section">
+                <button type="button" class="close-modal m-button-secondary small-m" id="closeAddCustomerModal">Cancel</button>
+                <button type="submit" class="m-button-primary small-m">Add Customer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-container" id="addShippingModal">
+    <div class="modal shipping-form">
+        <h1>Add Shipping Details</h1>
+        <div style="display: flex; flex-direction: row;">
+            <p class="required-message"><span>*</span> Required</p>
+        </div>
+
+        <form action="" id="addShippingForm">
+            {% csrf_token %}
+            <div class="divider"><p>Contact Person's Details</p><hr></div>
+            <div class="vertical-input-field">
+                <label for="contact-person-name"><span>*</span> Contact Person's Name:</label>
+                <div class="error-wrap">
+                    <input type="text" class="input" name="contact-person-name" id="contact-person-name" maxlength="150" required>
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+            
+            <div class="horizontal-section">
+                <div class="vertical-input-field">
+                    <label for="contact-person-email"><span>*</span> Contact Person's Email:</label>
+                    <div class="error-wrap">
+                        <input type="email" class="input" name="contact-person-email" id="contact-person-email" maxlength="150" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+    
+                <div class="vertical-input-field">
+                    <label for="contact-person-number"><span>*</span> Contact Person's Number:</label>
+                    <div class="error-wrap">
+                        <input type="text" class="input" name="contact-person-number" id="contact-person-number" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"><p>Shipping Address</p><hr></div>
+
+            <div class="horizontal-section">
+                <div class="vertical-input-field">
+                    <label for="address-line-1"><span>*</span> House/Bldg./Street Name:</label>
+                    <div class="error-wrap">
+                        <input type="text" class="input" name="address-line-1" id="address-line-1" maxlength="150" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+    
+                <div class="vertical-input-field">
+                    <label for="address-line-2">Address Line 2:</label>
+                    <div class="error-wrap">
+                        <input type="text" class="input" name="address-line-2" id="address-line-2" maxlength="150">
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="vertical-input-field">
+                    <label for="province"><span>*</span> Province:</label>
+                    <div class="error-wrap">
+                        <select class="input" name="province" id="province" required
+                                hx-get="{% url 'load_cities' %}" 
+                                hx-target="#city-municipality" 
+                                hx-trigger="change">
+                            <option value="" hidden selected>Select a province</option>
+                            {% for province in provinces %}
+                                <option value="{{ province.id }}">{{ province.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="city-municipality"><span>*</span> City/Municipality:</label>
+                    <div class="error-wrap">
+                        <select class="input" name="city-municipality" id="city-municipality" required
+                                hx-get="{% url 'load_barangays' %}" 
+                                hx-target="#barangay" 
+                                hx-trigger="change">
+                            <option value="" hidden selected>Select a province first</option>
+                        </select>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="vertical-input-field">
+                    <label for="barangay"><span>*</span> Barangay:</label>
+                    <div class="error-wrap">
+                        <select class="input" name="barangay" id="barangay" required>
+                            <option value="" hidden selected>Select a city first</option>
+                        </select>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="postal-code">Postal Code:</label>
+                    <div class="error-wrap">
+                        <input type="text" class="input" name="postal-code" id="postal-code" pattern="[0-9]{4}" maxlength="4">
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div> <div class="divider"><hr></div>
+            <div class="buttons-section">
+                <button type="button" class="close-modal close-btn m-button-secondary small-m">Cancel</button>
+                <button type="submit" class="m-button-primary small-m">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("--- DEBUG START: Edit Page Loaded ---");
+
+    const orderInput = document.getElementById('orderDataInput');
+    const serverItemsElement = document.getElementById('server-side-items');
+    
+    // 1. Check if we ALREADY have data in LocalStorage for this session
+    const currentSessionData = localStorage.getItem('pendingOrderItems');
+
+    // 2. Seeding Logic
+    if (serverItemsElement) {
+        const rawData = serverItemsElement.textContent;
+
+        try {
+            const parsedData = JSON.parse(rawData);
+
+            // ONLY overwrite LocalStorage if LocalStorage is currently empty
+            // This ensures we pull from DB on first load, but preserve changes on return
+            if (!currentSessionData || JSON.parse(currentSessionData).length === 0) {
+                if (Array.isArray(parsedData) && parsedData.length > 0) {
+                    const jsonString = JSON.stringify(parsedData);
+                    localStorage.setItem('pendingOrderItems', jsonString);
+                    if (orderInput) orderInput.value = jsonString;
+                    console.log("RESULT: First Load - Synced from Database.");
+                }
+            } else {
+                // If LocalStorage already has items, use those (preserves the "Add Item" progress)
+                if (orderInput) orderInput.value = currentSessionData;
+                console.log("RESULT: Session in progress - Preserving LocalStorage.");
+            }
+        } catch (e) {
+            console.error("FAILED: JSON Parsing Error:", e);
+        }
+    }
+
+    // 3. Trigger Table Draw
+    if (typeof renderOrderTable === 'function') {
+        renderOrderTable();
+    }
+
+    // 4. Run Toggles
+    if (typeof toggleCustomer === 'function') toggleCustomer();
+    if (typeof toggleShipping === 'function') toggleShipping();
+    
+    console.log("--- DEBUG END ---");
+});
+
+function submitDjangoOrder() {
+    const orderForm = document.getElementById('addOrderForm');
+    const orderInput = document.getElementById('orderDataInput');
+    
+    // 1. FINAL SYNC: Pull the latest state from localStorage into the hidden input
+    const currentCartData = localStorage.getItem('pendingOrderItems');
+    if (orderInput) {
+        orderInput.value = currentCartData || '[]';
+    }
+
+    // 2. CHECK EMPTY: Verify there are actually items to send
+    if (!orderInput.value || JSON.parse(orderInput.value).length === 0) {
+        alert("Your cart is empty! Please add items first.");
         return;
     }
 
-    const items = JSON.parse(savedData);
-    let totalQty = 0;
-    let totalPrice = 0;
+    // 3. VALIDATION: Check standard required fields (Dates, Manager, etc.)
+    if (typeof validateField === 'function') {
+        const fields = orderForm.querySelectorAll('.input[required]');
+        let valid = true;
+        fields.forEach(f => { 
+            if (!validateField(f)) valid = false; 
+        });
+        
+        if (!valid) {
+            console.warn("Submission blocked: Form validation failed.");
+            return; 
+        }
+    }
 
-    tableBody.innerHTML = ''; // Clear placeholder rows
+    // 4. SUBMIT: Send the form to Django
+    console.log("Submitting order data...");
+    orderForm.submit();
+}
 
-    items.forEach((item, index) => {
-        const qty = parseInt(item.qty) || 0;
-        const price = parseFloat(item.price) || 0;
-        totalQty += qty;
-        totalPrice += (qty * price);
+window.onpageshow = function(event) {
+    console.log("--- TRACE: Page Show (Persisted: " + event.persisted + ") ---");
+    
+    // Sync the hidden input with whatever happened in the catalog
+    const orderInput = document.getElementById('orderDataInput');
+    const savedItems = localStorage.getItem('pendingOrderItems');
+    
+    if (savedItems && orderInput) {
+        orderInput.value = savedItems;
+    }
 
-        const row = `
-            <tr>
-                <td>${item.code}</td>
-                <td>${item.color}</td>
-                <td>${item.custom}</td>
-                <td>${qty}</td>
-                <td>Php ${price.toFixed(2)}</td>
-                <td>
-                    <div class="cell-buttons">
-                        <button type="button" class="m-button-tertiary smaller-b" onclick="removeItem(${index})">Delete</button>
-                    </div>
-                </td>
-            </tr>`;
-        tableBody.insertAdjacentHTML('beforeend', row);
-    });
-
-    // Append the Total Row
-    tableBody.insertAdjacentHTML('beforeend', `
-        <tr style="font-weight: bold; background: #fdfdfd;">
-            <td colspan="2"></td>
-            <td><b>TOTAL:</b></td>
-            <td><b>${totalQty}</b></td>
-            <td><b>Php ${totalPrice.toLocaleString(undefined, {minimumFractionDigits: 2})}</b></td>
-            <td></td>
-        </tr>
-    `);
-});
-
-// FIX: Updated key here as well
-window.removeItem = (index) => {
-    let items = JSON.parse(localStorage.getItem('pendingOrderItems') || '[]');
-    items.splice(index, 1);
-    localStorage.setItem('pendingOrderItems', JSON.stringify(items));
-    location.reload();
+    // Redraw the table to show new items
+    if (typeof renderOrderTable === 'function') {
+        renderOrderTable();
+    }
 };
 </script>
 {% endblock %}

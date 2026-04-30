@@ -10,10 +10,6 @@
 {% endblock %}
 
 {% block catalog_button %}
-<!-- <button type="submit">
-    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">browse</i>
-    <p style="color: #898989;" class="button-text small-b">Catalog</p>
-</button> -->
 {% endblock %}
 
 {% block orders_button %}
@@ -24,31 +20,15 @@
 {% endblock %}
 
 {% block quotations_button %}
-<!-- <button type="submit">
-    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">request_quote</i>
-    <p style="color: #898989;" class="button-text small-b">Quotations</p>
-</button> -->
 {% endblock %}
 
 {% block billings_button %}
-<!-- <button type="submit">
-    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">receipt</i>
-    <p style="color: #898989;" class="button-text small-b">Billings</p>
-</button> -->
 {% endblock %}
 
 {% block customers_button %}
-<!-- <button type="submit">
-    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">group</i>
-    <p style="color: #898989;" class="button-text small-b">Customers</p>
-</button> -->
 {% endblock %}
 
 {% block profile_button %}
-<!-- <button type="submit">
-    <i class="material-symbols-outlined" style="font-size: 24px; color: #898989;">account_box</i>
-    <p style="color: #898989;" class="button-text small-b">Profile</p>
-</button> -->
 {% endblock %}
 
 {% block main %}
@@ -93,7 +73,8 @@
                                         id="company-name"
                                         hx-get="{% url 'load_customers' %}" 
                                         hx-target="#customer-name" 
-                                        hx-trigger="change">
+                                        hx-trigger="change"
+                                        required>
                                     <option value="" hidden selected>Select Company</option>
                                     {% for company in companies %}
                                         <option value="{{ company.company_id }}">{{ company.company_name }}</option>
@@ -103,7 +84,7 @@
 
                             <div class="horizontal-input-field" id="customer-name">
                                 <label><span>*</span> Customer Name:</label>
-                                <select class="input" name="customer-id">
+                                <select class="input" name="customer-id" required>
                                     <option value="" disabled selected>Select a Company First</option>
                                     <!-- This will be populated by the first HTMX call -->
                                 </select>
@@ -289,7 +270,7 @@
                 </div>
 
                 <div class="for-existing-shipping details" style="width: 100%;">
-                    <select class="input" name="shipping-id" id="shipping-address-select">
+                    <select class="input" name="shipping_id" id="shipping-address-select" required>
                         <option value="" disabled selected>Select a Customer First</option>
                         <!-- JS will handle injection of existing options -->
                     </select>
@@ -317,41 +298,35 @@
 
                     <div class="horizontal-input-field radio-choices">
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" value="email" id="email-option" checked>
+                            <input type="radio" name="transaction-platform" value="Email" id="email-option" checked>
                             <label for="email-option">Email</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" value="messenger" id="messenger-option">
+                            <input type="radio" name="transaction-platform" value="Messenger" id="messenger-option">
                             <label for="messenger-option">Messenger</label>
                         </div>
 
                         <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="transaction-platform" value="viber" id="viber-option">
+                            <input type="radio" name="transaction-platform" value="Viber" id="viber-option">
                             <label for="viber-option">Viber</label> 
                         </div>
                     </div>               
                 </div>
 
                 <div class="horizontal-input-field">
-                    <label><span>*</span> Account Manager:</label>
-                    
-                    <div class="horizontal-input-field radio-choices">
-                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" value="manager-1" id="manager-1" checked>
-                            <label for="manager-1">Manager 1</label>
+                    <label for="account-manager"><span>*</span> Account Manager:</label>
+                    <div class="error-wrap">
+                        <div class="error-wrap">
+                            <select class="input" name="account-manager" id="account-manager" required>
+                                <option value="" hidden selected></option>
+                                {% for m in managers %}
+                                <option value="{{ m.user_id }}">{{ m.user_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="error-msg"></span>
                         </div>
-
-                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" value="manager-2" id="manager-2">
-                            <label for="manager-2">Manager 2</label>
-                        </div>
-                        
-                        <div class="horizontal-input-field" style="white-space: nowrap; flex: 0;">
-                            <input type="radio" name="account-manager" value="top-manager" id="top-manager">
-                            <label for="top-manager">Top Manager</label> 
-                        </div>                    
-                    </div>             
+                    </div>         
                 </div>
             </div>
         </div>
@@ -362,7 +337,7 @@
 
         <div class="buttons-section">
             <button type="button" class="m-button-secondary small-m open-cancel-add-modal">Cancel</button>
-            <button type="submit" onclick="submitDjangoOrder()" class="m-button-primary small-m">Add Order</button>
+            <button type="button" onclick="submitDjangoOrder()" class="m-button-primary small-m">Add Order</button>
         </div>
     </form>
 </div>
@@ -726,11 +701,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // --- 1. BRIDGE: SYNC LOCALSTORAGE ---
-    const savedItems = localStorage.getItem('pendingOrderItems');
     const orderInput = document.getElementById('orderDataInput');
+    const savedItems = localStorage.getItem('pendingOrderItems');
+
+    // ONLY LOAD, NEVER OVERWRITE
     if (savedItems && orderInput) {
         orderInput.value = savedItems;
         if (typeof renderOrderTable === 'function') renderOrderTable();
+        console.log("Add Order: Progress Restored.");
     }
 
     // --- 2. CUSTOMER TOGGLE (Matches id="new" and id="existing") ---
@@ -788,21 +766,52 @@ function submitDjangoOrder() {
     const orderForm = document.getElementById('addOrderForm');
     const orderInput = document.getElementById('orderDataInput');
     
-    // Check if cart is empty
+    // 1. FINAL SYNC: Pull the latest state from localStorage into the hidden input
+    const currentCartData = localStorage.getItem('pendingOrderItems');
+    if (orderInput) {
+        orderInput.value = currentCartData || '[]';
+    }
+
+    // 2. CHECK EMPTY: Verify there are actually items to send
     if (!orderInput.value || JSON.parse(orderInput.value).length === 0) {
         alert("Your cart is empty! Please add items first.");
         return;
     }
 
-    // Use your global validation logic (if available)
+    // 3. VALIDATION: Check standard required fields (Dates, Manager, etc.)
     if (typeof validateField === 'function') {
         const fields = orderForm.querySelectorAll('.input[required]');
         let valid = true;
-        fields.forEach(f => { if (!validateField(f)) valid = false; });
-        if (!valid) return; 
+        fields.forEach(f => { 
+            if (!validateField(f)) valid = false; 
+        });
+        
+        if (!valid) {
+            console.warn("Submission blocked: Form validation failed.");
+            return; 
+        }
     }
 
+    // 4. SUBMIT: Send the form to Django
+    console.log("Submitting order data...");
     orderForm.submit();
 }
+
+window.onpageshow = function(event) {
+    console.log("--- TRACE: Page Show (Persisted: " + event.persisted + ") ---");
+    
+    // Sync the hidden input with whatever happened in the catalog
+    const orderInput = document.getElementById('orderDataInput');
+    const savedItems = localStorage.getItem('pendingOrderItems');
+    
+    if (savedItems && orderInput) {
+        orderInput.value = savedItems;
+    }
+
+    // Redraw the table to show new items
+    if (typeof renderOrderTable === 'function') {
+        renderOrderTable();
+    }
+};
 </script>
 {% endblock %}

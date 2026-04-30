@@ -301,9 +301,11 @@ main .filter {
 }
 .status-dropdown {
     position: relative;
+    display: inline-block;
 }
 .status-dropdown-content {
     position: absolute;
+    z-index: 999;
     display: none;
     padding: 9px;
     flex-direction: column;
@@ -1033,6 +1035,21 @@ nav.expand {
 }
 .m-button-tertiary:hover {
     background: var(--dark-maroon);
+}
+.m-button-quaternary {
+    display: flex;
+    padding: 6px 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    border: 0;
+    border-radius: 3px;
+    color: var(--alternative-black);
+    background: var(--warm-light-gray);
+    cursor: pointer;
+}
+.m-button-quaternary:hover {
+    background: var(--off-white);
 }
 
 /* Text Styles */
