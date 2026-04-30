@@ -95,7 +95,7 @@ class Product(models.Model):
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Others')
     description = models.TextField()
     starting_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    MOQ = models.PositiveIntegerField()
+    MOQ = models.PositiveIntegerField(default=1)
     objects = models.Manager()
 
     def __str__(self):
