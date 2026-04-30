@@ -419,7 +419,7 @@
         </div>
 
         <div class="body">
-            <p class="regular">Are you sure you want to cancel? Your progress will be lost</p>
+            <p class="small-r">Are you sure you want to cancel? Your progress will be lost</p>
             <div class="buttons-section">
                 <a href="" class="m-button-tertiary small-m confirm_cancel" style="flex: 1 0 0;">Yes</a>
                 <button type="button" class="m-button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
@@ -554,7 +554,7 @@
                 <div class="horizontal-input-field">
                     <label for="modal-viber">Viber:</label>
                     <div class="error-wrap">
-                        <input class="input" type="text" name="viber" id="modal-viber" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <input class="input" type="text" name="viber" id="modal-viber" pattern="^(09|\+639)\d{9}$" maxlength="13">
                         <span class="error-msg"></span>
                     </div>
                 </div>
@@ -760,6 +760,43 @@ document.addEventListener('DOMContentLoaded', function() {
     // Run once on load
     toggleCustomer();
     toggleShipping();
+
+    // Add Customer Company
+    const newRadio = document.getElementById('new-company');
+    const existingRadio = document.getElementById('existing-company');
+    const newFields = document.getElementById('newCompanyFields');
+    const existingFields = document.getElementById('existingCompanyFields');
+
+    function toggleCompany() {
+        // HTML uses 'modal-company-name' and 'company-address'
+        const modalCompanyName = document.getElementById('modal-company-name');
+        const companyAddress = document.getElementById('company-address');
+        // HTML uses 'modal-company' for the select dropdown
+        const existingSelect = document.getElementById('modal-company');
+
+        if (newRadio.checked) {
+            newFields.style.display = 'block';
+            existingFields.style.display = 'none';
+            
+            if (modalCompanyName) modalCompanyName.required = true;
+            if (companyAddress) companyAddress.required = true;
+            if (existingSelect) existingSelect.required = false;
+        } else {
+            newFields.style.display = 'none';
+            existingFields.style.display = 'block';
+            
+            if (modalCompanyName) modalCompanyName.required = false;
+            if (companyAddress) companyAddress.required = false;
+            if (existingSelect) existingSelect.required = true;
+        }
+    }
+
+    // Ensure listeners are only attached if elements exist
+    if (newRadio && existingRadio) {
+        newRadio.addEventListener('change', toggleCompany);
+        existingRadio.addEventListener('change', toggleCompany);
+        toggleCompany(); // Initialize state
+    }
 });
 
 function submitDjangoOrder() {

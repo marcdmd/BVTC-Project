@@ -572,7 +572,6 @@ document.addEventListener('click', function (e) {
 
     // For Update Order Status
     const statusLink = e.target.closest('.update-status-link');
-    
     if (statusLink) {
         e.preventDefault();
         
@@ -607,6 +606,31 @@ document.addEventListener('click', function (e) {
 
         // 4. Show the confirmation modal
         showModal(confirmModal);
+    }
+
+    // Cancel Order Confirmation
+    const cancelOrderBtn = e.target.closest('.cancel-order-modal-btn');
+
+    if (cancelOrderBtn && cancelOrderModal) {
+        e.preventDefault();
+        const viewOrderModal = document.getElementById('viewOrderModal');
+        
+        // 1. Pull the saved data from the View Modal
+        // Note: We saved this earlier using viewOrderModal.dataset.currentOrder
+        const data = JSON.parse(viewOrderModal.dataset.currentOrder);
+
+        // 2. Update the Order ID in the confirmation text
+        const idDisplay = qs('#cancel_order_id_display', cancelOrderModal);
+        if (idDisplay) idDisplay.textContent = data.order_id;
+
+        // 3. Set the "Yes" button link
+        const confirmBtn = cancelOrderModal.querySelector('.confirm_delete');
+        if (confirmBtn) {
+            confirmBtn.href = `/orders/cancel_order/${data.order_id}/`;
+        }
+
+        // 4. Show the confirmation modal
+        showModal(cancelOrderModal);
     }
 
     // Add Customer Modal
@@ -1035,6 +1059,7 @@ function editItem(index) {
 
     // 1. Rebuild the product data
     modal.dataset.currentProduct = JSON.stringify({
+        db_id: item.db_id,
         colors: item.all_colors || "",
         category: item.category || "",
         moq: item.moq || "",
@@ -1108,6 +1133,7 @@ function editItemFromSummary(index) {
 
     // Attach metadata
     modal.setAttribute('data-current-product', JSON.stringify({
+        db_id: item.db_id,
         name: item.name,
         colors: item.all_colors || "",
         starting_price: item.price || 0

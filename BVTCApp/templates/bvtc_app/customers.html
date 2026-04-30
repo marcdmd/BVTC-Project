@@ -294,13 +294,13 @@
                     </div>
                 </div>
     
-                <div class="divider"><p>Shipping Details</p><hr></div>
+                <!-- <div class="divider"><p>Shipping Details</p><hr></div>
                 <div class="horizontal-section">
-                    <button type="button" class="m-button-secondary">Shipping Detail</button>
-                    <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 21px;">add</i></button>
-                </div>
+                    <button type="button" class="m-button-quaternary">Shipping Detail</button>
+                    <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 18px; color: #101212;">add</i></button>
+                </div> -->
     
-                <div class="divider"><p>On-going Transactions</p><hr></div>
+                <!-- <div class="divider"><p>On-going Transactions</p><hr></div>
                 <div class="vertical-section">
                     <table class="small-database">
                         <thead>
@@ -317,8 +317,10 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
-    
+                </div> -->
+                
+                <div class="divider"><hr></div>
+                
                 <div class="buttons-section">
                     <button type="button" class="m-button-tertiary small-m">Delete</button>
                     <button type="button" class="m-button-primary small-m">Edit</button>
@@ -326,6 +328,120 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="modal-container" id="addShippingModal">
+    <div class="modal shipping-form">
+        <h1>Add Shipping Details</h1>
+        <div style="display: flex; flex-direction: row;">
+            <p class="required-message"><span>*</span> Required</p>
+        </div>
+
+        <form action="" id="addShippingForm">
+            {% csrf_token %}
+            <div class="divider"><p>Contact Person's Details</p><hr></div>
+            <div class="vertical-input-field">
+                <label for="contact-person-name"><span>*</span> Contact Person's Name:</label>
+                <div class="error-wrap">
+                    <input type="text" class="input" name="contact-person-name" id="contact-person-name" maxlength="150" required>
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+            
+            <div class="horizontal-section">
+                <div class="vertical-input-field">
+                    <label for="contact-person-email"><span>*</span> Contact Person's Email:</label>
+                    <div class="error-wrap">
+                        <input type="email" class="input" name="contact-person-email" id="contact-person-email" maxlength="150" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+    
+                <div class="vertical-input-field">
+                    <label for="contact-person-number"><span>*</span> Contact Person's Number:</label>
+                    <div class="error-wrap">
+                        <input type="text" class="input" name="contact-person-number" id="contact-person-number" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"><p>Shipping Address</p><hr></div>
+
+            <div class="horizontal-section">
+                <div class="vertical-input-field">
+                    <label for="address-line-1"><span>*</span> House/Bldg./Street Name:</label>
+                    <div class="error-wrap">
+                        <input type="text" class="input" name="address-line-1" id="address-line-1" maxlength="150" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+    
+                <div class="vertical-input-field">
+                    <label for="address-line-2">Address Line 2:</label>
+                    <div class="error-wrap">
+                        <input type="text" class="input" name="address-line-2" id="address-line-2" maxlength="150">
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="vertical-input-field">
+                    <label for="province"><span>*</span> Province:</label>
+                    <div class="error-wrap">
+                        <select class="input" name="province" id="province" required
+                                hx-get="{% url 'load_cities' %}" 
+                                hx-target="#city-municipality" 
+                                hx-trigger="change">
+                            <option value="" hidden selected>Select a province</option>
+                            {% for province in provinces %}
+                                <option value="{{ province.id }}">{{ province.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="city-municipality"><span>*</span> City/Municipality:</label>
+                    <div class="error-wrap">
+                        <select class="input" name="city-municipality" id="city-municipality" required
+                                hx-get="{% url 'load_barangays' %}" 
+                                hx-target="#barangay" 
+                                hx-trigger="change">
+                            <option value="" hidden selected>Select a province first</option>
+                        </select>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="vertical-input-field">
+                    <label for="barangay"><span>*</span> Barangay:</label>
+                    <div class="error-wrap">
+                        <select class="input" name="barangay" id="barangay" required>
+                            <option value="" hidden selected>Select a city first</option>
+                        </select>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+
+                <div class="vertical-input-field">
+                    <label for="postal-code">Postal Code:</label>
+                    <div class="error-wrap">
+                        <input type="text" class="input" name="postal-code" id="postal-code" pattern="[0-9]{4}" maxlength="4">
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div> <div class="divider"><hr></div>
+            <div class="buttons-section">
+                <button type="button" class="close-modal close-btn m-button-secondary small-m">Cancel</button>
+                <button type="submit" class="m-button-primary small-m">Add</button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
