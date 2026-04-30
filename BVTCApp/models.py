@@ -8,6 +8,7 @@ class UserAccount(models.Model):
        ('Officer', 'Officer'),
        ('Production', 'Production'),
        ('Graphic Designer', 'Graphic Designer'),
+       ('Other', 'Other')
        ]
     
     user_id = models.AutoField(primary_key=True)
@@ -16,7 +17,7 @@ class UserAccount(models.Model):
     user_role = models.CharField(max_length=100, choices=USER_ROLES, default='Other')
 
     def __str__(self):
-        return f'{self.user_name} - {self.user_title}'
+        return f'{self.user_name} - {self.user_role}'
 
 class Company(models.Model):
     company_id = models.AutoField(primary_key=True)
@@ -89,9 +90,9 @@ class Product(models.Model):
     ]
     
     product_id = models.AutoField(primary_key=True)
-    product_code = models.CharField(max_length=20, unique=True, blank=True)
+    product_code = models.CharField(max_length=20, unique=True)
     product_name = models.CharField(max_length=150)
-    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='others')
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Others')
     description = models.TextField()
     starting_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     MOQ = models.PositiveIntegerField()
@@ -100,7 +101,7 @@ class Product(models.Model):
     def __str__(self):
          return f'{self.product_code} - {self.product_name}'
 
-class ProductImage(models.Model): #Composite Key
+class ProductImage(models.Model):
     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
     product_image = models.ImageField(upload_to='images/')
     objects = models.Manager()
@@ -186,7 +187,7 @@ class Order(models.Model):
 
     note = models.TextField(blank=True, null=True)
     stock_availability = models.CharField(max_length=20, choices=STOCK_AVAILABILITY, default='Available', null=True)
-    customization_feasibility = models.CharField(max_length=100, blank=True)
+    customization_feasibility = models.CharField(max_length=100, blank=True, null=True)
     lead_time_feasibility = models.PositiveIntegerField(default=0, blank=True, null=True)
 
     actual_total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True)
@@ -245,7 +246,7 @@ class Image(models.Model): #Composite Key
     image_id = models.AutoField(primary_key=True)
     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
-    image_path = models.ImageField(max_length=255)
+    image_path = models.ImageField(upload_to='images/', max_length=255)
     feedback = models.TextField(blank=True, null=True)
     image_type = models.CharField(max_length=20, choices=IMAGE_TYPES)
     image_status = models.CharField(max_length=15, choices=IMAGE_STATUS, default='Pending')
