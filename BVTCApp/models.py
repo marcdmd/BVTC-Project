@@ -197,7 +197,7 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_id = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     color = models.CharField(max_length=7, blank=True, null=True)
     customization = models.TextField(blank=True, null=True)
     quantity = models.PositiveIntegerField(default=1)

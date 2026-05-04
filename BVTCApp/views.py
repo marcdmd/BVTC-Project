@@ -388,15 +388,19 @@ def delete_customer(request, pk):
     return redirect('customers')
 
 def customers(request):
-    # Back to basics: Just get the data and render it.
-    return render(request, 'bvtc_app/customers.html', {
-        'companies': Company.objects.all(), 
-        'all_customers': CustomerAccount.objects.all()
-    })
+    all_ships = ShippingDetails.objects.all()
+    print(f"DEBUG: Found {all_ships.count()} shipping records") # Look at your terminal!
 
-def add_shipping(request):
-    # Logic for UC-20 goes here
-    return redirect(request.META.get('HTTP_REFERER', 'customers'))
+    context = {
+        'all_shipping_details': all_ships, # Name must be EXACTLY this
+        'all_customers': CustomerAccount.objects.all(),
+        'companies': Company.objects.all(),
+    }
+    return render(request, 'bvtc_app/customers.html', context)
+
+# def add_shipping(request):
+#     # Logic for UC-20 goes here
+#     return redirect(request.META.get('HTTP_REFERER', 'customers'))
 
 def load_customers(request):
     company_id = request.GET.get('company-id')

@@ -74,7 +74,23 @@
                                 data-view_viber="{{ c.viber }}"
                                 data-view_email_transaction="{{ c.email_transaction }}"
                                 data-view_messenger_transaction="{{ c.messenger_transaction }}"
-                                data-view_viber_transaction="{{ c.viber_transaction }}">
+                                data-view_viber_transaction="{{ c.viber_transaction }}"
+                                
+                                data-shipping='[
+                                    {% for ship in c.shippingdetails_set.all %}
+                                    {
+                                        "contact": "{{ ship.contact_person_name|escapejs }}",
+                                        "email": "{{ ship.contact_person_email|escapejs }}",
+                                        "phone": "{{ ship.contact_person_number|escapejs }}",
+                                        "street": "{{ ship.address_line_1|escapejs }}",
+                                        "line_2": "{{ ship.address_line_2|escapejs }}",
+                                        "city": "{{ ship.address_city|escapejs }}",
+                                        "barangay": "{{ ship.address_barangay|escapejs }}",
+                                        "province": "{{ ship.address_province|escapejs }}",
+                                        "zip": "{{ ship.address_postal_code|escapejs }}"
+                                    }{% if not forloop.last %},{% endif %}
+                                    {% endfor %}
+                                ]'>
                                 View</button>
                         <button type="button" class="m-button-primary smaller-b">Edit</button>
                     </div>
@@ -259,7 +275,7 @@
     
             <div class="vertical-section" style="gap: 16px;">
                 <div class="divider"><p>Customer Information</p><hr></div>
-                <div class="vertical-section">
+                <div class="vertical-section" style="gap: 6px;">
                     <p class="small-r">Customer Name: <b id="view_customer_name"></b></p>
                     <p class="small-r">Company Name: <b id="view_company_name"></b></p>
                     <p class="small-r">Company Address: <b id="view_company_address"></b></p>
@@ -267,7 +283,7 @@
                 </div>
     
                 <div class="divider"><p>Contact Details</p><hr></div>
-                <div class="vertical-section">
+                <div class="vertical-section" style="gap: 6px;">
                     <p class="small-r">Email Address: <b id="view_customer_email"></b></p>
                     <p class="small-r">Contact Number: <b id="view_customer_contact_number"></b></p>
                     <p class="small-r">Messenger: <b id="view_customer_messenger"></b></p>
@@ -278,54 +294,85 @@
                     <p class="small-r">Transaction Platforms:</p>
                     <div class="horizontal-input-field">
                         <div class="horizontal-section">
-                            <input type="checkbox" name="transaction-platform" value="email" id="email-transaction" disabled>
+                            <input type="checkbox" name="transaction-platform" value="email" id="email-transaction" style="pointer-events: none;">
                             <label class="small-r" for="email-transaction">Email</label>
                         </div>
 
                         <div class="horizontal-section">
-                            <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction" disabled>
+                            <input type="checkbox" name="transaction-platform" value="messenger" id="messenger-transaction" style="pointer-events: none;">
                             <label class="small-r" for="messenger-transaction">Messenger</label>
                         </div>
 
                         <div class="horizontal-section">
-                            <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction" disabled>
+                            <input type="checkbox" name="transaction-platform" value="viber" id="viber-transaction" style="pointer-events: none;">
                             <label class="small-r" for="viber-transaction">Viber</label>
                         </div>
                     </div>
                 </div>
     
-                <!-- <div class="divider"><p>Shipping Details</p><hr></div>
-                <div class="horizontal-section">
-                    <button type="button" class="m-button-quaternary">Shipping Detail</button>
-                    <button type="button" class="add-color-btn"><i class="material-symbols-rounded" style="font-size: 18px; color: #101212;">add</i></button>
-                </div> -->
+                <div class="divider"><p>Shipping Details</p><hr></div>
+                <div class="horizontal-section" id="shipping-buttons-container">
+                    <!-- JS will handle population of shipping details and plus button -->
+                </div>
     
-                <!-- <div class="divider"><p>On-going Transactions</p><hr></div>
+                <div class="divider"><p>On-going Transactions</p><hr></div>
                 <div class="vertical-section">
                     <table class="small-database">
                         <thead>
                             <tr>
-                                <th>ORDERS</th>
-                                <th>BILLING STATEMENTS</th>
+                                <th style="width: 33.33%;">ORDERS</th>
+                                <th style="width: 33.33%;">QUOTATIONS</th>
+                                <th style="width: 33.34%;">BILLINGS</th>
                             </tr>
                         </thead>
     
                         <tbody>
                             <tr>
-                                <td></td>
-                                <td></td>
+                                <td style="width: 33.33%;"></td>
+                                <td style="width: 33.33%;"></td>
+                                <td style="width: 33.34%;"></td>
                             </tr>
                         </tbody>
                     </table>
-                </div> -->
+                </div>
                 
                 <div class="divider"><hr></div>
-                
                 <div class="buttons-section">
                     <button type="button" class="m-button-tertiary small-m">Delete</button>
                     <button type="button" class="m-button-primary small-m">Edit</button>
                     <button type="button" class="m-button-secondary small-m close-modal">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="viewShippingModal">
+    <div class="modal view-shipping">
+        <h1>Shipping Detail no.<span id="ship_number"></span></h1>
+
+        <div class="vertical-section" style="gap: 16px;">
+            <div class="divider"><p>Contact Person's Details</p><hr></div>
+            <div class="vertical-section" style="gap: 6px;">
+                <p class="small-r">Contact Person: <b id="ship_contact"></b></p>
+                <p class="small-r">Contact Email: <b id="ship_email"></b></p>
+                <p class="small-r">Contact Number: <b id="ship_phone"></b></p>
+            </div>
+
+            <div class="divider"><p>Shipping Address Details</p><hr></div>
+            <div class="vertical-section" style="gap: 6px;">
+                <p class="small-r">House/Bldg./Street Name: <b id="ship_street"></b></p>
+                <p class="small-r">Address Line 2: <b id="ship_line_2"></b></p>
+                <p class="small-r">City/Municipality: <b id="ship_city"></b></p>
+                <p class="small-r">Barangay: <b id="ship_barangay"></b></p>
+                <p class="small-r">State/Province: <b id="ship_province"></b></p>
+                <p class="small-r">Postal Code: <b id="ship_zip"></b></p>
+            </div>
+
+            <div class="divider"><hr></div>
+            <div class="buttons-section">
+                <button type="button" class="m-button-primary small-m">Edit</button>
+                <button type="button" class="m-button-secondary small-m close-modal">Close</button>
             </div>
         </div>
     </div>

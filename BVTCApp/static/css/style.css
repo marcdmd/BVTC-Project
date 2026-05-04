@@ -563,7 +563,8 @@ main .filter {
     width: 100px;
     flex: none;
 }
-.add-color-btn, .remove-color-btn {
+.add-color-btn,
+.remove-color-btn {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -575,6 +576,10 @@ main .filter {
     background: var(--warm-light-gray);
     color: var(--gray);
 }
+.add-color-btn:hover,
+.remove-color-btn:hover {
+    background: var(--cool-light-gray);
+} 
 .modal .content {
     font-size: 14px;
     font-weight: 700;
@@ -712,6 +717,10 @@ main .filter {
 .shipping-form {
     width: 500px;
     max-width: 500px;
+}
+.view-shipping {
+    width: 450px;
+    max-width: 450px;
 }
 
 /* Carousel from w3schools*/
@@ -1049,7 +1058,7 @@ nav.expand {
     cursor: pointer;
 }
 .m-button-quaternary:hover {
-    background: var(--off-white);
+    background: var(--cool-light-gray);
 }
 
 /* Text Styles */

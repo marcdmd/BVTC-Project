@@ -610,7 +610,6 @@ document.addEventListener('click', function (e) {
 
     // Cancel Order Confirmation
     const cancelOrderBtn = e.target.closest('.cancel-order-modal-btn');
-
     if (cancelOrderBtn && cancelOrderModal) {
         e.preventDefault();
         const viewOrderModal = document.getElementById('viewOrderModal');
@@ -644,14 +643,29 @@ document.addEventListener('click', function (e) {
     const viewCustomer = e.target.closest('.open-view-customer-modal');
     if (viewCustomer && viewCustomerModal) {
         e.preventDefault();
-        const id = viewCustomer.dataset.id;
+        const customerId = viewCustomer.dataset.view_customer_id;
+        console.log("1. Customer ID:", customerId);
         const logoUrl = viewCustomer.dataset.view_logo;
         const logoImg = qs('#view_company_logo', viewCustomerModal);
+
+        const rawShippingAttr = viewCustomer.dataset.shipping;
+        console.log("2. Raw data-shipping string:", rawShippingAttr);
+
+        let currentShippings = []; 
+        try {
+            // This regex cleans up trailing commas like [{},{}] -> [{},{}]
+            const cleanedJson = (rawShippingAttr || "[]").replace(/,\s*]/, ']');
+            currentShippings = JSON.parse(cleanedJson);
+            console.log("Parsed Array:", currentShippings);
+        } catch (err) {
+            console.error("JSON PARSE ERROR:", err.message);
+            console.log("Raw string was:", rawShippingAttr);
+        }
 
         if (logoImg) {
             logoImg.src = logoUrl ? logoUrl : '/static/images/no-logo-placeholder.png';
         }
-        qs('#view_customer_id', viewCustomerModal).textContent = viewCustomer.dataset.view_customer_id;
+        qs('#view_customer_id', viewCustomerModal).textContent = customerId;
         qs('#view_company_name', viewCustomerModal).textContent = viewCustomer.dataset.view_company_name;
         qs('#view_company_address', viewCustomerModal).textContent = viewCustomer.dataset.view_company_address;
         qs('#view_company_tin_number', viewCustomerModal).textContent = viewCustomer.dataset.view_company_tin_number;
@@ -664,6 +678,61 @@ document.addEventListener('click', function (e) {
         qs('#messenger-transaction', viewCustomerModal).checked = (viewCustomer.dataset.view_messenger_transaction === 'True');
         qs('#viber-transaction', viewCustomerModal).checked = (viewCustomer.dataset.view_viber_transaction === 'True');
 
+        const container = document.getElementById('shipping-buttons-container');
+        if (container) {
+            container.innerHTML = ''; 
+            
+            currentShippings.forEach((ship, index) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'm-button-quaternary small-m';
+                btn.textContent = `Shipping Detail ${index + 1}`; 
+                
+                btn.onclick = () => {
+                    const sModal = document.getElementById('viewShippingModal');
+                    // We already have 'viewCustomerModal' in scope from the outer block
+                    
+                    if (sModal) {
+                        // 1. Handle the "Stacking" Title logic
+                        const shipNumSpan = document.getElementById('ship_number');
+                        const shipCustIdSpan = document.getElementById('view_shipping_customer_id');
+                        
+                        if (shipNumSpan) shipNumSpan.textContent = index + 1;
+                        if (shipCustIdSpan) shipCustIdSpan.textContent = customerId;
+
+                        // 2. Map the address fields
+                        // Since we split these in the button, we map them here
+                        const fields = {
+                            'ship_contact': ship.contact,
+                            'ship_email': ship.email,
+                            'ship_phone': ship.phone,
+                            'ship_street': ship.street,
+                            'ship_line_2': ship.line_2,
+                            'ship_city': ship.city,
+                            'ship_barangay': ship.barangay,
+                            'ship_province': ship.province,
+                            'ship_zip': ship.zip
+                        };
+
+                        // Batch update to keep it clean
+                        for (const [id, value] of Object.entries(fields)) {
+                            const el = document.getElementById(id);
+                            if (el) el.textContent = value || 'N/A';
+                        }
+
+                        // 3. Show the modal on top
+                        showModal(sModal);
+                    }
+                };
+                container.appendChild(btn);
+            });
+
+            const addShippingBtn = document.createElement('button');
+            addShippingBtn.type = 'button';
+            addShippingBtn.className = 'add-color-btn';
+            addShippingBtn.innerHTML = `<i class="material-symbols-rounded" style="font-size: 18px; color: #101212;">add</i>`;
+            container.appendChild(addShippingBtn);
+        }
         if (viewCustomerModal) showModal(viewCustomerModal);
     }
 
@@ -843,7 +912,9 @@ function showModal(modal) {
     const isNotif = modal.querySelector('.notif-modal');
     
     // 2. NEW: Check if this is the specific Edit Modal we want to stack
-    const isStackable = isNotif || modal.id === 'editSummaryItemModal';
+    const isStackable = isNotif ||
+                        modal.id === 'editSummaryItemModal' ||
+                        modal.id === 'viewShippingModal';
 
     // 3. Only close other modals if the new one is NOT stackable
     if (!isStackable) {
