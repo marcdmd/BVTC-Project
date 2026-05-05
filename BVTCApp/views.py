@@ -83,17 +83,30 @@ def delete_product(request, pk):
     return redirect('catalog')
 
 def orders(request):
+    # Base queryset for the list
     all_orders = Order.objects.all()
 
-    # Calculate counts for the dashboard
+    # --- IMPLEMENT SEARCH ---
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        all_orders = all_orders.filter(
+            Q(order_id__icontains=search_query) | 
+            Q(customer_id__customer_name__icontains=search_query)
+        )
+    # ------------------------
+
+    # Dashboard counters use the unfiltered Order.objects.all() 
+    # so the summary boxes don't disappear when you search
+    total_stats = Order.objects.all()
+
     context = {
-        'orders': all_orders,
-        'count_feasibility': all_orders.filter(order_status='Under Feasibility').count(),
-        'count_quotation':   all_orders.filter(order_status='Under Quotation').count(),
-        'count_production':  all_orders.filter(order_status='In Production').count(),
-        'count_sampled':     all_orders.filter(order_status='Sampled').count(),
-        'count_packaged':    all_orders.filter(order_status='Packaged').count(),
-        'count_transit':     all_orders.filter(order_status='In Transit').count(),
+        'orders': all_orders, # The list displayed in the table
+        'count_feasibility': total_stats.filter(order_status='Under Feasibility').count(),
+        'count_quotation':   total_stats.filter(order_status='Under Quotation').count(),
+        'count_production':  total_stats.filter(order_status='In Production').count(),
+        'count_sampled':     total_stats.filter(order_status='Sampled').count(),
+        'count_packaged':    total_stats.filter(order_status='Packaged').count(),
+        'count_transit':     total_stats.filter(order_status='In Transit').count(),
     }
     
     return render(request, 'bvtc_app/orders.html', context)
@@ -468,12 +481,26 @@ def delete_customer(request, pk):
 
 def customers(request):
     all_ships = ShippingDetails.objects.all()
-    print(f"DEBUG: Found {all_ships.count()} shipping records") # Look at your terminal!
+    print(f"DEBUG: Found {all_ships.count()} shipping records") # Keeping your debug line!
+
+    # Start with all customers
+    all_customers = CustomerAccount.objects.all()
+
+    # --- IMPLEMENT SEARCH ---
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        all_customers = all_customers.filter(
+            Q(customer_name__icontains=search_query) | 
+            Q(customer_email__icontains=search_query) | 
+            Q(company_id__company_name__icontains=search_query)
+        )
+    # ------------------------
 
     context = {
-        'all_shipping_details': all_ships, # Name must be EXACTLY this
-        'all_customers': CustomerAccount.objects.all(),
+        'all_shipping_details': all_ships, 
+        'all_customers': all_customers, # This is now filtered if searched
         'companies': Company.objects.all(),
+        'provinces': Province.objects.all().order_by('name')
     }
     return render(request, 'bvtc_app/customers.html', context)
 
