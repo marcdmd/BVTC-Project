@@ -159,7 +159,12 @@
                                 {% endfor %}]'
                                 data-budget = "{{ o.budget }}"
                                 data-order_status = "{{ o.order_status }}"
-                                data-delivery_address = "{{ o.shipping_id.address_line_1 }}, {{ o.shipping_id.address_line_2 }}, {{ o.shipping_id.barangay }}, {{ o.shipping_id.address_province }} {{ o.shipping_id.address_postal_code }}"
+                                data-delivery_address = "{{ o.shipping_id.address_line_1|title }}, 
+                                                         {% if o.shipping_id.address_line_2 %}{{ o.shipping_id.address_line_2|title }}, {% endif %}
+                                                         Brgy. {{ o.shipping_id.address_barangay|title }}, 
+                                                         {{ o.shipping_id.address_city|title }}, 
+                                                         {{ o.shipping_id.address_province|title }} 
+                                                         {{ o.shipping_id.address_postal_code }}"
                                 data-contact = "{{ o.shipping_id.contact_person_name }}"
                                 data-contact_number = "{{ o.shipping_id.contact_person_number }}"
                                 data-contact_email = "{{ o.shipping_id.contact_person_email }}"

@@ -594,8 +594,14 @@
             <p class="required-message"><span>*</span> Required</p>
         </div>
 
-        <form action="" id="addShippingForm">
+        <form action="{% url 'save_shipping_details' %}"
+              id="addShippingForm"
+              hx-post="{% url 'save_shipping_details' %}" 
+              hx-target="#shipping-address-select" 
+              hx-on:htmx:after-on-load="if(event.detail.xhr.status === 200 && event.detail.elt.id === 'addShippingForm') document.getElementById('addShippingModal').style.display='none'">
             {% csrf_token %}
+            <input type="hidden" value="{{ order.customer_id.customer_id }}" name="customer-id" id="shipping_customer_id_input">
+            
             <div class="divider"><p>Contact Person's Details</p><hr></div>
             <div class="vertical-input-field">
                 <label for="contact-person-name"><span>*</span> Contact Person's Name:</label>
@@ -748,6 +754,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof toggleCustomer === 'function') toggleCustomer();
     if (typeof toggleShipping === 'function') toggleShipping();
     
+    // SEED SHIPPING BUTTON FOR EDIT MODE
+    const shippingBtn = document.getElementById('add-shipping-btn');
+    const existingCustomerId = "{{ order.customer_id.customer_id }}";
+
+    if (shippingBtn && existingCustomerId) {
+        // Enable the button immediately
+        shippingBtn.disabled = false;
+        shippingBtn.style.opacity = "1";
+        shippingBtn.style.cursor = "pointer";
+        
+        // Store the ID in the dataset so the click listener can find it
+        shippingBtn.dataset.customerId = existingCustomerId;
+        
+        // Also ensure the modal's hidden input is filled
+        const modalInput = document.getElementById('shipping_customer_id_input');
+        if (modalInput) modalInput.value = existingCustomerId;
+    }
+
     console.log("--- DEBUG END ---");
 });
 
@@ -802,5 +826,19 @@ window.onpageshow = function(event) {
         renderOrderTable();
     }
 };
+
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.open-add-shipping-modal');
+    if (btn && !btn.disabled) {
+        const hiddenInput = document.getElementById('shipping_customer_id_input');
+        // Fallback: If dataset is empty, try to pull the fixed value from the Edit Form
+        const customerId = btn.dataset.customerId || "{{ order.customer_id.customer_id }}";
+        
+        if (hiddenInput) {
+            hiddenInput.value = customerId;
+            console.log("Edit Mode: Shipping form seeded with ID", customerId);
+        }
+    }
+});
 </script>
 {% endblock %}

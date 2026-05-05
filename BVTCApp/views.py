@@ -299,6 +299,7 @@ def edit_order(request, pk):
         'customer_shipping_addresses': customer_shipping_addresses, # Filtered list
         'existing_items_json': existing_items,
         'companies': Company.objects.all(),
+        'provinces': Province.objects.all().order_by('name')
     }
     return render(request, 'bvtc_app/edit_order.html', context)
 
