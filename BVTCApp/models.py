@@ -202,6 +202,7 @@ class Order(models.Model):
 
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     issue_date = models.DateField(default=timezone.now)
+    date_quoted = models.DateField(default=timezone.now)
 
     note = models.TextField(blank=True, null=True)
     stock_availability = models.CharField(max_length=20, choices=STOCK_AVAILABILITY, default='Available', null=True)

@@ -358,6 +358,40 @@ main .filter {
     align-self: stretch;
     gap: 6px;
 }
+.medium-database {
+    align-self: stretch;
+    border-collapse: collapse;
+    flex-grow: 1;
+}
+.medium-database thead th {
+    background-color: var(--light-gray);
+    color: var(--alternative-black);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+}
+.medium-database tbody td {
+    padding: 6px 6px;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 500;
+}
+.medium-database tbody tr {
+    border-bottom: 1px solid var(--warm-light-gray);
+    text-align: center;
+}
+.medium-database tr:nth-child(even) {
+    background-color: var(--off-white);
+}
+.medium-database .cell-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: stretch;
+    gap: 6px;
+}
 .small-database {
     align-self: stretch;
     border-collapse: collapse;

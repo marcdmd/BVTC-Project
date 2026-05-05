@@ -19,6 +19,11 @@
     <h1>Quotation Status</h1>
     <div class="numbers">
         <div class="number-card">
+            <div class="number" style="color: #101212;">00</div>
+            <p>Unquoted</p>
+        </div>
+
+        <div class="number-card">
             <div class="number" style="color: #0B1E33;">00</div>
             <p>Under Validation</p>
         </div>
@@ -80,7 +85,7 @@
         </thead>
 
         <tbody>
-            <!-- {% for q in quotations %} -->
+            {% for q in quotations %}
             <tr>
                 <td>
                     <input type="checkbox" name="to-discard" value="" class="to-discard" form="discard-form">
@@ -88,77 +93,45 @@
                 <td class="small-b">{{ q.order_id }}</td>
                 <td class="small-b">{{ q.customer_id.customer_name }}</td>
                 <td class="small-b">{{ q.customer_id.company_id.company_name }}</td>
-                <td class="small-b">{{ q.amount }}</td>
+                <td class="small-b">{{ q.total_amount|stringformat:".2f" }}</td>
                 <td class="small-r">{{ q.delivery_date }}</td>
                 <td style="vertical-align: middle;">
-                    {% if o.order_status == 'Under Feasibility' %}
-                    <span class="status-pill" style="color: #FAF9F6; border: 2px solid #0B1E33;">
+                    {% if q.order_status == 'Under Validation' %}
+                    <span class="status-pill" style="color: #0B1E33; border: 1px solid #0B1E33;">
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-r">{{ o.order_status }}</p>
+                        <p class="smaller-b">{{ q.order_status }}</p>
                     </span>
-                    {% elif o.order_status == 'Under Quotation' %}
+                    {% elif q.order_status == 'Validated' %}
                     <span class="status-pill" style="color: #013C58; border: 1px solid #013C58;">
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b">{{ o.order_status }}</p>
+                        <p class="smaller-b">{{ q.order_status }}</p>
                     </span>                    
-                    {% elif o.order_status == 'In Production' %}
+                    {% elif q.order_status == 'Sent to Customer' %}
                     <span class="status-pill" style="color: #00537A; border: 1px solid #00537A;">
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b">{{ o.order_status }}</p>
+                        <p class="smaller-b">{{ q.order_status }}</p>
                     </span>  
-                    {% elif o.order_status == 'Sampled' %}
-                    <span class="status-pill" style="color: #F5A201; border: 1px solid #F5A201;">
-                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b">{{ o.order_status }}</p>
-                    </span>                    
-                    {% elif o.order_status == 'Packaged' %}
-                    <span class="status-pill" style="color: #EDC001; border: 1px solid #EDC001;">
-                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b">{{ o.order_status }}</p>
-                    </span>
-                    {% elif o.order_status == 'In Transit' %}
+                    {% elif q.order_status == 'Signed' %}
                     <span class="status-pill" style="color: #00C27D; border: 1px solid #00C27D;">
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b">{{ o.order_status }}</p>
+                        <p class="smaller-b">{{ q.order_status }}</p>
                     </span>
                     {% else %}
-                    <span class="status-pill" style="color: #00C27D; border: 1px solid #000000;">
+                    <span class="status-pill" style="color: #101212; border: 1px solid #101212;">
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b"></p>
+                        <p class="smaller-b">Unquoted</p>
                     </span>
                     {% endif %}
                 </td>
-                <td class="small-b">{{ o.user_id.user_name }}</td>
+                <td class="small-b">{{ q.user_id.user_name }}</td>
                 <td>
                     <div class="cell-buttons">
-                        <button type="button"
-                                class="m-button-primary smaller-b open-view-order-modal"
-                                data-order_id = "{{ o.order_id }}"
-                                data-customer_id = "{{  o.customer_id }}"
-                                data-customer_name = "{{ o.customer_id.customer_name }}"
-                                data-company_name = "{{ o.customer_id.company_id.company_name }}"
-                                data-company_address = "{{ o.customer_id.company_id.company_address }}"
-                                data-items='[{% for oi in o.orderitem_set.all %}{"code":"{{ oi.product_id.product_code }}","color":"{{ oi.color }}","custom":"{{ oi.customization }}","qty":"{{ oi.quantity }}","price":"{{ oi.price }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
-                                data-budget = "{{ o.budget }}"
-                                data-order_status = "{{ o.order_status }}"
-                                data-delivery_address = "{{ o.shipping_id.address_line_1 }}, {{ o.shipping_id.address_line_2 }}, {{ o.shipping_id.barangay }}, {{ o.shipping_id.address_province }} {{ o.shipping_id.address_postal_code }}"
-                                data-contact = "{{ o.shipping_id.contact_person_name }}"
-                                data-contact_number = "{{ o.shipping_id.contact_person_number }}"
-                                data-contact_email = "{{ o.shipping_id.contact_person_email }}"
-                                data-mode_of_payment = "{{ o.mode_of_payment }}"
-                                data-payment_terms = "{{ o.payment_terms }}"
-                                data-packing_instructions = "{{ o.packing_instructions }}"
-                                data-start_of_production = "{{ o.start_of_production }}"
-                                data-delivery_date = "{{ o.delivery_date }}"
-                                data-lead_time = "{{ o.lead_time }}"
-                                data-transaction_platform = "{{ o.transaction_platform }}"
-                                data-account_manager = "{{ o.user_id.user_name }}">
-                                View</button>
+                        <a href="{% url 'view_quotation' q.order_id %}" class="m-button-primary smaller-b" type="button">View</a>
                         <button type="button" class="m-button-secondary smaller-b">Edit</button>
                     </div>
                 </td>
             </tr>
-            <!-- {% endfor %} -->
+            {% endfor %}
         </tbody>
     </table>
 </div>

@@ -17,12 +17,14 @@ urlpatterns = [
     path('orders/update_status/<int:pk>/', views.update_order_status, name='update_order_status'),
 
     path('quotations/', views.quotations, name='quotations'),
+    path('quotations/view_quotation/<int:pk>', views.view_quotation, name='view_quotation'),
 
     path('billings/', views.billings, name='billings'),
 
     path('customers/', views.customers, name='customers'),
     path('customers/add_customer/', views.add_customer, name='add_customer'),
     path('customers/add_shipping/', views.add_shipping, name='add_shipping'),
+    path('customers/edit_customer/<int:pk>/', views.edit_customer, name='edit_customer'),
     path('get-shipping-buttons/<int:customer_id>/', views.get_shipping_buttons, name='get_shipping_buttons'),
     path('delete-customer/<int:pk>/', views.delete_customer, name='delete_customer'),
 

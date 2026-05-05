@@ -868,6 +868,53 @@ document.addEventListener('click', function (e) {
             showModal(sModal);
         }
     }
+
+    // Edit Customer Modal
+    const editCustomerBtn = event.target.closest('.edit-customer-btn');
+    if (editCustomerBtn) {
+        // Use dataset.id to get 'data-id'
+        const customerId = editCustomerBtn.dataset.id; 
+
+        // Safety check: Don't fetch if ID is missing
+        if (!customerId) {
+            console.error("Customer ID not found on button.");
+            return;
+        }
+        
+        fetch(`/customers/edit_customer/${customerId}/`)
+            .then(response => response.json())
+            .then(data => {
+                // Essential Fields
+                if(document.getElementById('edit-customer-id')) 
+                    document.getElementById('edit-customer-id').value = data.customer_id;
+                
+                // Name Splitting Logic
+                const nameParts = data.customer_name ? data.customer_name.trim().split(' ') : [];
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+                
+                if(document.getElementById('edit-first-name')) document.getElementById('edit-first-name').value = firstName;
+                if(document.getElementById('edit-last-name')) document.getElementById('edit-last-name').value = lastName;
+
+                // Company Details
+                if(document.getElementById('edit-company')) document.getElementById('edit-company').value = data.company_id;
+
+                // Contact Info
+                if(document.getElementById('edit-email')) document.getElementById('edit-email').value = data.customer_email;
+                if(document.getElementById('edit-phone')) document.getElementById('edit-phone').value = data.customer_phone_number;
+                
+                // These were likely the cause of your "null" error:
+                if(document.getElementById('edit-messenger')) document.getElementById('edit-messenger').value = data.messenger || '';
+                if(document.getElementById('edit-viber')) document.getElementById('edit-viber').value = data.viber || '';
+
+                // Checkboxes
+                if(document.getElementById('edit-email-trans')) document.getElementById('edit-email-trans').checked = data.email_transaction;
+                if(document.getElementById('edit-messenger-trans')) document.getElementById('edit-messenger-trans').checked = data.messenger_transaction;
+                if(document.getElementById('edit-viber-trans')) document.getElementById('edit-viber-trans').checked = data.viber_transaction;
+
+                document.getElementById('editCustomerModal').style.display = 'flex';
+            });
+    }
 });
 
 // For side bar

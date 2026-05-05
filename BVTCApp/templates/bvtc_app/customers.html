@@ -75,7 +75,6 @@
                                 data-view_email_transaction="{{ c.email_transaction }}"
                                 data-view_messenger_transaction="{{ c.messenger_transaction }}"
                                 data-view_viber_transaction="{{ c.viber_transaction }}"
-                                
                                 data-shipping='[
                                     {% for ship in c.shippingdetails_set.all %}
                                     {
@@ -92,7 +91,7 @@
                                     {% endfor %}
                                 ]'>
                                 View</button>
-                        <button type="button" class="m-button-primary smaller-b">Edit</button>
+                        <button type="button" class="m-button-primary smaller-b edit-customer-btn" data-id="{{ c.customer_id }}">Edit</button>
                     </div>
                 </td>
             </tr>
@@ -339,11 +338,137 @@
                 <div class="divider"><hr></div>
                 <div class="buttons-section">
                     <button type="button" class="m-button-tertiary small-m">Delete</button>
-                    <button type="button" class="m-button-primary small-m">Edit</button>
+                    <button type="button" class="m-button-primary small-m edit-customer-btn" data-id="{{ customer.customer_id }}">Edit</button>
                     <button type="button" class="m-button-secondary small-m close-modal">Close</button>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="modal-container" id="editCustomerModal">
+    <div class="modal customer-form">
+        <h1>Edit Customer</h1>
+    
+        <form id="editCustomerForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="customer_id" id="edit-customer-id">
+            
+            <div class="divider"><p>Basic Information</p><hr></div>
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="edit-first-name"><span>*</span> First Name:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" id="edit-first-name" name="first-name" readonly>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+                <div class="horizontal-input-field">
+                    <label for="edit-last-name"><span>*</span> Last Name:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" id="edit-last-name" name="last-name" readonly>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"><p>Company Information</p><hr></div>
+            <div class="vertical-section" style="height: max-content; max-height: max-content;">
+                <div class="horizontal-input-field" style="flex: 1;">
+                    <label><span>*</span> Company Details:</label>
+
+                    <input type="radio" value="new-company" name="company-details" id="new-company">
+                    <label for="new-company">New</label>
+                    
+                    <input type="radio" value="existing-company" name="company-details" id="existing-company" checked>
+                    <label for="existing-company">Existing</label>
+                </div>
+                
+                <div class="for-new-company details" id="newCompanyFields" style="width: 100%;">
+                    <div class="vertical-section">
+                        <div class="horizontal-section">
+                            <div class="file-upload" style="height: 100%;">
+                                <label style="cursor: pointer;">
+                                    <span><i class="material-symbols-outlined" style="font-size: 12px; color: #898989;">add</i></span>
+                                    <span class="file-text" style="color: #898989;"> Add Company Logo</span>
+                                    <input name="logo" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                </label>
+                            </div>
+
+                            <div class="vertical-section">
+                                <div class="horizontal-input-field">
+                                    <label for="company-name"><span>*</span> Company Name:</label>
+                                    <input type="text" class="input" id="company-name" name="company-name" maxlength="150">
+                                </div>
+
+                                <div class="horizontal-input-field">
+                                    <label for="company-address"><span>*</span> Company Address:</label>
+                                    <input type="text" class="input" id="company-address" name="company-address" maxlength="150">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="horizontal-input-field">
+                            <label for="tin-number">Tin Number:</label>
+                            <div class="error-wrap">
+                                <input type="number" class="input" id="tin-number" name="tin-number">
+                                <span class="error-msg"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="for-existing-company details" id="existingCompanyFields" style="width: 100%; display: none;">
+                    <div class="horizontal-input-field">
+                        <label for="edit-company"><span>*</span> Company Name:</label>
+                        <select class="input" name="company" id="edit-company">
+                            <option value=""></option>
+                            {% for comp in companies %}
+                                <option value="{{ comp.company_id }}">{{ comp.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>  
+            </div>
+
+            <div class="horizontal-input-field">
+                <label for="edit-email"><span>*</span> Email Address:</label>
+                <input class="input" type="email" name="customer_email" id="edit-email" required>
+            </div>
+
+            <div class="horizontal-input-field">
+                <label for="edit-phone"><span>*</span> Contact Number:</label>
+                <input class="input" type="text" name="customer_phone_number" id="edit-phone" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+            </div>
+
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="edit-messenger"><span>*</span> Messenger:</label>
+                    <input class="input" type="url" name="messenger" id="edit-messenger" required>
+                </div>
+
+                <div class="horizontal-input-field">
+                    <label for="edit-viber">Viber:</label>
+                    <input class="input" type="text" name="viber" id="edit-viber" pattern="^(09|\+639)\d{9}$" maxlength="13">
+                </div>
+            </div>
+
+            <!-- Transaction Platforms -->
+            <div class="horizontal-input-field">
+                <label>Transaction Platforms:</label>
+                <input type="checkbox" name="email_transaction" id="edit-email-trans">
+                <label for="edit-email-trans">Email</label>
+                <input type="checkbox" name="messenger_transaction" id="edit-messenger-trans">
+                <label for="edit-messenger-trans">Messenger</label>
+                <input type="checkbox" name="viber_transaction" id="edit-viber-trans">
+                <label for="edit-viber-trans">Viber</label>
+            </div>
+
+            <div class="buttons-section">
+                <button type="button" class="m-button-secondary small-m close-modal">Cancel</button>
+                <button type="submit" class="m-button-primary small-m">Update Customer</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -371,6 +496,7 @@
 
             <div class="divider"><hr></div>
             <div class="buttons-section">
+                <button type="button" class="m-button-tertiary small-m">Delete</button>
                 <button type="button" class="m-button-primary small-m">Edit</button>
                 <button type="button" class="m-button-secondary small-m close-modal">Close</button>
             </div>

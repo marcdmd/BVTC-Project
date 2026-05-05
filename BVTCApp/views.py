@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import Product, ProductImage, ProductColor, Order, OrderItem, Company, CustomerAccount, ShippingDetails, UserAccount
 from .models import Province, City, Barangay
+from django.http import JsonResponse
 import json
 
 def catalog(request):
@@ -397,6 +398,24 @@ def add_customer(request):
 
     return redirect('customers')
 
+def edit_customer(request, pk):
+    customer = get_object_or_404(CustomerAccount, pk=pk)
+    
+    # If the request is a GET (from your fetch), return JSON
+    if request.method == "GET":
+        data = {
+            'customer_id': customer.customer_id,
+            'customer_name': customer.customer_name,
+            'customer_email': customer.customer_email,
+            'customer_phone_number': customer.customer_phone_number,
+            'messenger': customer.messenger,
+            'viber': customer.viber,
+            'email_transaction': customer.email_transaction,
+            'messenger_transaction': customer.messenger_transaction,
+            'viber_transaction': customer.viber_transaction,
+        }
+        return JsonResponse(data)
+
 def delete_customer(request, pk):
     try:
         customer = CustomerAccount.objects.get(customer_id=pk)
@@ -490,7 +509,17 @@ def add_item(request):
     return render(request, 'bvtc_app/add_item.html', context)
 
 def quotations(request):
-    return render(request, 'bvtc_app/quotations.html')
+    orders_under_quotation = (Order.objects.filter(order_status="Under Quotation") |
+                              Order.objects.filter(order_status="Under Validation") |
+                              Order.objects.filter(order_status="Validated") |
+                              Order.objects.filter(order_status="Sent to Customer") |
+                              Order.objects.filter(order_status="Signed")
+                              )
+    return render(request, 'bvtc_app/quotations.html', {'quotations': orders_under_quotation})
+
+def view_quotation(request, pk):
+    quotation = get_object_or_404(Order, order_id=pk)
+    return render(request, 'bvtc_app/view_quotation.html', {'quotation': quotation})
 
 def billings(request):
     return render(request, 'bvtc_app/billings.html')
