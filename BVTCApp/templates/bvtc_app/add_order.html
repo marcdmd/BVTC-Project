@@ -263,7 +263,11 @@
                 </div>
 
                 <div class="for-new-shipping details" style="width: 100%;">
-                    <button type="button" class="button-primary small-m open-add-shipping-modal" style="width: 100%; display: block;">
+                    <button type="button"
+                            id="add-shipping-btn"
+                            class="button-primary small-m open-add-shipping-modal"
+                            style="width: 100%; display: block; opacity: 0.5;"
+                            disabled>
                         <i class="material-symbols-outlined" style="font-size: 15px;">add</i>
                         Add New Shipping Details
                     </button>
@@ -345,9 +349,8 @@
 
 {% block modals %}
 <div class="modal-container" id="editSummaryItemModal">        
-    <div class="modal product-view" style="max-width: 500px;">
+    <div class="modal" style="width: 450px; max-width: 450px;">
         <form id="editItemForm">
-            {% csrf_token %}
             <div class="vertical-section">
                 <div class="horizontal-input-field" style="flex: 0; justify-content: space-between; align-items: center;">
                     <!-- Unique ID: edit_item_code -->
@@ -355,11 +358,12 @@
                     <i class="material-symbols-outlined close-modal close-btn">close</i>
                 </div>
 
-                <!-- Unique ID: edit_item_name, edit_category, etc. -->
-                <h1 id="edit_item_name">Product Name</h1>
-                <p class="small-r">Category: <b id="edit_category"></b></p>
-                <p class="small-r">MOQ: <b id="edit_moq"></b> <b>pcs.</b></p>
-                <p class="small-r">Price: <b>₱</b> <b id="edit_price"></b></p>
+                <div class="vertical-section" style="gap: 3px;">
+                    <!-- Unique ID: edit_item_name, edit_category, etc. -->
+                    <h1 id="edit_item_name">Product Name</h1>
+                    <p class="small-r">Category: <b id="edit_category"></b></p>
+                    <p class="small-r">Starting Price: <b>₱</b> <b id="edit_price"></b></p>
+                </div>
 
                 <div class="divider"><p>Color Variations</p><hr></div>
                 <div class="color-container" style="height: max-content;">
@@ -367,29 +371,24 @@
                 </div>
                 
                 <div class="divider"><p>Customizations</p><hr></div>
-                <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
-                    <input class="filter-input radio-input" type="radio" name="customization" id="cut-&-sew-edit" value="Cut & Sew" checked>
-                    <label class="color-filter-label small-b" for="cut-&-sew-edit">Cut & Sew</label>
+                <div class="horizontal-input-field radio-choices custom-choices" style="flex-wrap: wrap; gap: 8px;">
+                    <!-- JS handles injection of customization options -->
+                </div>
 
-                    <input class="filter-input radio-input" type="radio" name="customization" id="silkscreen-print-edit" value="Silkscreen Print">
-                    <label class="color-filter-label small-b" for="silkscreen-print-edit">Silkscreen Print</label>
-
-                    <input class="filter-input radio-input" type="radio" name="customization" id="digital-print-edit" value="Digital Print">
-                    <label class="color-filter-label small-b" for="digital-print-edit">Digital Print</label>
-
-                    <input class="filter-input radio-input" type="radio" name="customization" id="laser-engrave-edit" value="Laser Engrave">
-                    <label class="color-filter-label small-b" for="laser-engrave-edit">Laser Engrave</label>
-
-                    <input class="filter-input radio-input" type="radio" name="customization" id="leather-stamp-edit" value="Leather Stamp">
-                    <label class="color-filter-label small-b" for="leather-stamp-edit">Leather Stamp</label>
-
-                    <input class="filter-input radio-input" type="radio" name="customization" id="none-edit" value="N/A">
-                    <label class="color-filter-label small-b" for="none-edit">None</label>
+                <div class="vertical-input-field">
+                    <label for="edit_est_custom_price">Est. Customization Price:</label>
+                    <div class="horizontal-input-field">
+                        <div class="error-wrap">
+                            <input type="number" class="input" placeholder="0" min="0" name="custom_price" id="edit_est_custom_price" onblur="this.value = parseFloat(this.value).toFixed(2)" required>
+                            <span class="error-msg"></span>
+                        </div>
+                        <label style="flex: 2 0 0; color: #898989;">pesos</label>
+                    </div>
                 </div>
 
                 <div class="vertical-input-field">
                     <label for="edit_note">Note:</label>
-                    <textarea class="input" name="note" id="edit_note" placeholder="Add specific instructions..."></textarea>
+                    <textarea class="input" name="note" id="edit_note"></textarea>
                 </div>                
 
                 <div class="divider"><p>Quantity</p><hr></div>
@@ -850,5 +849,38 @@ window.onpageshow = function(event) {
         renderOrderTable();
     }
 };
+
+// Function to check the state
+function validateShippingButton() {
+    const customerSelect = document.querySelector('select[name="customer-id"]');
+    const shippingBtn = document.getElementById('add-shipping-btn');
+
+    if (customerSelect && customerSelect.value && customerSelect.value !== "") {
+        shippingBtn.disabled = false;
+        shippingBtn.style.opacity = "1";
+        shippingBtn.style.cursor = "pointer";
+    } else {
+        shippingBtn.disabled = true;
+        shippingBtn.style.opacity = "0.5";
+        shippingBtn.style.cursor = "not-allowed";
+    }
+}
+
+// 1. Listen for changes on the document (delegation)
+// This catches the 'change' event even when HTMX replaces the select
+document.addEventListener('change', function (e) {
+    if (e.target && e.target.name === 'customer-id') {
+        validateShippingButton();
+    }
+});
+
+// 2. Listen for HTMX swaps
+// This ensures that if the company changes and a fresh customer list appears, 
+// the button resets to disabled (since the new select starts with no value).
+document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target.id === "customer-name") {
+        validateShippingButton();
+    }
+});
 </script>
 {% endblock %}

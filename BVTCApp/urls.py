@@ -16,7 +16,6 @@ urlpatterns = [
     path('orders/cancel_order/<int:pk>/', views.cancel_order, name='cancel_order'),
     path('orders/update_status/<int:pk>/', views.update_order_status, name='update_order_status'),
 
-
     path('quotations/', views.quotations, name='quotations'),
 
     path('billings/', views.billings, name='billings'),

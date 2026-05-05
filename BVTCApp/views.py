@@ -161,17 +161,21 @@ def add_order(request):
             for item in order_items:
                 product = Product.objects.get(product_id=item['db_id'])
                 qty   = int(item.get('qty', 1))
-                price = float(item.get('price', 0))
+                base_price = float(item.get('price', 0))
+                custom_price = float(item.get('custom_price', 0))
+
+                total_unit_price = base_price + custom_price
 
                 OrderItem.objects.create(
                     order_id=new_order,
                     product_id=product,
                     color=item.get('color', ''),
                     customization=item.get('custom', ''),
+                    item_note=item.get('note', ''),
                     quantity=qty,
-                    price=price,
+                    price=total_unit_price,
                 )
-                total += qty * price
+                total += qty * total_unit_price
 
             # computed total save to order
             new_order.initial_total_price = total
@@ -240,17 +244,21 @@ def edit_order(request, pk):
                 # Use product_id based on your Product model
                 product = Product.objects.get(product_id=item['db_id'])
                 qty = int(item.get('qty', 1))
-                price = float(item.get('price', 0))
+
+                base_price = float(item.get('price', 0))
+                custom_price = float(item.get('custom_price', 0))
+                unit_total = base_price + custom_price 
 
                 OrderItem.objects.create(
                     order_id=order,
                     product_id=product,
                     color=item.get('color', ''),
                     customization=item.get('custom', ''),
+                    item_note=item.get('note', ''),
                     quantity=qty,
-                    price=price
+                    price=unit_total
                 )
-                total += qty * price
+                total += qty * unit_total
 
             order.initial_total_price = total
             order.total_amount = total
@@ -263,15 +271,26 @@ def edit_order(request, pk):
     # GET: Prepare JSON for the frontend table
     existing_items = []
     for item in order.orderitem_set.all():
+        product = item.product_id
+        
+        total_saved_price = float(item.price)
+        base_price = float(product.starting_price)
+        derived_custom_price = total_saved_price - base_price
+
         existing_items.append({
             'db_id': item.product_id.product_id,
             'code': item.product_id.product_code,
             'name': item.product_id.product_name, # Matches your model
             'color': item.color,
             'custom': item.customization,
-            'price': float(item.price),
+            'price': base_price,
+            'custom_price': derived_custom_price,
+            'total_price': total_saved_price,
             'qty': item.quantity,
-            'moq': item.product_id.MOQ # Matches your model
+            'note': item.item_note,
+            'moq': product.MOQ,
+            'all_custom_options': ",".join(product.get_custom_options()),
+            'all_colors': ",".join([c.product_color for c in product.productcolor_set.all()])
         })
 
     context = {
@@ -398,9 +417,8 @@ def customers(request):
     }
     return render(request, 'bvtc_app/customers.html', context)
 
-# def add_shipping(request):
-#     # Logic for UC-20 goes here
-#     return redirect(request.META.get('HTTP_REFERER', 'customers'))
+def add_shipping(request):
+    return redirect('customers')
 
 def load_customers(request):
     company_id = request.GET.get('company-id')
@@ -493,7 +511,6 @@ def save_shipping_details(request):
             address_postal_code=request.POST.get('postal-code')
         )
 
-
-        return render(request, 'bvtc_app/partials/shipping_info_display.html', {
-            'shipping': shipping
-        })
+        # return render(request, 'bvtc_app/partials/shipping_info_display.html', {
+        #     'shipping': shipping
+        # })

@@ -154,43 +154,93 @@ document.addEventListener('click', function (e) {
 
         tableBody.innerHTML = ''; 
         let totalQty = 0;
-        let totalPrice = 0;
+        let subtotal = 0; // Raw total before discount
+
+        const formatter = new Intl.NumberFormat('en-PH', {
+            style: 'currency',
+            currency: 'PHP',
+        });
 
         items.forEach(item => {
             const qty = parseInt(item.qty) || 0;
-            const price = parseFloat(item.price) || 0;
-            const subtotal = qty * price;
+            const unitPrice = parseFloat(item.price) || 0;
+            const rowTotal = qty * unitPrice;
+            
             totalQty += qty;
-            totalPrice += subtotal;
+            subtotal += rowTotal;
 
-            const formattedSubtotal = subtotal.toLocaleString('en-US', { 
+            const formattedPrice = unitPrice.toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            });
+
+            const formattedQty = qty.toLocaleString('en-US');
+
+            const formattedSubtotal = rowTotal.toLocaleString('en-US', { 
                 minimumFractionDigits: 2, 
                 maximumFractionDigits: 2 
             });
 
             const row = `
                 <tr>
-                    <td class="small-r" style="width: 20%;">${item.code}</td>
-                    <td class="small-r" style="width: 15%;">${item.color || '-'}</td>
-                    <td class="small-r" style="width: 15%;">${item.custom || '-'}</td>
-                    <td class="small-r" style="width: 15%;">${price.toFixed(2)}</td>
-                    <td class="small-r" style="width: 15%;">${qty}</td>
-                    <td class="small-r" style="width: 20%;">${formattedSubtotal}</td>
+                    <td style="width: 15%;" class="small-r">${item.code}</td>
+                    <td style="width: 20%;" class="small-r">${item.color || '-'}, ${item.custom || '-'}</td>
+                    <td style="width: 15%;" class="small-r">${formattedPrice}</td>
+                    <td style="width: 15%;" class="small-r">${formattedQty}</td>
+                    <td style="width: 20%;" class="small-r">${formattedSubtotal}</td>
+                    <td style="width: 15%;">
+                        <div class="cell-buttons">
+                            <button type="button" class="m-button-primary smaller-b open-item-detail" 
+                                data-item='${JSON.stringify(item)}'>
+                                View
+                            </button>
+                        </div>
+                    </td>
                 </tr>`;
             tableBody.innerHTML += row;
         });
         
+        // APPLY BUSINESS RULE DISCOUNTS
+        let discountPercent = 0;
+        if (totalQty > 1000) discountPercent = 10;
+        else if (totalQty >= 501) discountPercent = 8;
+        else if (totalQty >= 301) discountPercent = 5;
+        else if (totalQty >= 101) discountPercent = 3;
+
+        const finalTotal = subtotal * (1 - (discountPercent / 100));
+
+        // 2. Update Footer Displays
         const qtyDisplay = qs('#order_total_qty', viewOrderModal);
+        const qtyDisplaySecond = qs('#order_total_qty_2', viewOrderModal);
         const priceDisplay = qs('#order_total_price', viewOrderModal);
+        const discountedPriceDisplay = qs('#order_discounted_total', viewOrderModal);
+        const discountNote = qs('#order_discount_note', viewOrderModal);
 
         if (qtyDisplay) qtyDisplay.textContent = totalQty;
+        if (qtyDisplaySecond) qtyDisplaySecond.textContent = totalQty;
+        
+        // This was likely where 'totalPrice' was causing the crash:
         if (priceDisplay) {
-            priceDisplay.textContent = totalPrice.toLocaleString(undefined, {
+            priceDisplay.textContent = subtotal.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
 
+        // 3. Update the Discounted Field
+        if (discountedPriceDisplay) {
+            discountedPriceDisplay.textContent = finalTotal.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        if (discountNote) {
+            discountNote.textContent = `(Less ${discountPercent}%)`;
+            discountNote.style.display = 'inline'; 
+        }
+
+        // For Dates
         const startDateStr = viewOrder.dataset.start_of_production;
         const deliveryDateStr = viewOrder.dataset.delivery_date;
 
@@ -323,7 +373,12 @@ document.addEventListener('click', function (e) {
     const viewItem = e.target.closest('.open-view-item-modal');
     if (viewItem && viewItemModal) {
         e.preventDefault();
-        // FIX: Changed viewProduct to viewItem
+        
+        const modalForm = viewItemModal.querySelector('form');
+        if (modalForm) {
+            modalForm.reset(); // This clears the textarea and resets the radio buttons to 'Cut & Sew'
+        }
+
         const id = viewItem.dataset.id;
         viewItemModal.dataset.currentDbId = id;
         // For Image Set
@@ -415,7 +470,7 @@ document.addEventListener('click', function (e) {
         qs('#view_item_code', viewItemModal).textContent = viewItem.dataset.product_code;
         qs('#view_item_name', viewItemModal).textContent = viewItem.dataset.product_name;
         qs('#view_category', viewItemModal).textContent = viewItem.dataset.category;
-        qs('#view_moq', viewItemModal).textContent = viewItem.dataset.moq;
+        qs('#view_starting_price', viewItemModal).textContent = viewItem.dataset.starting_price;
         
         // Set MOQ value for Min Quantity input
         const moqValue = viewItem.dataset.moq;
@@ -427,7 +482,44 @@ document.addEventListener('click', function (e) {
         quantityInput.placeholder = moqValue;
         quantityInput.min = moqValue;
         quantityInput.value = moqValue;
-        quantityInput.removeAttribute('max');
+
+        // Inside your viewItem click handler
+        const customContainer = qs('.custom-choices', viewItemModal);
+        const options = viewItem.dataset.custom_options ? viewItem.dataset.custom_options.split(',') : [];
+
+        // 1. Clear the hardcoded static list
+        customContainer.innerHTML = '';
+
+        // Helper to make IDs (e.g., "Cut & Sew" -> "cut-sew-edit")
+        const slugify = text => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+        // 2. Loop through product-specific options
+        options.forEach((opt, index) => {
+            const trimmedOpt = opt.trim();
+            if (trimmedOpt) {
+                const optId = `${slugify(trimmedOpt)}-edit`;
+                
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'contents'; 
+
+                wrapper.innerHTML = `
+                    <input class="filter-input radio-input" type="radio" name="customization" 
+                        id="${optId}" value="${trimmedOpt}" ${index === 0 ? 'checked' : ''}>
+                    <label class="color-filter-label small-b" for="${optId}">${trimmedOpt}</label>
+                `;
+                customContainer.appendChild(wrapper);
+            }
+        });
+
+        // 3. Always add the "None" option at the end
+        const noneWrapper = document.createElement('div');
+        noneWrapper.style.display = 'contents';
+        noneWrapper.innerHTML = `
+            <input class="filter-input radio-input" type="radio" name="customization" 
+                id="none-edit" value="N/A" ${options.length === 0 ? 'checked' : ''}>
+            <label class="color-filter-label small-b" for="none-edit">None</label>
+        `;
+        customContainer.appendChild(noneWrapper);
 
         viewItemModal.dataset.currentProduct = JSON.stringify(viewItem.dataset);
 
@@ -436,7 +528,37 @@ document.addEventListener('click', function (e) {
         if (typeof showSlides === 'function') showSlides(1, 'view');
     }
 
-    // Edit Modal from View
+    // View Item from View Order Modal
+    const detailBtn = e.target.closest('.open-item-detail');
+    if (detailBtn) {
+        const item = JSON.parse(detailBtn.dataset.item);
+        const modal = document.getElementById('itemDetailModal');
+
+        // Basic Info
+        qs('#detail_code', modal).textContent = item.code || 'N/A';
+        qs('#detail_name', modal).textContent = item.name || 'Product';
+        qs('#detail_color', modal).textContent = item.color || '-';
+        qs('#detail_custom', modal).textContent = item.custom || '-';
+        qs('#detail_qty', modal).textContent = `${item.qty || 0} pcs`;
+
+        // Pricing Logic
+        // In your system: item.price is the unit total saved in DB.
+        // We need to derive the base and custom parts.
+        const totalUnitPrice = parseFloat(item.price) || 0;
+        const basePrice = parseFloat(item.starting_price) || 0;
+        const customPrice = totalUnitPrice - basePrice;
+
+        qs('#detail_base_price', modal).textContent = basePrice.toLocaleString(undefined, {minimumFractionDigits: 2});
+        qs('#detail_custom_price', modal).textContent = customPrice.toLocaleString(undefined, {minimumFractionDigits: 2});
+        qs('#detail_total_price', modal).textContent = totalUnitPrice.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        // Note Logic - Check all possible keys
+        qs('#detail_note', modal).textContent = item.item_note || 'No special instructions provided.';
+
+        showModal(modal);
+    }
+
+    // Edit Product Modal from View
     const editBtn = e.target.closest('.open-edit-modal');
     if (editBtn) {
         const editProductModal = document.getElementById('editProductModal');
@@ -914,7 +1036,8 @@ function showModal(modal) {
     // 2. NEW: Check if this is the specific Edit Modal we want to stack
     const isStackable = isNotif ||
                         modal.id === 'editSummaryItemModal' ||
-                        modal.id === 'viewShippingModal';
+                        modal.id === 'viewShippingModal' ||
+                        modal.id === 'itemDetailModal';
 
     // 3. Only close other modals if the new one is NOT stackable
     if (!isStackable) {
@@ -970,6 +1093,8 @@ function saveItemToOrder(editIndex = null) {
     console.group("DEBUG: saveItemToOrder Execution");
 
     // 2. Data Extraction
+    const baseUnitPrice = parseFloat(productData.starting_price) || 0;
+    const customUnitPrice = parseFloat(activeModal.querySelector(isEdit ? '#edit_est_custom_price' : '#est_custom_price')?.value) || 0;
     const newItem = {
         db_id: productData.db_id,
         code: activeModal.querySelector(`#${prefix}_item_code`)?.textContent?.trim() || 'N/A',
@@ -977,9 +1102,14 @@ function saveItemToOrder(editIndex = null) {
         category: productData.category || activeModal.querySelector(`#${prefix}_category`)?.textContent?.trim(),
         color: activeModal.querySelector('.selected-color p')?.textContent?.trim() || '-',
         custom: activeModal.querySelector('input[name="customization"]:checked')?.value || '-',
-        qty: parseInt(activeModal.querySelector(isEdit ? '#edit_quantity' : '#quantity')?.value) || 0,
+        all_custom_options: productData.custom_options || '',
+        
+        price: baseUnitPrice,
+        custom_price: customUnitPrice,
+        total_price: (baseUnitPrice + customUnitPrice),
+
+        qty: parseInt(activeModal.querySelector(isEdit ? '#edit_quantity' : '#quantity')?.value) || 0,        
         note: activeModal.querySelector(isEdit ? '#edit_note' : '#note')?.value?.trim() || '',
-        price: parseFloat(productData.starting_price) || 0,
         all_colors: productData.colors || '',
         moq: productData.moq || activeModal.querySelector(`#${prefix}_moq`)?.textContent?.trim() || '0'
     };
@@ -1029,50 +1159,62 @@ function saveItemToOrder(editIndex = null) {
 }
 
 function updateOrderSummary() {
-    // 1. Get items from storage
     const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
     
-    // 2. Calculate Totals
     let totalQty = 0;
     let subtotal = 0;
     
     currentOrder.forEach(item => {
-        totalQty += item.qty;
-        // Calculation happens here
-        subtotal += (item.qty * item.price); 
+        const qty = parseInt(item.qty) || 0;
+        const unitTotal = parseFloat(item.total_price) || 0;
+        
+        totalQty += qty;
+        subtotal += (qty * unitTotal); 
     });
 
-    // Assume 0% for now (you can change this to a dynamic variable later)
-    const discountPercent = 0; 
+    // Business Rules for Discount
+    let discountPercent = 0;
+    if (totalQty > 1000) {
+        discountPercent = 10;
+    } else if (totalQty >= 501) {
+        discountPercent = 8;
+    } else if (totalQty >= 301) {
+        discountPercent = 5;
+    } else if (totalQty >= 101) {
+        discountPercent = 3;
+    } else {
+        discountPercent = 0;
+    }
+
     const discountAmount = (discountPercent / 100) * subtotal;
     const finalTotal = subtotal - discountAmount;
 
-    // 3. Format Currency (₱ 0.00)
     const formatter = new Intl.NumberFormat('en-PH', {
         style: 'currency',
         currency: 'PHP',
     });
 
-    // 4. Update the UI
+    // Update UI
     const itemsLabel = document.getElementById('initial-items-label');
     const totalLabel = document.getElementById('discounted-total-label');
 
     if (itemsLabel) {
-        // Ensure you are using the 'subtotal' variable here, NOT 'item.price'
         itemsLabel.innerHTML = `Initial Items (${totalQty} Items): <b>${formatter.format(subtotal)}</b>`;
     }
+    
     if (totalLabel) {
-        totalLabel.innerHTML = `Discounted Total <i>(less ${discountPercent}%)</i>: <b>${formatter.format(finalTotal)}</b>`;
+        totalLabel.innerHTML = `Discounted Total (less ${discountPercent}%): <b>${formatter.format(finalTotal)}</b>`;
     }
 }
 
+// For Order Summary
 function renderOrderTable() {
     const orderItemsBody = document.getElementById('order-items-body');
     if (!orderItemsBody) return;
 
     const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
     let grandTotal = 0;
-    let totalQty = 0; // Track total items
+    let totalQty = 0;
 
     const formatter = new Intl.NumberFormat('en-PH', {
         style: 'currency',
@@ -1082,21 +1224,29 @@ function renderOrderTable() {
     orderItemsBody.innerHTML = '';
 
     currentOrder.forEach((item, index) => {
-        const subtotal = item.qty * item.price;
-        grandTotal += subtotal;
-        totalQty += item.qty;
+        const unitBase = parseFloat(item.price) || 0;
+        const unitCustom = parseFloat(item.custom_price) || 0;
+        const quantity = parseInt(item.qty) || 0;
+
+        const unitTotal = parseFloat(item.total_price) || (unitBase + unitCustom);
+
+        const subtotal = quantity * unitTotal;
+
+        if (!isNaN(subtotal)) {
+            grandTotal += subtotal;
+            totalQty += quantity;
+        }
 
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${item.code} - ${item.name}</td>
             <td>${item.color}</td>
             <td>${item.custom}</td>
-            <td>${formatter.format(item.price)}</td>
+            <td>${formatter.format(unitTotal)}</td>
             <td>${item.qty}</td>
-            <td><b>${formatter.format(subtotal)}</b></td>
+            <td>${formatter.format(subtotal)}</td>
             <td>
                 <div class="cell-buttons">
-                    <!-- REMOVED onclick, ADDED data-index -->
                     <button type="button" class="m-button-primary smaller-b edit-btn" 
                         data-index="${index}">View/Edit</button>
                     <button type="button" class="m-button-tertiary smaller-b delete-btn" 
@@ -1104,20 +1254,111 @@ function renderOrderTable() {
                 </div>
             </td>
         `;
-
         orderItemsBody.appendChild(row);
     });
 
-    // FOOTER ROW: Aligned to new headers
+    // 1. Calculate Discount based on Business Rules
+    let discountPercent = 0;
+    if (totalQty > 1000) discountPercent = 10;
+    else if (totalQty >= 501) discountPercent = 8;
+    else if (totalQty >= 301) discountPercent = 5;
+    else if (totalQty >= 101) discountPercent = 3;
+
+    const discountAmount = (discountPercent / 100) * grandTotal;
+    const discountedGrandTotal = grandTotal - discountAmount;
+
+    // 2. FOOTER ROW: Total
     const footerRow = document.createElement('tr');
+    footerRow.style.borderTop = "2px solid #101212";
     footerRow.innerHTML = `
         <td colspan="3"></td>
         <td style="text-align: right;"><b>TOTAL:</b></td>
-        <td><b>${totalQty}</b></td> <!-- Total Qty under Quantity column -->
-        <td><b>${formatter.format(grandTotal)}</b></td> <!-- Grand Total under Subtotal column -->
+        <td><b>${totalQty}</b></td>
+        <td><b>${formatter.format(grandTotal)}</b></td>
         <td></td>
     `;
     orderItemsBody.appendChild(footerRow);
+
+    // 3. SECOND FOOTER ROW: Discounted Total
+    const secondFooterRow = document.createElement('tr');
+    secondFooterRow.innerHTML = `
+        <td colspan="3"></td>
+        <td style="text-align: right">DISCOUNTED TOTAL (${discountPercent}%):</td>
+        <td>${totalQty}</td>
+        <td>${formatter.format(discountedGrandTotal)}</td>
+        <td></td>
+    `;
+    orderItemsBody.appendChild(secondFooterRow);
+}
+
+function renderViewOnlyOrderTable(items, targetBodyId) {
+    const body = document.getElementById(targetBodyId);
+    if (!body || !items) return;
+
+    const formatter = new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+    });
+
+    body.innerHTML = '';
+    let grandTotal = 0;
+    let totalQty = 0;
+
+    items.forEach(item => {
+        // Handle your business rule: item.price is total unit price
+        const unitTotal = parseFloat(item.price) || 0;
+        const qty = parseInt(item.qty) || 0;
+        const subtotal = unitTotal * qty;
+
+        grandTotal += subtotal;
+        totalQty += qty;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.code}</td>
+            <td>${item.color}</td>
+            <td>${item.custom}</td>
+            <td>${qty}</td>
+            <td>${formatter.format(unitTotal)}</td>
+            <td><b>${formatter.format(subtotal)}</b></td>
+            <td>
+                <button type="button" 
+                        class="m-button-primary smaller-b view-item-detail-btn" 
+                        data-code="${item.code}"
+                        data-name="${item.name}"
+                        data-color="${item.color}"
+                        data-custom="${item.custom}"
+                        data-qty="${qty}"
+                        data-note="${item.note || 'No notes'}"
+                        data-images="${item.images || ''}">
+                    View Detail
+                </button>
+            </td>
+        `;
+        body.appendChild(row);
+    });
+
+    // Calculate Discount for the View Modal
+    let discountPercent = 0;
+    if (totalQty > 1000) discountPercent = 10;
+    else if (totalQty >= 501) discountPercent = 8;
+    else if (totalQty >= 301) discountPercent = 5;
+    else if (totalQty >= 101) discountPercent = 3;
+
+    const finalTotal = grandTotal * (1 - (discountPercent / 100));
+
+    // Update the "Total" labels in your modal (using the IDs from your HTML)
+    const totalQtyEl = document.getElementById('order_total_qty');
+    const totalPriceEl = document.getElementById('order_total_price');
+    
+    if (totalQtyEl) totalQtyEl.textContent = totalQty;
+    if (totalPriceEl) totalPriceEl.textContent = formatter.format(finalTotal);
+    
+    // Optional: Update a discount label if you add one to the modal
+    const discountLabel = document.getElementById('order_discount_note');
+    if (discountLabel) {
+        discountLabel.textContent = `(Applied ${discountPercent}% discount)`;
+    }
 }
 
 function editItem(index) {
@@ -1182,82 +1423,129 @@ function editItem(index) {
 }
 
 function editItemFromSummary(index) {
-    console.group("DEBUG: Opening Edit Modal");
+    console.group(`TRACE: Opening Edit Modal for Index [${index}]`);
+    
     const currentOrder = JSON.parse(localStorage.getItem('pendingOrderItems')) || [];
     const item = currentOrder[index];
     const modal = document.getElementById('editSummaryItemModal'); 
     
-    if (!item) { console.error("FAILED: No item found in localStorage at index", index); console.groupEnd(); return; }
-    if (!modal) { console.error("FAILED: Modal #editSummaryItemModal not found in DOM"); console.groupEnd(); return; }
+    if (!item) { console.error("TRACE: No item found at index", index); console.groupEnd(); return; }
+    if (!modal) { console.error("TRACE: Modal #editSummaryItemModal not found!"); console.groupEnd(); return; }
 
-    console.log("Item found:", item);
-    console.log("Setting Update button to index:", index);
+    console.log("TRACE: Raw Item Data:", item);
 
-    // DYNAMICALLY UPDATE THE BUTTON
-    const saveBtn = modal.querySelector('#saveItemBtn');
-    if (saveBtn) {
-        saveBtn.setAttribute('onclick', `saveItemToOrder(${index})`);
-        console.log("Button onclick set to:", saveBtn.getAttribute('onclick'));
-    } else {
-        console.error("FAILED: #saveItemBtn not found inside modal");
-    }
+    // 1. Check Metadata sync
+    const unitPrice = item.price || item.starting_price || 0;
+    console.log("TRACE: Determined Unit Price:", unitPrice);
 
-    // Attach metadata
     modal.setAttribute('data-current-product', JSON.stringify({
         db_id: item.db_id,
         name: item.name,
+        category: item.category,
         colors: item.all_colors || "",
-        starting_price: item.price || 0
+        custom_options: item.all_custom_options || "", 
+        starting_price: unitPrice,
+        moq: item.moq
     }));
 
-    // Populate Fields
-    const codeEl = modal.querySelector('#edit_item_code');
-    if (codeEl) { codeEl.textContent = item.code; console.log("Set code to:", item.code); }
-    const nameE1 = modal.querySelector('#edit_item_name');
-    if (nameE1) { nameE1.textContent = item.name; console.log("Set name to:", item.name); }
-    const categoryE1 = modal.querySelector('#edit_category');
-    if (categoryE1) { categoryE1.textContent = item.category; console.log("Set category to:", item.category); }
-    const moqE1 = modal.querySelector('#edit_moq');
-    if (moqE1) { moqE1.textContent = item.moq; console.log("Set moq to:", item.moq); }
-    const priceE1 = modal.querySelector('#edit_price');
-    if (priceE1) { priceE1.textContent = item.price; console.log("Set price to:", item.price); }
-    const noteEl = modal.querySelector('#edit_note');
-    if (noteEl) noteEl.value = item.note || '';
-    const qtyEl = modal.querySelector('#edit_quantity');
-    if (qtyEl) {
-        qtyEl.value = item.qty;
-        qtyEl.min = item.moq;
-        console.log("Set quantity to:", item.qty); }
-    const moq2E1 = modal.querySelector('#edit_moq_2');
-    if (moq2E1) { moq2E1.textContent = item.moq; console.log("Set moq2 to:", item.moq); }
+    // 2. Set Button
+    const saveBtn = modal.querySelector('#saveItemBtn');
+    if (saveBtn) saveBtn.setAttribute('onclick', `saveItemToOrder(${index})`);
 
-    // Customization
-    console.log("Attempting to auto-select customization:", item.custom);
-    const customRadios = modal.querySelectorAll('.radio-input');
-    setTimeout(() => {
-        customRadios.forEach(radio => {
-            if (radio.value.trim() === item.custom) {
-                radio.checked = true;
+    // 3. Trace Basic Fields
+    try {
+        const codeEl = modal.querySelector('#edit_item_code');
+        const nameEl = modal.querySelector('#edit_item_name');
+        if (codeEl) codeEl.textContent = item.code || 'N/A';
+        if (nameEl) nameEl.textContent = item.name || 'Product';
+        
+        const priceEl = modal.querySelector('#edit_price');
+        if (priceEl) priceEl.textContent = unitPrice;
+        
+        console.log("TRACE: Basic text fields populated.");
+    } catch (err) { console.error("TRACE: Error in basic fields:", err); }
+
+    // 4. Trace Input Fields
+    const customPriceInput = modal.querySelector('#edit_est_custom_price');
+    if (customPriceInput) {
+        customPriceInput.value = item.custom_price || 0;
+        console.log("TRACE: Custom Price Input set to:", customPriceInput.value);
+    } else {
+        console.warn("TRACE: Selector #edit_est_custom_price NOT FOUND");
+    }
+
+    const qtyInput = modal.querySelector('#edit_quantity');
+    if (qtyInput) {
+        qtyInput.value = item.qty || 0;
+        console.log("TRACE: Quantity Input set to:", qtyInput.value);
+    }
+
+    const noteEl = modal.querySelector('#edit_note');
+    if (noteEl) {
+        // Check both 'note' (from Django Seed) and 'item_note' (just in case)
+        noteEl.value = item.note || item.item_note || ''; 
+        console.log("TRACE: Set note textarea to:", noteEl.value);
+    }
+
+    // 5. Trace Customization Generation
+    const customContainer = modal.querySelector('.custom-choices');
+    console.log("TRACE: all_custom_options string:", item.all_custom_options);
+    
+    const options = item.all_custom_options ? item.all_custom_options.split(',') : [];
+    if (customContainer) {
+        customContainer.innerHTML = ''; 
+        const slugify = text => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+        options.forEach((opt) => {
+            const trimmedOpt = opt.trim();
+            if (trimmedOpt) {
+                const optId = `${slugify(trimmedOpt)}-edit`;
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'contents';
+                wrapper.innerHTML = `
+                    <input class="filter-input radio-input" type="radio" name="customization" 
+                           id="${optId}" value="${trimmedOpt}">
+                    <label class="color-filter-label small-b" for="${optId}">${trimmedOpt}</label>
+                `;
+                customContainer.appendChild(wrapper);
             }
         });
-    }, 150);
 
-    // Colors
+        // Add None
+        const noneWrapper = document.createElement('div');
+        noneWrapper.style.display = 'contents';
+        noneWrapper.innerHTML = `<input class="filter-input radio-input" type="radio" name="customization" id="none-edit" value="N/A"><label class="color-filter-label small-b" for="none-edit">None</label>`;
+        customContainer.appendChild(noneWrapper);
+        console.log("TRACE: Customization radios generated.");
+    }
+
+    // 6. Auto-select Radio
+    const customRadios = modal.querySelectorAll('.radio-input');
+    console.log("TRACE: Looking for saved customization:", item.custom);
+    customRadios.forEach(radio => {
+        if (radio.value.trim() === item.custom) {
+            radio.checked = true;
+            console.log("TRACE: Matched and checked:", radio.value);
+        }
+    });
+
+    // 7. Colors
     if (typeof renderModalColors === 'function') {
         renderModalColors(modal, item.all_colors);
         setTimeout(() => {
             const colorDivs = modal.querySelectorAll('.product-highlight');
+            console.log("TRACE: Found color options:", colorDivs.length);
             colorDivs.forEach(div => {
                 if (div.querySelector('p')?.textContent.trim() === item.color) {
+                    console.log("TRACE: Clicking color:", item.color);
                     div.click();
                 }
             });
-        }, 150);
+        }, 100);
     }
 
     showModal(modal);
     console.groupEnd();
-    updateOrderSummary();
 }
 
 function deleteOrderItem(index) {

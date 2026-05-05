@@ -44,9 +44,9 @@
                     Initial Items (0 Items): <b>₱ 0.00</b>
                 </p>
                 <!-- Added ID: discounted-total-label -->
-                <!-- <p class="smaller-r" id="discounted-total-label" style="color: #898989; white-space: nowrap;">
-                    Discounted Total <i>(less 0%)</i>: <b>₱ 0.00</b>
-                </p> -->
+                <p class="smaller-r" id="discounted-total-label" style="color: #898989; white-space: nowrap;">
+                    Discounted Total (less <span id="order_discount"></span>%): <b id="order_discounted_total">₱ 0.00</b>
+                </p>
             </div>
             <div class="horizontal-input-field" style="width: max-content; max-width: max-content;">
                 <button type="button" class="button-secondary small-m open-quick-summary">View Cart</button>
@@ -102,7 +102,8 @@
                 data-category="{{ p.category }}"
                 data-moq="{{ p.MOQ }}"
                 data-starting_price="{{ p.starting_price }}"
-                data-product_description="{{ p.description }}">
+                data-product_description="{{ p.description }}"
+                data-custom_options="{% for opt in p.get_custom_options %}{{ opt }}{% if not forloop.last %},{% endif %}{% endfor %}">
                 <div class="thumbnail">
                 {% with p.productimage_set.first as img %}
                     {% if img %}
@@ -144,10 +145,12 @@
                         <p class="product-id smaller-r" id="view_item_code"></p>
                         <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
                     </div>
-    
-                    <h1 id="view_item_name"></h1>
-                    <p class="small-r">Category: <b id="view_category"></b></p>
-                    <p class="small-r">MOQ: <b id="view_moq"></b> <b>pcs.</b></p>
+                    
+                    <div class="vertical-section" style="gap: 3px;">
+                        <h1 id="view_item_name"></h1>
+                        <p class="small-r">Category: <b id="view_category"></b></p>
+                        <p class="small-r">Base Price: <b>₱</b> <b id="view_starting_price"></b></p>
+                    </div>
     
                     <div class="divider"><p>Color Variations</p><hr></div>
                     <div class="color-container" style="height: max-content; max-height: max-content;">
@@ -155,26 +158,21 @@
                     </div>
                     
                     <div class="divider"><p>Customizations</p><hr></div>
-                    <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
-                        <input class="filter-input" type="radio" name="customization" id="cut-&-sew" value="Cut & Sew" checked>
-                        <label class="color-filter-label small-b" for="cut-&-sew">Cut & Sew</label>
-    
-                        <input class="filter-input" type="radio" name="customization" id="silkscreen-print" value="Silkscreen Print">
-                        <label class="color-filter-label small-b" for="silkscreen-print">Silkscreen Print</label>
-    
-                        <input class="filter-input" type="radio" name="customization" id="digital-print" value="Digital Print">
-                        <label class="color-filter-label small-b" for="digital-print">Digital Print</label>
-    
-                        <input class="filter-input" type="radio" name="customization" id="laser-engrave" value="Laser Engrave">
-                        <label class="color-filter-label small-b" for="laser-engrave">Laser Engrave</label>
-    
-                        <input class="filter-input" type="radio" name="customization" id="leather-stamp" value="Leather Stamp">
-                        <label class="color-filter-label small-b" for="leather-stamp">Leather Stamp</label>
-
-                        <input class="filter-input" type="radio" name="customization" id="none" value="N/A">
-                        <label class="color-filter-label small-b" for="none">None</label>
+                    <div class="horizontal-input-field radio-choices custom-choices" style="flex-wrap: wrap; gap: 8px;">
+                        <!-- JS will handle the injection of customization options -->
                     </div>
     
+                    <div class="vertical-input-field">
+                        <label for="est_custom_price">Est. Customization Price:</label>
+                        <div class="horizontal-input-field">
+                            <div class="error-wrap">
+                                <input type="number" class="input" placeholder="0" min="0" name="custom_price" id="est_custom_price" onblur="this.value = parseFloat(this.value).toFixed(2)" required>
+                                <span class="error-msg"></span>
+                            </div>
+                            <label style="flex: 2 0 0; color: #898989;">pesos</label>
+                        </div>
+                    </div>
+
                     <div class="vertical-input-field">
                         <label for="note">Note:</label>
                         <textarea type="text" class="input" name="note" id="note"></textarea>
@@ -223,30 +221,7 @@
             </thead>
 
             <tbody id="order-items-body">
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <div class="cell-buttons">
-                            <button type="button" class="m-button-primary smaller-b">View/Edit</button>
-                            <a href="" class="m-button-tertiary smaller-b">Delete</a>
-                        </div>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>TOTAL:</td>
-                    <td></td>
-                    <td><b>Php 0.00</b></td>
-                    <td></td>
-                </tr>                    
+                <!-- JS handles the creation of the rows -->
             </tbody>
         </table>
 
@@ -263,7 +238,7 @@
 </div>
 
 <div class="modal-container" id="editSummaryItemModal">        
-    <div class="modal product-view" style="max-width: 500px;">
+    <div class="modal" style="width: 450px; max-width: 450px;">
         <form id="editItemForm">
             <div class="vertical-section">
                 <div class="horizontal-input-field" style="flex: 0; justify-content: space-between; align-items: center;">
@@ -272,11 +247,12 @@
                     <i class="material-symbols-outlined close-modal close-btn">close</i>
                 </div>
 
-                <!-- Unique ID: edit_item_name, edit_category, etc. -->
-                <h1 id="edit_item_name">Product Name</h1>
-                <p class="small-r">Category: <b id="edit_category"></b></p>
-                <p class="small-r">MOQ: <b id="edit_moq"></b> <b>pcs.</b></p>
-                <p class="small-r">Price: <b>₱</b> <b id="edit_price"></b></p>
+                <div class="vertical-section" style="gap: 3px;">
+                    <!-- Unique ID: edit_item_name, edit_category, etc. -->
+                    <h1 id="edit_item_name">Product Name</h1>
+                    <p class="small-r">Category: <b id="edit_category"></b></p>
+                    <p class="small-r">Starting Price: <b>₱</b> <b id="edit_price"></b></p>
+                </div>
 
                 <div class="divider"><p>Color Variations</p><hr></div>
                 <div class="color-container" style="height: max-content;">
@@ -284,29 +260,24 @@
                 </div>
                 
                 <div class="divider"><p>Customizations</p><hr></div>
-                <div class="horizontal-input-field radio-choices" style="flex-wrap: wrap; gap: 8px;">
-                    <input class="filter-input radio-input" type="radio" name="customization" id="cut-&-sew-edit" value="Cut & Sew" checked>
-                    <label class="color-filter-label small-b" for="cut-&-sew-edit">Cut & Sew</label>
+                <div class="horizontal-input-field radio-choices custom-choices" style="flex-wrap: wrap; gap: 8px;">
+                    <!-- JS handles injection of customization options -->
+                </div>
 
-                    <input class="filter-input radio-input" type="radio" name="customization" id="silkscreen-print-edit" value="Silkscreen Print">
-                    <label class="color-filter-label small-b" for="silkscreen-print-edit">Silkscreen Print</label>
-
-                    <input class="filter-input radio-input" type="radio" name="customization" id="digital-print-edit" value="Digital Print">
-                    <label class="color-filter-label small-b" for="digital-print-edit">Digital Print</label>
-
-                    <input class="filter-input radio-input" type="radio" name="customization" id="laser-engrave-edit" value="Laser Engrave">
-                    <label class="color-filter-label small-b" for="laser-engrave-edit">Laser Engrave</label>
-
-                    <input class="filter-input radio-input" type="radio" name="customization" id="leather-stamp-edit" value="Leather Stamp">
-                    <label class="color-filter-label small-b" for="leather-stamp-edit">Leather Stamp</label>
-
-                    <input class="filter-input radio-input" type="radio" name="customization" id="none-edit" value="N/A">
-                    <label class="color-filter-label small-b" for="none-edit">None</label>
+                <div class="vertical-input-field">
+                    <label for="edit_est_custom_price">Est. Customization Price:</label>
+                    <div class="horizontal-input-field">
+                        <div class="error-wrap">
+                            <input type="number" class="input" placeholder="0" min="0" name="custom_price" id="edit_est_custom_price" onblur="this.value = parseFloat(this.value).toFixed(2)" required>
+                            <span class="error-msg"></span>
+                        </div>
+                        <label style="flex: 2 0 0; color: #898989;">pesos</label>
+                    </div>
                 </div>
 
                 <div class="vertical-input-field">
                     <label for="edit_note">Note:</label>
-                    <textarea class="input" name="note" id="edit_note" placeholder="Add specific instructions..."></textarea>
+                    <textarea class="input" name="note" id="edit_note"></textarea>
                 </div>                
 
                 <div class="divider"><p>Quantity</p><hr></div>

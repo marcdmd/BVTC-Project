@@ -145,7 +145,18 @@
                                 data-customer_name = "{{ o.customer_id.customer_name }}"
                                 data-company_name = "{{ o.customer_id.company_id.company_name }}"
                                 data-company_address = "{{ o.customer_id.company_id.company_address }}"
-                                data-items='[{% for oi in o.orderitem_set.all %}{"code":"{{ oi.product_id.product_code }}","color":"{{ oi.color }}","custom":"{{ oi.customization }}","qty":"{{ oi.quantity }}","price":"{{ oi.price }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                data-items='[{% for oi in o.orderitem_set.all %}
+                                    {
+                                        "code":"{{ oi.product_id.product_code|escapejs }}",
+                                        "name":"{{ oi.product_id.product_name|escapejs }}",
+                                        "color":"{{ oi.color|escapejs }}",
+                                        "custom":"{{ oi.customization|escapejs }}",
+                                        "qty": {{ oi.quantity }},
+                                        "price": {{ oi.price|floatformat:2 }},
+                                        "starting_price": {{ oi.product_id.starting_price|floatformat:2 }},
+                                        "item_note":"{{ oi.item_note|default:''|escapejs }}"
+                                    }{% if not forloop.last %},{% endif %}
+                                {% endfor %}]'
                                 data-budget = "{{ o.budget }}"
                                 data-order_status = "{{ o.order_status }}"
                                 data-delivery_address = "{{ o.shipping_id.address_line_1 }}, {{ o.shipping_id.address_line_2 }}, {{ o.shipping_id.barangay }}, {{ o.shipping_id.address_province }} {{ o.shipping_id.address_postal_code }}"
@@ -257,12 +268,12 @@
                         <table class="small-database" style="width: 100%; border-collapse: collapse;">
                             <thead style="position: sticky; top: 0; background: white; z-index: 10;">
                                 <tr>
-                                    <th>PRODUCT CODE</th>
-                                    <th>COLOR</th>
-                                    <th>CUSTOMIZATION</th>
-                                    <th>QUANTITY</th>
-                                    <th>PRICE</th>
-                                    <th>SUBTOTAL</th>
+                                    <th style="width: 15%;">PRODUCT</th> <!-- Combined -->
+                                    <th style="width: 20%;">CUSTOMIZATION</th> <!-- Combined -->
+                                    <th style="width: 15%;">UNIT PRICE</th>
+                                    <th style="width: 15%;">QUANTITY</th>
+                                    <th style="width: 20%;">SUBTOTAL</th>
+                                    <th style="width: 15%;">ACTIONS</th>
                                 </tr>
                             </thead>
 
@@ -274,14 +285,19 @@
 
                     <table class="small-database">
                         <tbody>
-                            <tr>
-                                <td style="border-bottom: 0; border-top: 1px solid #E9E6E3;">
-                                <td style="width: 20%;"></td>
-                                <td style="width: 15%;"></td>
-                                <td style="width: 15%;"></td>
-                                <td style="width: 15%; font-weight: bold;">TOTAL:</td>
+                            <!-- Main Total Row -->
+                            <tr style="border-top: 3px solid #333;">
+                                <td style="width: 50%; text-align: right; font-weight: bold;" colspan="3">TOTAL:</td>
                                 <td style="width: 15%;"><b id="order_total_qty"></b></td>
-                                <td style="width: 20%;"><b>₱</b> <b id="order_total_price"></b></b></td>
+                                <td style="width: 20%;"><b>₱</b> <b id="order_total_price"></b></td>
+                                <td style="width: 15%;"></td>
+                            </tr>
+                            <!-- Discounted Total Row -->
+                            <tr id="discount-row">
+                                <td style="width: 50%; text-align: right;" colspan="3">DISCOUNTED TOTAL <span id="order_discount_note"></span>:</td>
+                                <td style="width: 15%;"><span id="order_total_qty_2"></span></td>
+                                <td style="width: 20%;">₱ <span id="order_discounted_total"></span></td>
+                                <td style="width: 15%;"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -365,6 +381,40 @@
             <div class="buttons-section">
                 <button type="button" id="confirmStatusUpdateBtn" class="m-button-primary small-m" style="flex: 1 0 0;">Yes</button>
                 <button type="button" class="m-button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="itemDetailModal">
+    <div class="modal" style="width: 400px;">
+        <div class="vertical-section">
+            <div class="horizontal-section" style="justify-content: space-between;">
+                <p class="product-id smaller-r" id="detail_code"></p>
+                <i class="material-symbols-outlined close-modal close-btn">close</i>
+            </div>
+            <h1 id="detail_name"></h1>
+            
+            <div class="divider"><p>Selection</p><hr></div>
+            <div class="vertical-section" style="gap: 6px;">
+                <p class="small-r">Color: <b id="detail_color"></b></p>
+                <p class="small-r">Customization: <b id="detail_custom"></b></p>
+                <p class="small-r">Quantity: <b id="detail_qty"></b></p>
+            </div>
+
+            <!-- Added Pricing Section -->
+            <div class="divider"><p>Pricing (Per Unit)</p><hr></div>
+            <div class="vertical-section" style="gap: 6px;">
+                <p class="small-r">Base Price: <b>₱</b> <b id="detail_base_price"></b></p>
+                <p class="small-r">Customization Price: <b>₱</b> <b id="detail_custom_price"></b></p>
+                <p class="small-r">Total Unit Price: <b>₱</b> <b id="detail_total_price"></b></p>
+            </div>
+            
+            <div class="divider"><p>Notes/Instructions</p><hr></div>
+            <p class="small-r" id="detail_note" style="background: #E9E6E3; padding: 6px; border-radius: 3px; white-space: pre-wrap;"></p>
+
+            <div class="buttons-section">
+                <button type="button" class="close-modal m-button-secondary small-m">Close</button>
             </div>
         </div>
     </div>

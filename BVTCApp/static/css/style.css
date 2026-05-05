@@ -709,6 +709,7 @@ main .filter {
 .order-view {
     flex: 0 0 1080px;
 }
+.edit-item-form,
 .customer-form,
 .view-customer {
     width: 600px;
@@ -954,7 +955,7 @@ nav.expand {
 }
 .button-primary {
     display: inline-flex;
-    padding: 9px 18px;
+    padding: 8px 16px;
     justify-content: center;
     align-items: center;
     gap: 3px;
@@ -969,7 +970,7 @@ nav.expand {
 }
 .button-secondary {
     display: inline-flex;
-    padding: 9px 18px;
+    padding: 8px 16px;
     justify-content: center;
     align-items: center;
     gap: 3px;
@@ -984,7 +985,7 @@ nav.expand {
 }
 .button-tertiary {
     display: flex;
-    padding: 9px 18px;
+    padding: 8px 16px;
     justify-content: center;
     align-items: center;
     gap: 3px;

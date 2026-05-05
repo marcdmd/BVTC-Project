@@ -88,6 +88,21 @@ class Product(models.Model):
         ('Wellness & Travel', 'Wellness & Travel'),
         ('Others', 'Others')
     ]
+
+    CUSTOM_OPTIONS = {
+        "Apparel": ["Cut & Sew", "Silkscreen Print", "Digital Print"],
+        "Awards & Recognition": ["Laser Engrave", "Digital Print", "Silkscreen Print"],
+        "Bag": ["Cut & Sew", "Silkscreen Print", "Digital Print", "Leather Stamp"],
+        "Coffee & Wine Item": ["Laser Engrave", "Silkscreen Print", "Digital Print"],
+        "Drinkware": ["Laser Engrave", "Silkscreen Print", "Digital Print"],
+        "Eco Item": ["Silkscreen Print", "Laser Engrave", "Digital Print"],
+        "Gadgets & Electronics": ["Laser Engrave", "Silkscreen Print", "Digital Print"],
+        "Individual Item": ["Silkscreen Print", "Digital Print", "Laser Engrave", "Leather Stamp"],
+        "Leather Item": ["Leather Stamp", "Laser Engrave", "Digital Print"],
+        "Office Item": ["Silkscreen Print", "Laser Engrave", "Digital Print", "Leather Stamp"],
+        "Packaging Item": ["Silkscreen Print", "Digital Print", "Laser Engrave"],
+        "Wellness & Travel": ["Silkscreen Print", "Digital Print", "Laser Engrave", "Leather Stamp"],
+    }
     
     product_id = models.AutoField(primary_key=True)
     product_code = models.CharField(max_length=20, unique=True)
@@ -97,6 +112,9 @@ class Product(models.Model):
     starting_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     MOQ = models.PositiveIntegerField(default=1)
     objects = models.Manager()
+
+    def get_custom_options(self):
+        return self.CUSTOM_OPTIONS.get(self.category, [])
 
     def __str__(self):
          return f'{self.product_code} - {self.product_name}'
@@ -199,7 +217,8 @@ class OrderItem(models.Model):
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
     product_id = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     color = models.CharField(max_length=7, blank=True, null=True)
-    customization = models.TextField(blank=True, null=True)
+    customization = models.CharField(blank=True, null=True)
+    item_note = models.TextField(blank=True, null=True)
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     objects = models.Manager()
