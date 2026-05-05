@@ -527,6 +527,26 @@ def add_shipping(request):
         except Exception as e:
             print(f"Error: {e}")
             return HttpResponse("Error saving address", status=400)
+        
+def delete_shipping(request, pk):
+    # 1. Fetch only the specific shipping detail
+    shipping = get_object_or_404(ShippingDetails, pk=pk)
+    
+    # Optional: Get the name for the alert message before it's deleted
+    contact_name = shipping.contact_person_name 
+
+    try:
+        # 2. Delete only this specific record
+        shipping.delete()
+        
+        messages.success(request, f"Shipping detail for {contact_name} has been removed.")
+        
+    except Exception as e:
+        # 4. Error Alert
+        messages.error(request, f"Error deleting shipping detail: {str(e)}")
+    
+    # 5. Redirect back to the customer list
+    return redirect('customers')
 
 def load_customers(request):
     company_id = request.GET.get('company-id')
