@@ -141,3 +141,58 @@
     </table>
 </div>
 {% endblock %}
+
+{% block modals %}
+<div class="modal-container" id="addQuotationModal">
+    <div class="modal quotation-form">
+        <h1>Create New Quotation</h1>
+        <div style="display: flex; flex-direction: row;">
+            <p class="required-message"><span>*</span> Required</p>
+        </div>
+
+        <form action="" method="POST" enctype="multipart/form-data" id="addQuotationForm">
+            {% csrf_token %}
+            <div class="divider"><p>Order Reference</p><hr></div>
+            <div class="horizontal-input-field">
+                <label for="quote-order-id"><span>*</span> Order ID:</label>
+                <div class="error-msg">
+                    <select class="input" name="quote-order-id" id="quote-order-id" required>
+                        <option value="" selected></option>
+                        {% for o in orders %}
+                        <option value="{{ o.order_id }}">{{ o.order_id }} - {{ o.customer_id.customer_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+
+            <div class="divider"><p>Additional Payment Details</p><hr></div>
+            <div class="horizontal-input-field">
+                <label for="quote-delivery-fee"><span>*</span> Delivery Fee:</label>
+
+                <input type="radio" value="freight_term_true" name="delivery-fee" id="freight_term_true" checked>
+                <label for="freight_term_true">Shouldered by the Customer</label>
+
+                <input type="radio" value="freight_term_false" name="delivery-fee" id="freight_term_false" checked>
+                <label for="freight_term_false">Shouldered by BVTC</label>
+            </div>
+
+            <div class="horizontal-input-field">
+                <label for="quote-discount"><span>*</span> Additional Discount:</label>
+                <div class="error-wrap">
+                    <input type="number" min="0" max="100" class="input" name="quote-discount" id="quote-discount">
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+
+            <div class="divider"><p>Quotation Details</p><hr></div>
+            <div class="horizontal-input-field">
+                <label for="quote-date-quoted">Date Quoted:</label>
+                <div class="error-wrap">
+                    <input type="date">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

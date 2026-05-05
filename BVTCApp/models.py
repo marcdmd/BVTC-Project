@@ -241,8 +241,13 @@ class Order(models.Model):
         discount_amount = total * self.get_discount_percentage()
         return total - discount_amount
 
+    def get_total_less_lylty_discount(self):
+        total = self.get_total_less_discount()
+        discount_amount = total * (self.discount / 100)
+        return total - discount_amount
+
     def get_vat(self):
-        total_price = self.get_total_less_discount()
+        total_price = self.get_total_less_lylty_discount()
         return total_price * Decimal('0.12')
 
     def get_grand_total_with_vat(self):
@@ -250,8 +255,16 @@ class Order(models.Model):
         # Note: If your item prices are already VAT-inclusive, 
         # you wouldn't add 12% again. 
         # Assuming you want to add 12% on top of the discounted price:
-        discounted_price = self.get_total_less_discount()
+        discounted_price = self.get_total_less_lylty_discount()
         return discounted_price * Decimal('1.12')
+
+    def get_partial_sixty(self):
+        grand_total = self.get_grand_total_with_vat()
+        return grand_total * Decimal('0.6')
+    
+    def get_partial_forty(self):
+        grand_total = self.get_grand_total_with_vat()
+        return grand_total * Decimal('0.4')
 
     def __str__(self):
         return f'{self.order_id} - {self.customer_id}'

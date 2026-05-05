@@ -744,6 +744,7 @@ main .filter {
     flex: 0 0 1080px;
 }
 .edit-item-form,
+.quotation-form,
 .customer-form,
 .view-customer {
     width: 600px;
