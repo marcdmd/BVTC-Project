@@ -144,30 +144,31 @@
                 <tr>
                     <td colspan="4"></td>
                     <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">TOTAL w/out VAT</p></td>
-                    <td><b>₱ {{ quotation.get_items_total|stringformat:".2f"|intcomma }}</td>b></td>
+                    <td><b>₱ {{ quotation.get_items_total|stringformat:".2f"|intcomma }}</b></td>
                 </tr>
 
                 <tr>
                     <td colspan="4"></td>
-                    <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">Less Discount</p></td>
-                    <td></td>
+                    <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">{{ quotation.get_discount_display }}% Less Discount</p></td>
+                    <td><b>₱ {{ quotation.get_total_less_discount|stringformat:".2f"|intcomma }}</b></td>
                 </tr>
 
                 <tr>
                     <td colspan="4"></td>
                     <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">+12% VAT</p></td>
-                    <td></td>
+                    <td><b>₱ {{ quotation.get_vat|stringformat:".2f"|intcomma }}</b></td>
                 </tr>
 
                 <tr style="border-bottom: none;">
                     <td colspan="4"></td>
                     <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33; background: #0B1E33;"><p style="font-style: italic; color: #FFFFFF;">GRAND TOTAL</p></td>
-                    <td style="background: #0B1E33;"></td>
+                    <td style="background: #0B1E33;"><p style="color: #FFFFFF;"><b>₱ {{ quotation.get_grand_total_with_vat|stringformat:".2f"|intcomma }}</b></p></td>
                 </tr>
 
+                {% if quotation.payment_terms == "Partial" %}
                 <tr style="background: #00537A; border-bottom: none;">
-                    <td style="width: 20%; justify-content: flex-start;""><p style="color: #FFFFFF; text-align: left;">Payment Terms:</p></td>
-                    <td style="width: 20%;"><p style="color: #FFFFFF; text-align: left;"></p></td>
+                    <td style="width: 20%; justify-content: flex-start;"><p style="color: #FFFFFF; text-align: left;">Payment Terms:</p></td>
+                    <td style="width: 20%;"><p style="color: #FFFFFF; text-align: left;"></p>60% Down Payment</td>
                     <td style="width: 20%;"><p style="color: #FFFFFF; text-align: left;"></p></td>
                     <td style="width: 40%;" colspan="3"><p style="color: #FFFFFF; text-align: left;"></p></td>
                 </tr>
@@ -177,9 +178,16 @@
                     <td><p style="color: #FFFFFF; text-align: left;"></p></td>
                     <td><p style="color: #FFFFFF; text-align: left;"></p></td>
                     <td><p style="color: #FFFFFF; text-align: left;"></p></td>
-                    <td><p style="color: #FFFFFF; text-align: left;"></p></td>
-                    <td><p style="color: #FFFFFF; text-align: left;"></p></td>
+                    <td colspan=""><p style="color: #FFFFFF; text-align: left;"></p></td>
                 </tr>
+                {% elif quotation.payment_terms == "Full" %}
+                <tr style="background: #00537A; border-bottom: none;">
+                    <td style="width: 20%; justify-content: flex-start;""><p style="color: #FFFFFF; text-align: left;">Payment Terms:</p></td>
+                    <td style="width: 20%;"><p style="color: #FFFFFF; text-align: left;"><b>Full Payment</b></p></td>
+                    <td style="width: 20%;"><p style="color: #FFFFFF; text-align: left;">₱ {{ quotation.get_grand_total_with_vat|stringformat:".2f"|intcomma }}</p></td>
+                    <td style="width: 40%;" colspan="3"><p style="color: #FFFFFF; text-align: left;"></p></td>
+                </tr>
+                {% endif %}
 
                 <tr style="background: #013C58; border-bottom: none;">
                     <td style="justify-content: flex-start;"><p style="color: #FFFFFF; text-align: left;">Delivery Fee:</p></td>

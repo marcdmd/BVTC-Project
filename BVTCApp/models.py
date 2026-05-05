@@ -231,11 +231,19 @@ class Order(models.Model):
         else:
             return Decimal('0.00')
 
+    def get_discount_display(self):
+        """Returns the percentage as a whole number (e.g., 10 instead of 0.10)"""
+        return int(self.get_discount_percentage() * 100)
+
     def get_total_less_discount(self):
         """Total price after applying the tiered discount."""
         total = self.get_items_total()
         discount_amount = total * self.get_discount_percentage()
         return total - discount_amount
+
+    def get_vat(self):
+        total_price = self.get_total_less_discount()
+        return total_price * Decimal('0.12')
 
     def get_grand_total_with_vat(self):
         """The final price including 12% VAT."""
