@@ -555,7 +555,8 @@ def quotations(request):
                               Order.objects.filter(order_status="Sent to Customer") |
                               Order.objects.filter(order_status="Signed")
                               )
-    return render(request, 'bvtc_app/quotations.html', {'quotations': orders_under_quotation})
+    orders = Order.objects.all()
+    return render(request, 'bvtc_app/quotations.html', {'quotations': orders_under_quotation, 'orders': orders})
 
 def view_quotation(request, pk):
     quotation = get_object_or_404(Order, order_id=pk)

@@ -64,7 +64,7 @@
             <form action="" class="search-area">
                 <input type="search" class="search-bar" placeholder="Search">
             </form>
-            <a href="" type="submit" class="button-primary small-m"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add New Quotation</a>
+            <button type="submit" class="button-primary small-m open-add-quotation-modal"><i class="material-symbols-outlined" style="font-size: 15px;">add</i>Add New Quotation</button>
         </div>
     </div>
 
@@ -187,10 +187,17 @@
 
             <div class="divider"><p>Quotation Details</p><hr></div>
             <div class="horizontal-input-field">
-                <label for="quote-date-quoted">Date Quoted:</label>
+                <label for="quote-date">Date Quoted:</label>
                 <div class="error-wrap">
-                    <input type="date">
+                    <input type="date" name="quote-date" id="quote-date" class="input">
+                    <span class="error-msg"></span>
                 </div>
+            </div>
+
+            <div class="divider"><hr></div>
+            <div class="buttons-section">
+                <button type="button" class="m-button-secondary small-m">Cancel</button>
+                <button type="button" class="m-button-primary small-m">Create Quotation</button>
             </div>
         </form>
     </div>
