@@ -19,32 +19,32 @@
     <h1>Order Status</h1>
     <div class="numbers">
         <div class="number-card">
-            <div class="number" style="color: #0B1E33;">{{ count_feasibility|default:0 }}</div>
+            <div class="number" style="color: #0B1E33;">{{ count_feasibility|default:00|stringformat:"02d" }}</div>
             <p>Under Feasibility</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #013C58;">{{ count_quotation|default:0 }}</div>
+            <div class="number" style="color: #013C58;">{{ count_quotation|default:00|stringformat:"02d" }}</div>
             <p>Under Quotation</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #00537A;">{{ count_production|default:0 }}</div>
+            <div class="number" style="color: #00537A;">{{ count_production|default:00|stringformat:"02d" }}</div>
             <p>In Production</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #F5A201;">{{ count_sampled|default:0 }}</div>
+            <div class="number" style="color: #F5A201;">{{ count_sampled|default:00|stringformat:"02d" }}</div>
             <p>Sampled</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #EDC001;">{{ count_packaged|default:0 }}</div>
+            <div class="number" style="color: #EDC001;">{{ count_packaged|default:00|stringformat:"02d" }}</div>
             <p>Packaged</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #00A887;">{{ count_transit|default:0 }}</div>
+            <div class="number" style="color: #00A887;">{{ count_transit|default:00|stringformat:"02d" }}</div>
             <p>In Transit</p>
         </div>
     </div>

@@ -486,31 +486,38 @@ def load_barangays(request):
 
 def save_shipping_details(request):
     if request.method == "POST":
-        # 1. Get the Customer (Crucial because of your ForeignKey)
-        # Assuming you have a hidden input or selected customer ID in the form
-        customer_id = request.POST.get('customer_id') 
-        customer = CustomerAccount.objects.get(customer_id=customer_id)
+        try:
+            # 1. Get the Customer (Crucial because of your ForeignKey)
+            # Assuming you have a hidden input or selected customer ID in the form
+            customer_id = request.POST.get('customer-id') 
+            customer = CustomerAccount.objects.get(customer_id=customer_id)
 
-        # 2. Get the Names from the Geography IDs
+            # 2. Get the Names from the Geography IDs
 
-        province_obj = Province.objects.get(id=request.POST.get('province'))
-        city_obj = City.objects.get(id=request.POST.get('city-municipality'))
-        barangay_obj = Barangay.objects.get(id=request.POST.get('barangay'))
+            province_obj = Province.objects.get(id=request.POST.get('province'))
+            city_obj = City.objects.get(id=request.POST.get('city-municipality'))
+            barangay_obj = Barangay.objects.get(id=request.POST.get('barangay'))
 
-        # 3. Create the ShippingDetails instance
-        shipping = ShippingDetails.objects.create(
-            customer_id=customer,
-            contact_person_name=request.POST.get('contact-person-name'),
-            contact_person_email=request.POST.get('contact-person-email'),
-            contact_person_number=request.POST.get('contact-person-number'),
-            address_line_1=request.POST.get('address-line-1'),
-            address_line_2=request.POST.get('address-line-2'),
-            address_province=province_obj.name, # Storing the string name
-            address_city=city_obj.name,         # Storing the string name
-            address_barangay=barangay_obj.name,   # Storing the string name
-            address_postal_code=request.POST.get('postal-code')
-        )
+            # 3. Create the ShippingDetails instance
+            shipping = ShippingDetails.objects.create(
+                customer_id=customer,
+                contact_person_name=request.POST.get('contact-person-name'),
+                contact_person_email=request.POST.get('contact-person-email'),
+                contact_person_number=request.POST.get('contact-person-number'),
+                address_line_1=request.POST.get('address-line-1'),
+                address_line_2=request.POST.get('address-line-2'),
+                address_province=province_obj.name, # Storing the string name
+                address_city=city_obj.name,         # Storing the string name
+                address_barangay=barangay_obj.name,   # Storing the string name
+                address_postal_code=int(request.POST.get('postal-code') or 0)
+            )
 
-        # return render(request, 'bvtc_app/partials/shipping_info_display.html', {
-        #     'shipping': shipping
-        # })
+            customers_shipping_addresses = ShippingDetails.objects.filter(customer_id=customer)
+            return render(request, 'bvtc_app/partials/shipping_options.html', {
+                'addresses': customers_shipping_addresses,
+                'new_id': shipping.shipping_id  # To auto-select the new one
+            })
+        
+        except Exception as e:
+            print(f"Error: {e}")
+            return HttpResponse("Error saving address", status=400)

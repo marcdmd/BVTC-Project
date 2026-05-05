@@ -1,9 +1,9 @@
-<option value="" hidden selected>Select Shipping Address</option>
+<option value="" hidden {% if not new_id %}selected{% endif %}>Select Shipping Address</option>
 {% for addr in addresses %}
-    <option value="{{ addr.shipping_id }}">
+    <option value="{{ addr.shipping_id }}" {% if addr.shipping_id == new_id %}selected{% endif %}>
         {{ addr.contact_person_name }} - {{ addr.address_city }}, {{ addr.address_province }}
     </option>
 {% endfor %}
 {% if not addresses %}
-    <option value="">No existing addresses found</option>
+    <option value="" disabled>No existing addresses found</option>
 {% endif %}
