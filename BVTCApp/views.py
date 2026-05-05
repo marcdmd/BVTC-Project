@@ -401,8 +401,11 @@ def add_customer(request):
 def edit_customer(request, pk):
     customer = get_object_or_404(CustomerAccount, pk=pk)
     
-    # If the request is a GET (from your fetch), return JSON
+# 1. GET: Send data to pre-fill the modal
     if request.method == "GET":
+        # We grab the company linked to this customer
+        company = customer.company_id 
+        
         data = {
             'customer_id': customer.customer_id,
             'customer_name': customer.customer_name,
@@ -413,8 +416,44 @@ def edit_customer(request, pk):
             'email_transaction': customer.email_transaction,
             'messenger_transaction': customer.messenger_transaction,
             'viber_transaction': customer.viber_transaction,
+            
+            # ADD THESE: This allows the frontend to show the "Frozen" company info
+            'company_name': company.company_name,
+            'company_address': company.company_address,
+            'tin_number': company.tin_number,
         }
         return JsonResponse(data)
+
+    # 2. POST: This saves the changes when you click the submit button
+    if request.method == "POST":
+        try:
+            # COMBINE NAMES: Grab 'first-name' and 'last-name' from the form
+            first = request.POST.get('first-name', '').strip()
+            last = request.POST.get('last-name', '').strip()
+            customer.customer_name = f"{first} {last}".strip()
+            
+            # UPDATING DATA: Using exact field names from your models.py
+            customer.customer_email = request.POST.get('email-address')
+            customer.customer_phone_number = request.POST.get('contact-number')
+            customer.messenger = request.POST.get('messenger')
+            customer.viber = request.POST.get('viber')
+
+            # UPDATE CHECKBOXES: 'on' means the checkbox was checked
+            customer.email_transaction = request.POST.get('email-transaction') == 'on'
+            customer.messenger_transaction = request.POST.get('messenger-transaction') == 'on'
+            customer.viber_transaction = request.POST.get('viber-transaction') == 'on'
+
+            # SAVE: The company_id field is NOT updated, so it remains frozen.
+            customer.save()
+
+            messages.success(request, f"Customer {customer.customer_name} updated successfully!")
+            return redirect('customers')
+
+        except Exception as e:
+            messages.error(request, f"Error updating customer: {str(e)}")
+            return redirect('customers')
+
+    return redirect('customers')
 
 def delete_customer(request, pk):
     try:
