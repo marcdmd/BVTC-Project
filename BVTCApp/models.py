@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from decimal import Decimal
 
 class UserAccount(models.Model):    
     USER_ROLES = [
@@ -211,6 +212,39 @@ class Order(models.Model):
 
     actual_total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True)
 
+    def get_items_total(self):
+        """Calculates the sum of (quantity * price) for all items."""
+        return sum(item.quantity * item.price for item in self.orderitem_set.all())
+
+    def get_discount_percentage(self):
+        """Returns the discount rate based on total quantity of items."""
+        total_qty = sum(item.quantity for item in self.orderitem_set.all())
+        
+        if total_qty >= 1000:
+            return Decimal('0.10')
+        elif total_qty >= 501:
+            return Decimal('0.08')
+        elif total_qty >= 301:
+            return Decimal('0.05')
+        elif total_qty >= 101:
+            return Decimal('0.03')
+        else:
+            return Decimal('0.00')
+
+    def get_total_less_discount(self):
+        """Total price after applying the tiered discount."""
+        total = self.get_items_total()
+        discount_amount = total * self.get_discount_percentage()
+        return total - discount_amount
+
+    def get_grand_total_with_vat(self):
+        """The final price including 12% VAT."""
+        # Note: If your item prices are already VAT-inclusive, 
+        # you wouldn't add 12% again. 
+        # Assuming you want to add 12% on top of the discounted price:
+        discounted_price = self.get_total_less_discount()
+        return discounted_price * Decimal('1.12')
+
     def __str__(self):
         return f'{self.order_id} - {self.customer_id}'
 
@@ -226,6 +260,10 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.order_id}-{self.product_id}'
+
+    def get_total(self):
+        # Quantity * Inclusive Price
+        return self.quantity * self.price
 
     class Meta:
         verbose_name_plural: str = 'Order Items'

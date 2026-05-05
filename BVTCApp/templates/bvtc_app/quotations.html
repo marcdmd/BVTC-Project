@@ -1,4 +1,5 @@
 {% extends 'bvtc_app/base.html' %}
+{% load humanize %}
 {% load static %}
 
 {% block title %}Quotations{% endblock %}
@@ -47,7 +48,7 @@
 
 <div class="tracker">
     <div class="horizontal-section">
-        <form action="" class="filter">
+        <!-- <form action="" class="filter">
             <p class="small-r filter-name" style="padding: 6px 15px 6px 15px;">Sort by:</p>
             <input class="filter-input" type="radio" name="sort-by" value="client-name" id="client-name" checked>
             <label class="filter-label small-b" for="client-name">Client Name</label>
@@ -57,7 +58,7 @@
 
             <input class="filter-input" type="radio" name="sort-by" value="account-manager" id="account-manager">
             <label class="filter-label small-b" for="account-manager">Account Manager</label>
-        </form>
+        </form> -->
 
         <div class="actions">
             <form action="" class="search-area">
@@ -93,7 +94,7 @@
                 <td class="small-b">{{ q.order_id }}</td>
                 <td class="small-b">{{ q.customer_id.customer_name }}</td>
                 <td class="small-b">{{ q.customer_id.company_id.company_name }}</td>
-                <td class="small-b">{{ q.total_amount|stringformat:".2f" }}</td>
+                <td class="small-b">{{ q.total_amount|stringformat:".2f"|intcomma }}</td>
                 <td class="small-r">{{ q.delivery_date }}</td>
                 <td style="vertical-align: middle;">
                     {% if q.order_status == 'Under Validation' %}
@@ -126,7 +127,11 @@
                 <td class="small-b">{{ q.user_id.user_name }}</td>
                 <td>
                     <div class="cell-buttons">
+                        {% if q.order_status == "Under Quotation" %}
+                        <button type="button" class="m-button-primary smaller-b">Quote</button>
+                        {% else %}
                         <a href="{% url 'view_quotation' q.order_id %}" class="m-button-primary smaller-b" type="button">View</a>
+                        {% endif %}
                         <button type="button" class="m-button-secondary smaller-b">Edit</button>
                     </div>
                 </td>

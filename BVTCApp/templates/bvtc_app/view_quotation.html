@@ -1,4 +1,5 @@
 {% extends 'bvtc_app/base.html' %}
+{% load humanize %}
 {% load static %}
 
 {% block title %}View Quotation{% endblock %}
@@ -73,7 +74,7 @@
             <button class="button-tertiary small-m">Reject</button>
             <button class="button-secondary small-m">Comment</button>
             <button class="button-secondary small-m">Download</button>
-            <button class="button-secondary small-m">Close</button>
+            <a href="{% url 'quotations' %}" class="button-secondary small-m">Close</a>
         </div>
     </div>
 </div>
@@ -101,7 +102,7 @@
 
         <div class="vertical-section" style="padding: 3px; flex: 1 0 0; gap: 6px;">
             <p class="small-r"><b>Quotation no.:</b> {{ quotation.order_id }}</p>
-            <p class="small-r"><b>Quotation Date:</b> </p>
+            <p class="small-r"><b>Quotation Date:</b> {{ quotation.date_quoted }}</p>
         </div>
     </div>
 
@@ -127,28 +128,40 @@
             </thead>
 
             <tbody>
+                {% for item in quotation.orderitem_set.all %}
                 <tr>
-                    <td colspan="3"></td>
-                    <td></td>
-                    <td></td>
+                    <td colspan="3">
+                        {% if item.color %}{{ item.color }} {% endif %}
+                        {{ item.product_id.product_name }}, 
+                        {% if item.customization %}{{ item.customization }}{% endif %} 
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;">₱ {{ item.price|intcomma }}</td>
+                    <td>₱ {{ item.get_total|stringformat:".2f"|intcomma }}</td>
+                </tr>
+                {% endfor %}
+
+                <tr>
+                    <td colspan="4"></td>
+                    <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">TOTAL w/out VAT</p></td>
+                    <td><b>₱ {{ quotation.get_items_total|stringformat:".2f"|intcomma }}</td>b></td>
+                </tr>
+
+                <tr>
+                    <td colspan="4"></td>
+                    <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">Less Discount</p></td>
                     <td></td>
                 </tr>
 
                 <tr>
                     <td colspan="4"></td>
-                    <td><p style="font-style: italic; color: #621D1D;">TOTAL w/out VAT</p></td>
-                    <td></td>
-                </tr>
-
-                <tr>
-                    <td colspan="4"></td>
-                    <td><p style="font-style: italic; color: #621D1D;">+12% VAT</p></td>
+                    <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">+12% VAT</p></td>
                     <td></td>
                 </tr>
 
                 <tr style="border-bottom: none;">
                     <td colspan="4"></td>
-                    <td style="background: #0B1E33;"><p style="font-style: italic; color: #FFFFFF;">GRAND TOTAL</p></td>
+                    <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33; background: #0B1E33;"><p style="font-style: italic; color: #FFFFFF;">GRAND TOTAL</p></td>
                     <td style="background: #0B1E33;"></td>
                 </tr>
 

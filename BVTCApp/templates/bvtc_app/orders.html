@@ -107,10 +107,10 @@
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                         <p class="smaller-b" >{{ o.order_status }}</p>
                     </span>
-                    {% elif o.order_status == 'Under Quotation' %}
+                    {% elif o.order_status == 'Under Quotation' or o.order_status == 'Under Validation' or o.order_status == 'Validated' or o.order_status == 'Sent to Customer' or o.order_status == 'Signed' %}
                     <span class="status-pill" style="color: #013C58; border: 1px solid #013C58;">
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b" >{{ o.order_status }}</p>
+                        <p class="smaller-b" >Under Quotation</p>
                     </span>                    
                     {% elif o.order_status == 'In Production' %}
                     <span class="status-pill" style="color: #00537A; border: 1px solid #00537A;">
