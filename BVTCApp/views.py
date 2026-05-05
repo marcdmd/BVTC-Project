@@ -403,7 +403,6 @@ def edit_customer(request, pk):
     
 # 1. GET: Send data to pre-fill the modal
     if request.method == "GET":
-        # We grab the company linked to this customer
         company = customer.company_id 
         
         data = {
@@ -417,10 +416,12 @@ def edit_customer(request, pk):
             'messenger_transaction': customer.messenger_transaction,
             'viber_transaction': customer.viber_transaction,
             
-            # ADD THESE: This allows the frontend to show the "Frozen" company info
+            # Frozen company info
             'company_name': company.company_name,
             'company_address': company.company_address,
             'tin_number': company.tin_number,
+            # ADD THIS: Get the URL of the logo image
+            'company_logo': company.company_logo.url if company.company_logo else None,
         }
         return JsonResponse(data)
 
