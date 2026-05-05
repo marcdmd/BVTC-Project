@@ -800,69 +800,73 @@ document.addEventListener('click', function (e) {
         qs('#messenger-transaction', viewCustomerModal).checked = (viewCustomer.dataset.view_messenger_transaction === 'True');
         qs('#viber-transaction', viewCustomerModal).checked = (viewCustomer.dataset.view_viber_transaction === 'True');
 
-        const container = document.getElementById('shipping-buttons-container');
+        const dividers = viewCustomerModal.querySelectorAll('.divider p');
+        let container = null;
+        dividers.forEach(p => {
+            if (p.textContent.includes('Shipping Details')) {
+                container = p.closest('.divider').nextElementSibling;
+            }
+        });
+
         if (container) {
-            container.innerHTML = ''; 
+            // Give the container the ID HTMX is looking for (if it doesn't have it)
+            container.id = 'shipping-buttons-container'; 
             
-            currentShippings.forEach((ship, index) => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'm-button-quaternary small-m';
-                btn.textContent = `Shipping Detail ${index + 1}`; 
-                
-                btn.onclick = () => {
-                    const sModal = document.getElementById('viewShippingModal');
-                    // We already have 'viewCustomerModal' in scope from the outer block
-                    
-                    if (sModal) {
-                        // 1. Handle the "Stacking" Title logic
-                        const shipNumSpan = document.getElementById('ship_number');
-                        const shipCustIdSpan = document.getElementById('view_shipping_customer_id');
-                        
-                        if (shipNumSpan) shipNumSpan.textContent = index + 1;
-                        if (shipCustIdSpan) shipCustIdSpan.textContent = customerId;
-
-                        // 2. Map the address fields
-                        // Since we split these in the button, we map them here
-                        const fields = {
-                            'ship_contact': ship.contact,
-                            'ship_email': ship.email,
-                            'ship_phone': ship.phone,
-                            'ship_street': ship.street,
-                            'ship_line_2': ship.line_2,
-                            'ship_city': ship.city,
-                            'ship_barangay': ship.barangay,
-                            'ship_province': ship.province,
-                            'ship_zip': ship.zip
-                        };
-
-                        // Batch update to keep it clean
-                        for (const [id, value] of Object.entries(fields)) {
-                            const el = document.getElementById(id);
-                            if (el) el.textContent = value || 'N/A';
-                        }
-
-                        // 3. Show the modal on top
-                        showModal(sModal);
-                    }
-                };
-                container.appendChild(btn);
-            });
-
-            const addShippingBtn = document.createElement('button');
-            addShippingBtn.type = 'button';
-            addShippingBtn.className = 'add-color-btn';
-            addShippingBtn.innerHTML = `<i class="material-symbols-rounded" style="font-size: 18px; color: #101212;">add</i>`;
-            container.appendChild(addShippingBtn);
+            // Just ask Django for the pre-built buttons!
+            // No loops, no JSON.parse, no appendChild errors.
+            htmx.ajax('GET', `/get-shipping-buttons/${customerId}/`, {target: '#shipping-buttons-container'});
         }
+
         if (viewCustomerModal) showModal(viewCustomerModal);
     }
 
-    // Add Shipping Details
+    // Add Shipping Details through Add Order
     const addShipping = e.target.closest('.open-add-shipping-modal');
     if (addShipping) {
         const addShippingModal = document.getElementById('addShippingModal');
         if (addShippingModal) showModal(addShippingModal);
+    }
+
+    // Add Shipping Details through Customer Page
+    const addShippingBtn = e.target.closest('.open-add-shipping-form'); // Check if this class matches your partial!
+    if (addShippingBtn) {
+        // FIX: Change 'addBtn' to 'addShippingBtn'
+        const customerId = addShippingBtn.dataset.customerId; 
+        
+        const hiddenInput = document.getElementById('shipping_for_customer_id');
+        const modal = document.getElementById('addShippingModal');
+
+        if (hiddenInput && customerId) {
+            hiddenInput.value = customerId;
+            showModal(modal);
+            console.log("Seeded Modal with Customer ID:", customerId);
+        }
+    }
+
+    // View Shipping Details through Customers Page
+    const btn = e.target.closest('.open-shipping-detail-btn');
+    if (btn) {
+        // Parse the JSON data-attribute we put in the partial
+        const ship = JSON.parse(btn.dataset.shipInfo);
+        const sModal = document.getElementById('viewShippingModal');
+        
+        if (sModal) {
+            // Fill the labels/text in the View Shipping Modal
+            document.getElementById('ship_number').textContent = btn.dataset.shipNum;
+            // document.getElementById('view_shipping_customer_id').textContent = btn.dataset.customerId;
+            
+            document.getElementById('ship_contact').textContent = ship.contact;
+            document.getElementById('ship_email').textContent = ship.email;
+            document.getElementById('ship_phone').textContent = ship.phone;
+            document.getElementById('ship_street').textContent = ship.street;
+            document.getElementById('ship_line_2').textContent = ship.line_2;
+            document.getElementById('ship_city').textContent = ship.city;
+            document.getElementById('ship_barangay').textContent = ship.barangay;
+            document.getElementById('ship_province').textContent = ship.province;
+            document.getElementById('ship_zip').textContent = ship.zip;
+
+            showModal(sModal);
+        }
     }
 });
 
@@ -1037,7 +1041,8 @@ function showModal(modal) {
     const isStackable = isNotif ||
                         modal.id === 'editSummaryItemModal' ||
                         modal.id === 'viewShippingModal' ||
-                        modal.id === 'itemDetailModal';
+                        modal.id === 'itemDetailModal' ||
+                        modal.id === 'addShippingModal';
 
     // 3. Only close other modals if the new one is NOT stackable
     if (!isStackable) {

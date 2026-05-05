@@ -1,0 +1,27 @@
+{% for ship in shipping_list %}
+    <button type="button" 
+            class="m-button-quaternary small-m open-shipping-detail-btn"
+            data-ship-num="{{ forloop.counter }}"
+            data-customer-id="{{ customer_id }}"
+            data-ship-info='{
+                "contact": "{{ ship.contact_person_name|escapejs }}",
+                "email": "{{ ship.contact_person_email|escapejs }}",
+                "phone": "{{ ship.contact_person_number|escapejs }}",
+                "street": "{{ ship.address_line_1|escapejs }}",
+                "line_2": "{{ ship.address_line_2|default:"N/A"|escapejs }}",
+                "city": "{{ ship.address_city|escapejs }}",
+                "barangay": "{{ ship.address_barangay|escapejs }}",
+                "province": "{{ ship.address_province|escapejs }}",
+                "zip": "{{ ship.address_postal_code|escapejs }}"
+            }'>
+        Shipping Detail {{ forloop.counter }}
+    </button>
+{% endfor %}
+
+<!-- The Plus Button (Carries the ID for the JS seeder) -->
+<button type="button" 
+        class="m-button-quaternary open-add-shipping-form" 
+        style="padding: 6px;"
+        data-customer-id="{{ customer_id }}">
+    <i class="material-symbols-outlined">add</i>
+</button>

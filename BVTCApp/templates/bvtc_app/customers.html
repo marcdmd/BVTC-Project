@@ -385,8 +385,16 @@
             <p class="required-message"><span>*</span> Required</p>
         </div>
 
-        <form action="" id="addShippingForm">
+        <form hx-post="{% url 'add_shipping' %}" 
+            id="addShippingForm" 
+            hx-target="#shipping-buttons-container" 
+            hx-on:htmx:after-on-load="if(event.detail.xhr.status === 200 && event.detail.elt.id === 'addShippingForm') { 
+                document.getElementById('addShippingModal').style.display='none'; 
+                this.reset(); 
+            }">
             {% csrf_token %}
+            <input type="hidden" name="customer-id" id="shipping_for_customer_id">
+
             <div class="divider"><p>Contact Person's Details</p><hr></div>
             <div class="vertical-input-field">
                 <label for="contact-person-name"><span>*</span> Contact Person's Name:</label>
