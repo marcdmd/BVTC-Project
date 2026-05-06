@@ -817,6 +817,11 @@ document.addEventListener('click', function (e) {
             htmx.ajax('GET', `/get-shipping-buttons/${customerId}/`, {target: '#shipping-buttons-container'});
         }
 
+        const viewEditBtn = document.querySelector('#viewCustomerModal .edit-customer-btn');
+        if (viewEditBtn) {
+            viewEditBtn.setAttribute('data-id', customerId);
+        }
+
         if (viewCustomerModal) showModal(viewCustomerModal);
     }
 
@@ -869,51 +874,219 @@ document.addEventListener('click', function (e) {
         }
     }
 
-    // Edit Customer Modal
+    // Edit Customer Modal Trigger
     const editCustomerBtn = event.target.closest('.edit-customer-btn');
     if (editCustomerBtn) {
-        // Use dataset.id to get 'data-id'
-        const customerId = editCustomerBtn.dataset.id; 
-
-        // Safety check: Don't fetch if ID is missing
-        if (!customerId) {
-            console.error("Customer ID not found on button.");
-            return;
-        }
+        const customerId = editCustomerBtn.dataset.id;
         
+        if (viewCustomerModal) viewCustomerModal.style.display = 'none';
+
         fetch(`/customers/edit_customer/${customerId}/`)
             .then(response => response.json())
             .then(data => {
-                // Essential Fields
-                if(document.getElementById('edit-customer-id')) 
-                    document.getElementById('edit-customer-id').value = data.customer_id;
-                
-                // Name Splitting Logic
+                const setVal = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val || '';
+                };
+
+                setVal('edit-customer-id', data.customer_id);
+                setVal('edit-email', data.customer_email);
+                setVal('edit-phone', data.customer_phone_number);
+                setVal('edit-messenger', data.messenger);
+                setVal('edit-viber', data.viber);
+
                 const nameParts = data.customer_name ? data.customer_name.trim().split(' ') : [];
-                const firstName = nameParts[0] || '';
-                const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-                
-                if(document.getElementById('edit-first-name')) document.getElementById('edit-first-name').value = firstName;
-                if(document.getElementById('edit-last-name')) document.getElementById('edit-last-name').value = lastName;
+                setVal('edit-first-name', nameParts[0]);
+                setVal('edit-last-name', nameParts.slice(1).join(' '));
 
-                // Company Details
-                if(document.getElementById('edit-company')) document.getElementById('edit-company').value = data.company_id;
+                // Prefill Company Data
+                setVal('edit-company-name', data.company_name);
+                setVal('edit-company-address', data.company_address);
+                setVal('edit-tin-number', data.tin_number);
 
-                // Contact Info
-                if(document.getElementById('edit-email')) document.getElementById('edit-email').value = data.customer_email;
-                if(document.getElementById('edit-phone')) document.getElementById('edit-phone').value = data.customer_phone_number;
-                
-                // These were likely the cause of your "null" error:
-                if(document.getElementById('edit-messenger')) document.getElementById('edit-messenger').value = data.messenger || '';
-                if(document.getElementById('edit-viber')) document.getElementById('edit-viber').value = data.viber || '';
+                const fileText = document.querySelector('#editCustomerModal .file-text');
+                if (fileText && data.company_logo) {
+                    const fileName = data.company_logo.split('/').pop();
+                    fileText.textContent = ` Current: ${fileName}`;
+                }
 
-                // Checkboxes
-                if(document.getElementById('edit-email-trans')) document.getElementById('edit-email-trans').checked = data.email_transaction;
-                if(document.getElementById('edit-messenger-trans')) document.getElementById('edit-messenger-trans').checked = data.messenger_transaction;
-                if(document.getElementById('edit-viber-trans')) document.getElementById('edit-viber-trans').checked = data.viber_transaction;
+                const setCheck = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.checked = val;
+                };
+                setCheck('edit-email-trans', data.email_transaction);
+                setCheck('edit-messenger-trans', data.messenger_transaction);
+                setCheck('edit-viber-trans', data.viber_transaction);
+
+                // Update form action
+                document.getElementById('editCustomerForm').action = `/customers/edit_customer/${data.customer_id}/`;
 
                 document.getElementById('editCustomerModal').style.display = 'flex';
             });
+    }
+
+    // Edit Customer Form
+    const editForm = document.getElementById('editCustomerForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            // --- THIS IS THE MISSING PART ---
+            // Stops the browser from leaving the page and showing raw JSON
+            e.preventDefault(); 
+
+            const formData = new FormData(this);
+            const customerId = document.getElementById('edit-customer-id').value;
+
+            fetch(`/customers/edit_customer/${customerId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Manually move the user back to the list
+                    window.location.href = '/customers/'; 
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => console.error("Submit Error:", err));
+        });
+    }
+
+    // Delete Customer Confirmation Modal
+    const openDeleteBtn = e.target.closest('.delete-customer-btn');
+    if (openDeleteBtn) {
+        console.log("[TRACE] Delete Button Clicked in View Modal.");
+        
+        const deleteModal = document.getElementById('deleteCustomerModal');
+        const viewModal = document.getElementById('viewCustomerModal');
+        
+        // Grab the ID from the text span in the View Modal
+        const idSpan = document.getElementById('view_customer_id');
+        const customerId = idSpan ? idSpan.textContent.trim() : null;
+        
+        console.log("[TRACE] Captured Customer ID for deletion:", customerId);
+
+        if (deleteModal && customerId) {
+            const deleteForm = deleteModal.querySelector('#deleteForm');
+            
+            if (deleteForm) {
+                // Set the form's action URL
+                deleteForm.action = `/customers/delete_customer/${customerId}/`;
+                console.log("[TRACE] Delete Form Action set to:", deleteForm.action);
+            } else {
+                // Fallback for link-based delete
+                const confirmBtn = deleteModal.querySelector('.confirm_delete');
+                if (confirmBtn) {
+                    // Match your new path('customers/delete_customer/...')
+                    confirmBtn.href = `/customers/delete_customer/${customerId}/`;
+                    console.log("[TRACE] Delete Link href updated to:", confirmBtn.href);
+                }
+            }
+
+            // Show the delete modal (View modal stays visible behind it for "stacking")
+            showModal(deleteModal);
+        } else {
+            console.error("[TRACE] Failed to open Delete Modal: ID or Modal element missing.");
+        }
+    }
+
+    // Add Quotation Modal
+    const addQuotation = e.target.closest('.open-add-quotation-modal');
+    if (addQuotation) {
+        const addQuotationModal = document.getElementById('addQuotationModal');
+        if (addQuotationModal) {
+            const orderId = addQuotation.dataset.id;
+            const selectField = addQuotationModal.querySelector('#quote-order-id');
+
+            if (selectField) {
+                if (orderId) {
+                    // Scenario A: Clicked "Quote" on a table row
+                    selectField.value = orderId;
+                } else {
+                    // Scenario B: Clicked the general "Add New Quotation" button
+                    selectField.value = ""; 
+                }
+            }
+
+            showModal(addQuotationModal);
+        }
+    }
+
+    // Edit Quotation Modal
+    const editQuoteBtn = e.target.closest('.open-edit-quotation-modal');
+    if (editQuoteBtn) {
+        const editModal = document.getElementById('editQuotationModal');
+        if (editModal) {
+            // Pull data from button attributes
+            const orderId = editQuoteBtn.dataset.id;
+            const discount = editQuoteBtn.dataset.discount;
+            const freight = editQuoteBtn.dataset.freight; // 'true' or 'false'
+            const quoteDate = editQuoteBtn.dataset.date;
+
+            // Populate Order ID (Disabled select + Hidden input)
+            const displaySelect = document.getElementById('edit-quote-order-id');
+            const hiddenInput = document.getElementById('edit-quote-order-id-hidden');
+            if (displaySelect) displaySelect.value = orderId;
+            if (hiddenInput) hiddenInput.value = orderId;
+
+            // Populate Discount and Date
+            const discountInput = document.getElementById('edit-quote-discount');
+            const dateInput = document.getElementById('edit-quote-date');
+            if (discountInput) discountInput.value = discount || 0;
+            if (dateInput) dateInput.value = quoteDate;
+
+            // Handle unique Radio IDs for Edit Modal
+            const freightTrue = document.getElementById('edit-freight-true');
+            const freightFalse = document.getElementById('edit-freight-false');
+            if (freight === 'true') {
+                if (freightTrue) freightTrue.checked = true;
+            } else {
+                if (freightFalse) freightFalse.checked = true;
+            }
+
+            showModal(editModal);
+        }
+    }
+
+    // Update Quotation Status
+    const quotationStatusTrigger = event.target.closest('.status-update-trigger');
+    if (quotationStatusTrigger) {
+        event.preventDefault();
+        
+        const statusActionModal = document.getElementById('statusConfirmModal');
+        const nextStatusName = quotationStatusTrigger.dataset.newStatus;
+
+        if (statusActionModal) {
+            // Populate the modal with the chosen status
+            const hiddenStatusField = document.getElementById('hiddenStatusInput');
+            const statusLabelElement = document.getElementById('statusLabelDisplay');
+
+            if (hiddenStatusField) hiddenStatusField.value = nextStatusName;
+            if (statusLabelElement) statusLabelElement.textContent = nextStatusName;
+
+            // Show the modal
+            statusActionModal.style.display = 'flex';
+        }
+    }
+
+    // Open Approve Modal
+    const openApproveBtn = e.target.closest('.open-approve-modal');
+    if (openApproveBtn) {
+        const approveModal = document.getElementById('approveQuotationModal');
+        if (approveModal) {
+            approveModal.style.display = 'flex';
+        }
+    }
+
+    // Open Reject Modal
+    const openReject = e.target.closest('.open-reject-modal');
+    if (openReject) {
+        const modal = document.getElementById('rejectQuotationModal');
+        if (modal) modal.style.display = 'flex';
     }
 });
 
@@ -1343,6 +1516,25 @@ function renderOrderTable() {
     orderItemsBody.appendChild(secondFooterRow);
 }
 
+function toggleEditCompany() {
+    const isNew = document.getElementById('edit-new-company')?.checked;
+    const newFields = document.getElementById('editNewCompanyFields');
+    const existingFields = document.getElementById('editExistingCompanyFields');
+
+    if (newFields && existingFields) {
+        newFields.style.display = isNew ? 'block' : 'none';
+        existingFields.style.display = isNew ? 'none' : 'block';
+
+        // Disable unused fields so the Validator and FormData ignore them
+        document.getElementById('edit-company-name').disabled = !isNew;
+        document.getElementById('edit-company-address').disabled = !isNew;
+        document.getElementById('edit-tin-number').disabled = !isNew;
+        document.getElementById('edit-company').disabled = isNew;
+        
+        console.log("[TRACE] Toggle Complete. New Company Mode:", isNew);
+    }
+}
+
 function renderViewOnlyOrderTable(items, targetBodyId) {
     const body = document.getElementById(targetBodyId);
     if (!body || !items) return;
@@ -1716,6 +1908,13 @@ function validateField(field) {
     const errorWrap = field.closest('.error-wrap');
     const errorMsg = errorWrap ? errorWrap.querySelector('.error-msg') : null;
 
+    // THE FIX: Skip validation if the field is hidden OR disabled
+    if (field.offsetParent === null || field.disabled) {
+        if (errorMsg) errorMsg.style.display = 'none';
+        field.classList.remove('error-border');
+        return true; 
+    }
+
     // 1. CUSTOM CHECK: Force "Select" with value="" to be invalid
     let isInvalidSelect = (field.tagName === 'SELECT' && field.value === "");
     
@@ -1841,11 +2040,21 @@ modalForms.forEach(form => {
 
     function updateButtonState() {
         if (!submitBtn) return;
-        // checkValidity() is a built-in browser method that checks all required/pattern rules
-        const isFormValid = form.checkValidity();
+        
+        // 1. Get all fields that are currently active (not hidden, not disabled)
+        const activeFields = Array.from(form.querySelectorAll('.input, input[type="file"]'))
+                                  .filter(field => field.offsetParent !== null && !field.disabled);
+        
+        // 2. The form is valid only if EVERY active field passes your custom validateField logic
+        // We use .checkValidity() for browser rules and add the custom Select check
+        const isFormValid = activeFields.every(field => {
+            const isInvalidSelect = (field.tagName === 'SELECT' && field.value === "");
+            return field.checkValidity() && !isInvalidSelect;
+        });
+
         submitBtn.disabled = !isFormValid;
         
-        // Optional: Add a class for styling the disabled state
+        // Styling
         submitBtn.style.opacity = isFormValid ? "1" : "0.5";
         submitBtn.style.cursor = isFormValid ? "pointer" : "not-allowed";
     }
@@ -1857,23 +2066,31 @@ modalForms.forEach(form => {
         
         if (field.classList.contains('input') || field.type === 'file') {
             validateField(field);
-            updateButtonState(); // Toggle button on every keystroke
+            updateButtonState(); // Toggle button based on your custom logic
         }
     });
 
-    // 2. Initial check on load (in case fields are empty/required)
+    // 2. Initial check on load
     updateButtonState();
 
-    // 3. Final check on submit (Keep your existing safety)
+    // 3. Final check on submit
     form.addEventListener('submit', function (e) {
         const fields = form.querySelectorAll('.input, input[type="file"]');
         let isValid = true;
         fields.forEach(field => {
+            // This now correctly skips hidden/disabled fields thanks to our previous fix
             if (!validateField(field)) isValid = false;
         });
 
         if (!isValid) {
             e.preventDefault();
+            updateButtonState();
+        }
+    });
+
+    // --- ADD THIS: Ensure button state updates when radios toggle company sections ---
+    form.addEventListener('change', function (e) {
+        if (e.target.type === 'radio') {
             updateButtonState();
         }
     });

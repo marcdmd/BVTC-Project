@@ -314,7 +314,7 @@
                     <!-- JS will handle population of shipping details and plus button -->
                 </div>
     
-                <div class="divider"><p>On-going Transactions</p><hr></div>
+                <!-- <div class="divider"><p>On-going Transactions</p><hr></div>
                 <div class="vertical-section">
                     <table class="small-database">
                         <thead>
@@ -333,11 +333,11 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
+                </div> -->
                 
                 <div class="divider"><hr></div>
                 <div class="buttons-section">
-                    <button type="button" class="m-button-tertiary small-m">Delete</button>
+                    <button type="button" class="m-button-tertiary small-m delete-customer-btn">Delete</button>
                     <button type="button" class="m-button-primary small-m edit-customer-btn" data-id="{{ customer.customer_id }}">Edit</button>
                     <button type="button" class="m-button-secondary small-m close-modal">Close</button>
                 </div>
@@ -348,8 +348,12 @@
 
 <div class="modal-container" id="editCustomerModal">
     <div class="modal customer-form">
-        <h1>Edit Customer</h1>
-    
+        <h1>Edit Customer Account</h1>
+        <div style="display: flex; flex-direction: row;">
+            <p class="required-message"><span>*</span> Required</p>
+        </div>
+
+        <!-- The action will be set dynamically via JS -->
         <form id="editCustomerForm" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" name="customer_id" id="edit-customer-id">
@@ -359,14 +363,14 @@
                 <div class="horizontal-input-field">
                     <label for="edit-first-name"><span>*</span> First Name:</label>
                     <div class="error-wrap">
-                        <input class="input" type="text" id="edit-first-name" name="first-name" readonly>
+                        <input class="input" type="text" id="edit-first-name" name="first-name" readonly required>
                         <span class="error-msg"></span>
                     </div>
                 </div>
                 <div class="horizontal-input-field">
                     <label for="edit-last-name"><span>*</span> Last Name:</label>
                     <div class="error-wrap">
-                        <input class="input" type="text" id="edit-last-name" name="last-name" readonly>
+                        <input class="input" type="text" id="edit-last-name" name="last-name" readonly required>
                         <span class="error-msg"></span>
                     </div>
                 </div>
@@ -374,98 +378,124 @@
 
             <div class="divider"><p>Company Information</p><hr></div>
             <div class="vertical-section" style="height: max-content; max-height: max-content;">
-                <div class="horizontal-input-field" style="flex: 1;">
+                <!-- <div class="horizontal-input-field" style="flex: 1;">
                     <label><span>*</span> Company Details:</label>
 
-                    <input type="radio" value="new-company" name="company-details" id="new-company">
-                    <label for="new-company">New</label>
+                    <input type="radio" value="new-company" name="edit-company-details" id="edit-new-company" checked>
+                    <label for="edit-new-company">New</label>
                     
-                    <input type="radio" value="existing-company" name="company-details" id="existing-company" checked>
-                    <label for="existing-company">Existing</label>
-                </div>
+                    <input type="radio" value="existing-company" name="edit-company-details" id="edit-existing-company">
+                    <label for="edit-existing-company">Existing</label>
+                </div> -->
                 
-                <div class="for-new-company details" id="newCompanyFields" style="width: 100%;">
+                <div class="for-new-company details" id="editNewCompanyFields" style="width: 100%; display: flex;">
                     <div class="vertical-section">
                         <div class="horizontal-section">
-                            <div class="file-upload" style="height: 100%;">
+                            <div class="file-upload" style="width: 85px; height: 85px; flex-shrink: 0; border: 1px dashed #898989; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
                                 <label style="cursor: pointer;">
                                     <span><i class="material-symbols-outlined" style="font-size: 12px; color: #898989;">add</i></span>
-                                    <span class="file-text" style="color: #898989;"> Add Company Logo</span>
+                                    <span class="file-text" style="color: #898989;"> Update Logo</span>
                                     <input name="logo" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
                                 </label>
                             </div>
 
                             <div class="vertical-section">
                                 <div class="horizontal-input-field">
-                                    <label for="company-name"><span>*</span> Company Name:</label>
-                                    <input type="text" class="input" id="company-name" name="company-name" maxlength="150">
+                                    <label for="edit-company-name"><span>*</span> Company Name:</label>
+                                    <div class="error-wrap">
+                                        <input type="text" class="input" id="edit-company-name" name="company-name" maxlength="150">
+                                        <span class="error-msg"></span>
+                                    </div>
                                 </div>
 
                                 <div class="horizontal-input-field">
-                                    <label for="company-address"><span>*</span> Company Address:</label>
-                                    <input type="text" class="input" id="company-address" name="company-address" maxlength="150">
+                                    <label for="edit-company-address"><span>*</span> Company Address:</label>
+                                    <div class="error-wrap">
+                                        <input type="text" class="input" id="edit-company-address" name="company-address" maxlength="150">
+                                        <span class="error-msg"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="horizontal-input-field">
-                            <label for="tin-number">Tin Number:</label>
+                            <label for="edit-tin-number">Tin Number:</label>
                             <div class="error-wrap">
-                                <input type="number" class="input" id="tin-number" name="tin-number">
+                                <input type="number" class="input" id="edit-tin-number" name="tin-number">
                                 <span class="error-msg"></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="for-existing-company details" id="existingCompanyFields" style="width: 100%; display: none;">
+                <!-- <div class="for-existing-company details" id="editExistingCompanyFields" style="width: 100%;">
                     <div class="horizontal-input-field">
                         <label for="edit-company"><span>*</span> Company Name:</label>
-                        <select class="input" name="company" id="edit-company">
-                            <option value=""></option>
-                            {% for comp in companies %}
-                                <option value="{{ comp.company_id }}">{{ comp.company_name }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="error-wrap" style="width: 100%;">
+                            <select class="input" name="company" id="edit-company">
+                                <option value="" hidden></option>
+                                {% for comp in companies %}
+                                    <option value="{{ comp.company_id }}">{{ comp.company_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="error-msg"></span>
+                        </div>
                     </div>
-                </div>  
+                </div>   -->
             </div>
 
-            <div class="horizontal-input-field">
-                <label for="edit-email"><span>*</span> Email Address:</label>
-                <input class="input" type="email" name="customer_email" id="edit-email" required>
-            </div>
+            <div class="divider"><p>Contact Details</p><hr></div>
+            <div class="horizontal-section">
+                <div class="horizontal-input-field">
+                    <label for="edit-email"><span>*</span> Email Address:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="email" name="customer_email" id="edit-email" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
 
-            <div class="horizontal-input-field">
-                <label for="edit-phone"><span>*</span> Contact Number:</label>
-                <input class="input" type="text" name="customer_phone_number" id="edit-phone" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                <div class="horizontal-input-field">
+                    <label for="edit-phone"><span>*</span> Contact Number:</label>
+                    <div class="error-wrap">
+                        <input class="input" type="text" name="customer_phone_number" id="edit-phone" pattern="^(09|\+639)\d{9}$" maxlength="13" required>
+                        <span class="error-msg"></span>
+                    </div>
+                </div>
             </div>
 
             <div class="horizontal-section">
                 <div class="horizontal-input-field">
                     <label for="edit-messenger"><span>*</span> Messenger:</label>
-                    <input class="input" type="url" name="messenger" id="edit-messenger" required>
+                    <div class="error-wrap">
+                        <input class="input" type="url" name="messenger" id="edit-messenger" required>
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
 
                 <div class="horizontal-input-field">
                     <label for="edit-viber">Viber:</label>
-                    <input class="input" type="text" name="viber" id="edit-viber" pattern="^(09|\+639)\d{9}$" maxlength="13">
+                    <div class="error-wrap">
+                        <input class="input" type="text" name="viber" id="edit-viber" pattern="^(09|\+639)\d{9}$" maxlength="13">
+                        <span class="error-msg"></span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Transaction Platforms -->
             <div class="horizontal-input-field">
                 <label>Transaction Platforms:</label>
                 <input type="checkbox" name="email_transaction" id="edit-email-trans">
-                <label for="edit-email-trans">Email</label>
+                <label class="small-r" for="edit-email-trans">Email</label>
+
                 <input type="checkbox" name="messenger_transaction" id="edit-messenger-trans">
-                <label for="edit-messenger-trans">Messenger</label>
+                <label class="small-r" for="edit-messenger-trans">Messenger</label>
+
                 <input type="checkbox" name="viber_transaction" id="edit-viber-trans">
-                <label for="edit-viber-trans">Viber</label>
+                <label class="small-r" for="edit-viber-trans">Viber</label>
             </div>
 
+            <div class="divider"><hr></div>
             <div class="buttons-section">
-                <button type="button" class="m-button-secondary small-m close-modal">Cancel</button>
+                <button type="button" class="m-button-secondary small-m close-modal" id="closeEditCustomerModal">Cancel</button>
                 <button type="submit" class="m-button-primary small-m">Update Customer</button>
             </div>
         </form>
@@ -497,7 +527,6 @@
             <div class="divider"><hr></div>
             <div class="buttons-section">
                 <button type="button" class="m-button-tertiary small-m">Delete</button>
-                <button type="button" class="m-button-primary small-m">Edit</button>
                 <button type="button" class="m-button-secondary small-m close-modal">Close</button>
             </div>
         </div>
@@ -625,6 +654,23 @@
         </form>
     </div>
 </div>
+
+<div class="modal-container" id="deleteCustomerModal">
+    <div class="notif-modal">
+        <div class="header-warning">
+            <h1 class="bold">Delete Customer Account?</h1>
+            <i class="material-symbols-outlined close-modal close-btn" style="font-size: 21px;">close</i>
+        </div>
+
+        <div class="body">
+            <p class="small-r">Are you sure you want to delete this customer account?</p>
+            <div class="buttons-section">
+                <a href="" class="m-button-tertiary small-m confirm_delete" style="flex: 1 0 0;">Yes</a>
+                <button type="button" class="m-button-secondary small-m close-modal close-btn" style="flex: 1 0 0;">No</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -645,23 +691,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Company Toggle Logic
     function toggleCompany() {
-        if (newRadio.checked) {
-            newFields.style.display = 'block';
-            existingFields.style.display = 'none';
-            document.getElementById('company-name').required = true;
-            document.getElementById('company-address').required = true;
-            document.getElementById('company').required = false;
-        } else {
-            newFields.style.display = 'none';
-            existingFields.style.display = 'block';
-            document.getElementById('company-name').required = false;
-            document.getElementById('company-address').required = false;
-            document.getElementById('company').required = true;
-        }
+        const isNew = newRadio.checked;
+
+        // Toggle Visibility
+        newFields.style.display = isNew ? 'block' : 'none';
+        existingFields.style.display = isNew ? 'none' : 'block';
+
+        // Toggle Disabled state (Disabled fields are ignored by validation)
+        document.getElementById('company-name').disabled = !isNew;
+        document.getElementById('company-address').disabled = !isNew;
+        document.getElementById('tin-number').disabled = !isNew;
+        
+        document.getElementById('company').disabled = isNew;
+
+        // Remove required attributes entirely if you want to be safe
+        document.getElementById('company-name').required = false;
+        document.getElementById('company-address').required = false;
+        document.getElementById('company').required = false;
     }
 
     newRadio.addEventListener('change', toggleCompany);
     existingRadio.addEventListener('change', toggleCompany);
+
+    // For Edit Modal
+    // const editNewRadio = document.getElementById('edit-new-company');
+    // const editExistingRadio = document.getElementById('edit-existing-company');
+    // const editNewFields = document.getElementById('editNewCompanyFields');
+    // const editExistingFields = document.getElementById('editExistingCompanyFields');
+
+    // function toggleEditCompany() {
+    //     const isNew = document.getElementById('edit-new-company').checked;
+    //     const editNewFields = document.getElementById('editNewCompanyFields');
+    //     const editExistingFields = document.getElementById('editExistingCompanyFields');
+
+    //     editNewFields.style.display = isNew ? 'block' : 'none';
+    //     editExistingFields.style.display = isNew ? 'none' : 'block';
+        
+    //     // Set disabled states so the validator ignores the hidden fields
+    //     document.getElementById('edit-company-name').disabled = !isNew;
+    //     document.getElementById('edit-company-address').disabled = !isNew;
+    //     document.getElementById('edit-company').disabled = isNew;
+    // }
+
+    // editNewRadio.addEventListener('change', toggleEditCompany);
+    // editExistingRadio.addEventListener('change', toggleEditCompany);
 });
 </script>
 {% endblock %}

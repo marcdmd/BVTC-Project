@@ -83,30 +83,17 @@ def delete_product(request, pk):
     return redirect('catalog')
 
 def orders(request):
-    # Base queryset for the list
     all_orders = Order.objects.all()
 
-    # --- IMPLEMENT SEARCH ---
-    search_query = request.GET.get('search', '').strip()
-    if search_query:
-        all_orders = all_orders.filter(
-            Q(order_id__icontains=search_query) | 
-            Q(customer_id__customer_name__icontains=search_query)
-        )
-    # ------------------------
-
-    # Dashboard counters use the unfiltered Order.objects.all() 
-    # so the summary boxes don't disappear when you search
-    total_stats = Order.objects.all()
-
+    # Calculate counts for the dashboard
     context = {
-        'orders': all_orders, # The list displayed in the table
-        'count_feasibility': total_stats.filter(order_status='Under Feasibility').count(),
-        'count_quotation':   total_stats.filter(order_status='Under Quotation').count(),
-        'count_production':  total_stats.filter(order_status='In Production').count(),
-        'count_sampled':     total_stats.filter(order_status='Sampled').count(),
-        'count_packaged':    total_stats.filter(order_status='Packaged').count(),
-        'count_transit':     total_stats.filter(order_status='In Transit').count(),
+        'orders': all_orders,
+        'count_feasibility': all_orders.filter(order_status='Under Feasibility').count(),
+        'count_quotation':   all_orders.filter(order_status='Under Quotation').count(),
+        'count_production':  all_orders.filter(order_status='In Production').count(),
+        'count_sampled':     all_orders.filter(order_status='Sampled').count(),
+        'count_packaged':    all_orders.filter(order_status='Packaged').count(),
+        'count_transit':     all_orders.filter(order_status='In Transit').count(),
     }
     
     return render(request, 'bvtc_app/orders.html', context)
@@ -414,7 +401,6 @@ def add_customer(request):
 def edit_customer(request, pk):
     customer = get_object_or_404(CustomerAccount, pk=pk)
     
-# 1. GET: Send data to pre-fill the modal
     if request.method == "GET":
         company = customer.company_id 
         
@@ -441,66 +427,64 @@ def edit_customer(request, pk):
     # 2. POST: This saves the changes when you click the submit button
     if request.method == "POST":
         try:
-            # COMBINE NAMES: Grab 'first-name' and 'last-name' from the form
+            company = customer.company_id
+            if company:
+                company.company_name = request.POST.get('company-name')
+                company.company_address = request.POST.get('company-address')
+                company.tin_number = request.POST.get('tin-number')
+                
+                logo = request.FILES.get('logo')
+                if logo:
+                    company.company_logo = logo
+                company.save()
+
+            # 1. Combine Names
             first = request.POST.get('first-name', '').strip()
             last = request.POST.get('last-name', '').strip()
             customer.customer_name = f"{first} {last}".strip()
             
-            # UPDATING DATA: Using exact field names from your models.py
-            customer.customer_email = request.POST.get('email-address')
-            customer.customer_phone_number = request.POST.get('contact-number')
+            # 2. MATCHING YOUR HTML NAMES
+            # (In your provided HTML, these were: customer_email and customer_phone_number)
+            customer.customer_email = request.POST.get('customer_email')
+            customer.customer_phone_number = request.POST.get('customer_phone_number')
+            
             customer.messenger = request.POST.get('messenger')
             customer.viber = request.POST.get('viber')
 
-            # UPDATE CHECKBOXES: 'on' means the checkbox was checked
-            customer.email_transaction = request.POST.get('email-transaction') == 'on'
-            customer.messenger_transaction = request.POST.get('messenger-transaction') == 'on'
-            customer.viber_transaction = request.POST.get('viber-transaction') == 'on'
+            # 3. UPDATED CHECKBOX LOGIC
+            # Use 'in request.POST' to check if the checkbox was sent at all
+            customer.email_transaction = 'email_transaction' in request.POST
+            customer.messenger_transaction = 'messenger_transaction' in request.POST
+            customer.viber_transaction = 'viber_transaction' in request.POST
 
-            # SAVE: The company_id field is NOT updated, so it remains frozen.
             customer.save()
 
-            messages.success(request, f"Customer {customer.customer_name} updated successfully!")
-            return redirect('customers')
+            # 4. JSON RESPONSE (Since you are using Fetch)
+            # Fetch expects JSON, not a redirect. Django messages don't work well with Fetch.
+            return JsonResponse({'status': 'success', 'message': 'Updated successfully'})
 
         except Exception as e:
-            messages.error(request, f"Error updating customer: {str(e)}")
-            return redirect('customers')
-
-    return redirect('customers')
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 def delete_customer(request, pk):
     try:
         customer = CustomerAccount.objects.get(customer_id=pk)
         name = customer.customer_name
         customer.delete()
-        messages.success(request, f"Customer '{name}' was deleted successfully.")
+        messages.success(request, f"Customer '{name}' deleted.")
     except CustomerAccount.DoesNotExist:
         messages.error(request, "Customer not found.")
+        
     return redirect('customers')
 
 def customers(request):
     all_ships = ShippingDetails.objects.all()
-    print(f"DEBUG: Found {all_ships.count()} shipping records") # Keeping your debug line!
-
-    # Start with all customers
-    all_customers = CustomerAccount.objects.all()
-
-    # --- IMPLEMENT SEARCH ---
-    search_query = request.GET.get('search', '').strip()
-    if search_query:
-        all_customers = all_customers.filter(
-            Q(customer_name__icontains=search_query) | 
-            Q(customer_email__icontains=search_query) | 
-            Q(company_id__company_name__icontains=search_query)
-        )
-    # ------------------------
+    print(f"DEBUG: Found {all_ships.count()} shipping records") # Look at your terminal!
 
     context = {
-        'all_shipping_details': all_ships, 
-        'all_customers': all_customers, # This is now filtered if searched
+        'all_shipping_details': all_ships, # Name must be EXACTLY this
+        'all_customers': CustomerAccount.objects.all(),
         'companies': Company.objects.all(),
-        'provinces': Province.objects.all().order_by('name')
     }
     return render(request, 'bvtc_app/customers.html', context)
 
@@ -554,7 +538,7 @@ def add_shipping(request):
         except Exception as e:
             print(f"Error: {e}")
             return HttpResponse("Error saving address", status=400)
-        
+
 def delete_shipping(request, pk):
     # 1. Fetch only the specific shipping detail
     shipping = get_object_or_404(ShippingDetails, pk=pk)
@@ -596,18 +580,116 @@ def add_item(request):
     return render(request, 'bvtc_app/add_item.html', context)
 
 def quotations(request):
-    orders_under_quotation = (Order.objects.filter(order_status="Under Quotation") |
-                              Order.objects.filter(order_status="Under Validation") |
-                              Order.objects.filter(order_status="Validated") |
-                              Order.objects.filter(order_status="Sent to Customer") |
-                              Order.objects.filter(order_status="Signed")
-                              )
-    orders = Order.objects.all()
-    return render(request, 'bvtc_app/quotations.html', {'quotations': orders_under_quotation, 'orders': orders})
+    # Your existing table query
+    orders_under_quotation = Order.objects.filter(
+        order_status__in=["Under Quotation", "Under Validation", "Validated", "Sent to Customer", "Signed"]
+    )
+    
+    # Logic for the numbers in your dashboard cards
+    context = {
+        'quotations': orders_under_quotation,
+        'orders': Order.objects.all(),
+        # Card Counts
+        'unquoted': Order.objects.filter(order_status="Under Quotation").count(),
+        'under_validation': Order.objects.filter(order_status="Under Validation").count(),
+        'validated': Order.objects.filter(order_status="Validated").count(),
+        'sent': Order.objects.filter(order_status="Sent to Customer").count(),
+        'signed': Order.objects.filter(order_status="Signed").count(),
+    }
+    
+    return render(request, 'bvtc_app/quotations.html', context)
 
 def view_quotation(request, pk):
     quotation = get_object_or_404(Order, order_id=pk)
     return render(request, 'bvtc_app/view_quotation.html', {'quotation': quotation})
+
+def create_quotation(request):
+    if request.method == "POST":
+        # 1. Get the Order ID from the select dropdown
+        order_id = request.POST.get('quote-order-id')
+        order = get_object_or_404(Order, pk=order_id)
+        
+        # 2. Get data from the form
+        discount_val = request.POST.get('quote-discount')
+        freight_radio = request.POST.get('delivery-fee') # 'freight_term_true' or 'freight_term_false'
+        quote_date = request.POST.get('quote-date')
+
+        # 3. Update Order fields
+        # Convert radio string back to Boolean
+        order.freight_term = True if freight_radio == 'freight_term_true' else False
+        
+        if discount_val:
+            order.discount = discount_val
+            
+        if quote_date:
+            order.date_quoted = quote_date
+
+        # 4. Change Status
+        order.order_status = 'Under Validation'
+        
+        order.save()
+        
+        messages.success(request, f"Quotation for Order #{order.order_id} has been created and sent for validation.")
+        return redirect('quotations') # Or wherever your list view is
+
+    return redirect('quotations')
+
+def approve_quotation(request, pk):
+    quotation = get_object_or_404(Order, pk=pk)
+    quotation.order_status = 'Validated'
+    quotation.save()
+    messages.success(request, f"Quotation #{pk} has been Approved (Validated).")
+    return redirect('view_quotation', pk=pk)
+
+def reject_quotation(request, pk):
+    quotation = get_object_or_404(Order, pk=pk)
+    quotation.order_status = 'Under Quotation'
+    quotation.save()
+    messages.warning(request, f"Quotation #{pk} has been Rejected (Returned to Under Quotation).")
+    return redirect('quotations')
+
+def update_quotation_status(request, pk):
+    if request.method == "POST":
+        order_instance = get_object_or_404(Order, pk=pk)
+        new_status_name = request.POST.get('new_status_val')
+        
+        # Security check: Ensure the status is valid based on your model choices
+        if new_status_name in dict(Order.ORDER_STATUS):
+            order_instance.order_status = new_status_name
+            order_instance.save()
+            messages.success(request, f"Status successfully changed to {new_status_name}.")
+        
+        # Redirect back to the view_quotation page for this specific order
+        return redirect('view_quotation', pk=pk)
+    
+    return redirect('quotations')
+
+def update_quotation(request):
+    if request.method == "POST":
+        # 1. Get the ID from the HIDDEN input we added
+        order_id = request.POST.get('quote-order-id')
+        order = get_object_or_404(Order, pk=order_id)
+        
+        # 2. Get the values from the EDIT modal fields
+        discount_val = request.POST.get('quote-discount')
+        freight_radio = request.POST.get('delivery-fee')
+        quote_date = request.POST.get('quote-date')
+
+        # 3. Apply updates
+        order.freight_term = True if freight_radio == 'freight_term_true' else False
+        
+        if discount_val is not None:
+            order.discount = discount_val
+            
+        if quote_date:
+            order.date_quoted = quote_date
+
+        order.save()
+        
+        messages.success(request, f"Quotation for Order #{order.order_id} updated successfully.")
+        return redirect('quotations')
+
+    return redirect('quotations')
 
 def billings(request):
     return render(request, 'bvtc_app/billings.html')

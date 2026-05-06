@@ -18,6 +18,11 @@ urlpatterns = [
 
     path('quotations/', views.quotations, name='quotations'),
     path('quotations/view_quotation/<int:pk>', views.view_quotation, name='view_quotation'),
+    path('quotations/create_quotation/', views.create_quotation, name='create_quotation'),
+    path('quotations/approve/<int:pk>/', views.approve_quotation, name='approve_quotation'),
+    path('quotations/reject/<int:pk>/', views.reject_quotation, name='reject_quotation'),
+    path('quotations/update_status/<int:pk>/', views.update_quotation_status, name='update_quotation_status'),
+    path('quotations/update_quotation/', views.update_quotation, name='update_quotation'),
 
     path('billings/', views.billings, name='billings'),
 
@@ -25,8 +30,8 @@ urlpatterns = [
     path('customers/add_customer/', views.add_customer, name='add_customer'),
     path('customers/add_shipping/', views.add_shipping, name='add_shipping'),
     path('customers/edit_customer/<int:pk>/', views.edit_customer, name='edit_customer'),
+    path('customers/delete_customer/<int:pk>/', views.delete_customer, name='delete_customer'),
     path('get-shipping-buttons/<int:customer_id>/', views.get_shipping_buttons, name='get_shipping_buttons'),
-    path('delete-customer/<int:pk>/', views.delete_customer, name='delete_customer'),
 
     path('profile/', views.profile, name='profile'),
 

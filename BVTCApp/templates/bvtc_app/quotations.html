@@ -20,27 +20,27 @@
     <h1>Quotation Status</h1>
     <div class="numbers">
         <div class="number-card">
-            <div class="number" style="color: #101212;">00</div>
+            <div class="number" style="color: #101212;">{{ unquoted|stringformat:"02d" }}</div>
             <p>Unquoted</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #0B1E33;">00</div>
+            <div class="number" style="color: #0B1E33;">{{ under_validation|stringformat:"02d" }}</div>
             <p>Under Validation</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #013C58;">00</div>
+            <div class="number" style="color: #013C58;">{{ validated|stringformat:"02d" }}</div>
             <p>Validated</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #00537A;">00</div>
+            <div class="number" style="color: #00537A;">{{ sent|stringformat:"02d" }}</div>
             <p>Sent to Customer</p>
         </div>
 
         <div class="number-card">
-            <div class="number" style="color: #00A887;">00</div>
+            <div class="number" style="color: #00A887;">{{ signed|stringformat:"02d" }}</div>
             <p>Signed</p>
         </div>
     </div>
@@ -128,11 +128,23 @@
                 <td>
                     <div class="cell-buttons">
                         {% if q.order_status == "Under Quotation" %}
-                        <button type="button" class="m-button-primary smaller-b">Quote</button>
+                        <button type="button" 
+                                class="m-button-primary smaller-b open-add-quotation-modal" 
+                                data-id="{{ q.order_id }}">
+                            Quote
+                        </button>
                         {% else %}
                         <a href="{% url 'view_quotation' q.order_id %}" class="m-button-primary smaller-b" type="button">View</a>
+                        
+                        <button type="button" 
+                                class="m-button-secondary smaller-b open-add-quotation-modal" 
+                                data-id="{{ q.order_id }}"
+                                data-discount="{{ q.discount }}"
+                                data-freight="{{ q.freight_term|lower }}" 
+                                data-date="{{ q.date_quoted|date:'Y-m-d' }}">
+                            Edit
+                        </button>
                         {% endif %}
-                        <button type="button" class="m-button-secondary smaller-b">Edit</button>
                     </div>
                 </td>
             </tr>
@@ -150,14 +162,14 @@
             <p class="required-message"><span>*</span> Required</p>
         </div>
 
-        <form action="" method="POST" enctype="multipart/form-data" id="addQuotationForm">
+        <form action="{% url 'create_quotation' %}" method="POST" id="addQuotationForm">
             {% csrf_token %}
             <div class="divider"><p>Order Reference</p><hr></div>
             <div class="horizontal-input-field">
                 <label for="quote-order-id"><span>*</span> Order ID:</label>
                 <div class="error-msg">
-                    <select class="input" name="quote-order-id" id="quote-order-id" required>
-                        <option value="" selected></option>
+                    <select class="input" name="quote-order-id" id="quote-order-id" style="width: 150px;" required>
+                        <option value="" hidden selected></option>
                         {% for o in orders %}
                         <option value="{{ o.order_id }}">{{ o.order_id }} - {{ o.customer_id.customer_name }}</option>
                         {% endfor %}
@@ -173,14 +185,14 @@
                 <input type="radio" value="freight_term_true" name="delivery-fee" id="freight_term_true" checked>
                 <label for="freight_term_true">Shouldered by the Customer</label>
 
-                <input type="radio" value="freight_term_false" name="delivery-fee" id="freight_term_false" checked>
+                <input type="radio" value="freight_term_false" name="delivery-fee" id="freight_term_false">
                 <label for="freight_term_false">Shouldered by BVTC</label>
             </div>
 
             <div class="horizontal-input-field">
                 <label for="quote-discount"><span>*</span> Additional Discount:</label>
                 <div class="error-wrap">
-                    <input type="number" min="0" max="100" class="input" name="quote-discount" id="quote-discount">
+                    <input type="number" min="0" max="100" class="input" name="quote-discount" id="quote-discount" style="max-width: 150px;">
                     <span class="error-msg"></span>
                 </div>
             </div>
@@ -189,15 +201,77 @@
             <div class="horizontal-input-field">
                 <label for="quote-date">Date Quoted:</label>
                 <div class="error-wrap">
-                    <input type="date" name="quote-date" id="quote-date" class="input">
+                    <input type="date" name="quote-date" id="quote-date" class="input" style="max-width: 150px">
                     <span class="error-msg"></span>
                 </div>
             </div>
 
             <div class="divider"><hr></div>
             <div class="buttons-section">
-                <button type="button" class="m-button-secondary small-m">Cancel</button>
-                <button type="button" class="m-button-primary small-m">Create Quotation</button>
+                <button type="button" class="m-button-secondary small-m close-modal">Cancel</button>
+                <button type="submit" class="m-button-primary small-m">Create Quotation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-container" id="editQuotationModal">
+    <div class="modal quotation-form">
+        <h1>Edit Quotation Details</h1>
+        <div style="display: flex; flex-direction: row;">
+            <p class="required-message"><span>*</span> Required</p>
+        </div>
+
+        <form action="{% url 'create_quotation' %}" method="POST" id="editQuotationForm">
+            {% csrf_token %}
+            <div class="divider"><p>Order Reference</p><hr></div>
+            <div class="horizontal-input-field">
+                <label for="edit-quote-order-id"><span>*</span> Order ID:</label>
+                <div class="error-msg">
+                    <select class="input" name="quote-order-id" id="edit-quote-order-id" style="width: 150px;" disabled>
+                        <option value="" hidden selected></option>
+                        {% for o in orders %}
+                        <option value="{{ o.order_id }}">{{ o.order_id }} - {{ o.customer_id.customer_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="error-msg"></span>
+
+                    <input type="hidden" name="quote-order-id" id="edit-quote-order-id-hidden">
+                </div>
+            </div>
+
+            <div class="divider"><p>Additional Payment Details</p><hr></div>
+            <div class="horizontal-input-field">
+                <label for="quote-delivery-fee"><span>*</span> Delivery Fee:</label>
+
+                <input type="radio" value="freight_term_true" name="delivery-fee" id="edit-freight_term_true" checked>
+                <label for="edit-freight_term_true">Shouldered by the Customer</label>
+
+                <input type="radio" value="freight_term_false" name="delivery-fee" id="edit-freight_term_false">
+                <label for="edit-freight_term_false">Shouldered by BVTC</label>
+            </div>
+
+            <div class="horizontal-input-field">
+                <label for="edit-quote-discount"><span>*</span> Additional Discount:</label>
+                <div class="error-wrap">
+                    <input type="number" min="0" max="100" class="input" name="quote-discount" id="edit-quote-discount" style="max-width: 150px;">
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+
+            <div class="divider"><p>Quotation Details</p><hr></div>
+            <div class="horizontal-input-field">
+                <label for="edit-quote-date">Date Quoted:</label>
+                <div class="error-wrap">
+                    <input type="date" name="quote-date" id="edit-quote-date" class="input" style="max-width: 150px">
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+
+            <div class="divider"><hr></div>
+            <div class="buttons-section">
+                <button type="button" class="m-button-secondary small-m close-modal">Cancel</button>
+                <button type="submit" class="m-button-primary small-m">Create Quotation</button>
             </div>
         </form>
     </div>

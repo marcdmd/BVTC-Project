@@ -744,13 +744,13 @@ main .filter {
     flex: 0 0 1080px;
 }
 .edit-item-form,
-.quotation-form,
 .customer-form,
 .view-customer {
     width: 600px;
     max-width: 600px;
 }
-.shipping-form {
+.shipping-form,
+.quotation-form {
     width: 500px;
     max-width: 500px;
 }

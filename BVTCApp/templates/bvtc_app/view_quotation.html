@@ -46,33 +46,34 @@
                 {% endif %}
     
                 <div class="status-dropdown-content">
-                    <a href="#" class="status-btn update-status-link" data-status="Under Validation" style="color: #FAF9F6; background: #0B1E33; flex: 0; align-items: center; justify-content: flex-start;">
+                    <!-- Always available: Returns it to validation phase -->
+                    <a href="#" class="status-btn status-update-trigger" data-new-status="Under Validation" style="background: #0B1E33; text-decoration: none; color: #FFFFFF;">
                         <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
                         <p class="smaller-b">Under Validation</p>
                     </a>
-                    
-                    <a href="#" class="status-btn update-status-link" data-status="Validated" style="color: #FAF9F6; background: #013C58; flex: 0; align-items: center; justify-content: flex-start;">
-                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b">Validated</p>
-                    </a>
-                    
-                    <a href="#" class="status-btn update-status-link" data-status="Sent to Customer" style="color: #FAF9F6; background: #00537A; flex: 0; align-items: center; justify-content: flex-start;">
-                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b">Sent to Customer</p>
-                    </a>
-    
-                    <a href="#" class="status-btn update-status-link" data-status="Signed" style="color: #101212; background: #00C27D; flex: 0; align-items: center; justify-content: flex-start;">
-                        <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
-                        <p class="smaller-b">Signed</p>
-                    </a>
+
+                    <!-- Only show these if the quotation has been Approved (Validated) -->
+                    {% if quotation.order_status != 'Under Validation' and quotation.order_status != 'Under Quotation' %}
+                        <a href="#" class="status-btn status-update-trigger" data-new-status="Sent to Customer" style="background: #00537A; text-decoration: none; color: #FFFFFF;">
+                            <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                            <p class="smaller-b">Sent to Customer</p>
+                        </a>
+
+                        <a href="#" class="status-btn status-update-trigger" data-new-status="Signed" style="background: #00A887; text-decoration: none; color: #FFFFFF;">
+                            <i class="material-symbols-rounded" style="font-size: 8px;">circle</i>
+                            <p class="smaller-b">Signed</p>
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
         <div class="buttons-section">
-            <button class="button-primary small-m">Approve</button>
-            <button class="button-tertiary small-m">Reject</button>
-            <button class="button-secondary small-m">Comment</button>
+            {% if quotation.order_status == 'Under Validation' %}
+                <button type="button" class="button-primary small-m open-approve-modal">Approve</button>
+                <button type="button" class="button-tertiary small-m open-reject-modal">Reject</button>
+            {% endif %}
+            
             <button class="button-secondary small-m">Download</button>
             <a href="{% url 'quotations' %}" class="button-secondary small-m">Close</a>
         </div>
@@ -152,12 +153,14 @@
                     <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">{{ quotation.get_discount_display }}% Less Discount</p></td>
                     <td><b>₱ {{ quotation.get_total_less_discount|stringformat:".2f"|intcomma }}</b></td>
                 </tr>
-
+                
+                {% if quotation.discount != 0 %}
                 <tr>
                     <td colspan="4"></td>
                     <td style="border-width: 0px 2px 0px 2px; border-style: solid; border-color: #0B1E33;"><p style="font-style: italic; color: #621D1D;">{{ quotation.discount|stringformat:".1d" }}% Less Loyalty Discount</p></td>
                     <td><b>₱ {{ quotation.get_total_less_lylty_discount|stringformat:".2f"|intcomma }}</b></td>
                 </tr>
+                {% endif %}
 
                 <tr>
                     <td colspan="4"></td>
@@ -308,6 +311,63 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal-container" id="approveQuotationModal" style="display: none;">
+    <div class="notif-modal">
+        <div class="header-success">
+            <h1 class="bold" style="color: #FAF9F6;">Approve Quotation?</h1>
+            <i class="material-symbols-outlined close-modal" style="font-size: 21px; color: #FAF9F6; cursor: pointer;">close</i>
+        </div>
+
+        <div class="body">
+            <p class="small-r">Are you sure you want to approve <b>Order no. {{ quotation.order_id|stringformat:".2d" }} Quotation</b>? This will set the status to <b>Validated</b>.</p>
+            <div class="buttons-section">
+                <a href="{% url 'approve_quotation' quotation.order_id %}" class="m-button-primary small-m" style="flex: 1 0 0;">Yes, Approve</a>
+                <button type="button" class="m-button-secondary small-m close-modal" style="flex: 1 0 0;">No, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="rejectQuotationModal" style="display: none;">
+    <div class="notif-modal">
+        <div class="header-warning">
+            <h1 class="bold" style="color: #FAF9F6;">Reject Quotation?</h1>
+            <i class="material-symbols-outlined close-modal" style="font-size: 21px; color: #FAF9F6; cursor: pointer;">close</i>
+        </div>
+
+        <div class="body">
+            <p class="small-r">Are you sure you want to reject <b>Order no. {{ quotation.order_id|stringformat:".2d" }} Quotation</b>? This will return it to <b>Unquoted</b>.</p>
+            <div class="buttons-section">
+                <a href="{% url 'reject_quotation' quotation.order_id %}" class="m-button-tertiary small-m" style="flex: 1 0 0;">Yes, Reject</a>
+                <button type="button" class="m-button-secondary small-m close-modal" style="flex: 1 0 0;">No, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-container" id="statusConfirmModal" style="display: none;">
+    <div class="notif-modal">
+        <div class="header-success" id="statusHeaderStripe">
+            <h1 class="bold" style="color: #FAF9F6;">Change Status?</h1>
+            <i class="material-symbols-outlined close-modal" style="cursor: pointer; color: white;">close</i>
+        </div>
+
+        <div class="body">
+            <p class="small-r">Switch status to <b id="statusLabelDisplay"></b>?</p>
+            <div class="buttons-section">
+                <form action="{% url 'update_quotation_status' quotation.order_id %}" method="POST" style="flex: 1;">
+                    {% csrf_token %}
+                    <input type="hidden" name="new_status_val" id="hiddenStatusInput">
+                    <button type="submit" class="m-button-primary small-m" style="width: 100%;">Confirm</button>
+                </form>
+                <button type="button" class="m-button-secondary small-m close-modal" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
